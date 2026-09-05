@@ -9,23 +9,23 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@expo/metro-runtime": "~4.0.1",
-    "@react-native-async-storage/async-storage": "1.23.1",
-    "expo": "~52.0.37",
-    "expo-asset": "~11.0.5",
-    "expo-haptics": "~14.0.1",
-    "expo-sharing": "~13.0.1",
-    "expo-status-bar": "~2.0.1",
+    "@expo/metro-runtime": "~57.0.15",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "expo": "~57.0.20",
+    "expo-asset": "~57.0.16",
+    "expo-haptics": "~57.0.2",
+    "expo-sharing": "~57.0.18",
+    "expo-status-bar": "~57.0.1",
     "lucide-react-native": "^0.475.0",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "react-native": "0.76.7",
-    "react-native-svg": "15.8.0",
-    "react-native-view-shot": "~4.0.3",
-    "react-native-web": "~0.19.13"
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-svg": "15.15.4",
+    "react-native-view-shot": "5.1.0",
+    "react-native-web": "^0.21.2"
   },
   "devDependencies": {
-    "@types/react": "~18.3.12",
+    "@types/react": "^19.0.0",
     "typescript": "^5.3.3"
   },
   "private": true

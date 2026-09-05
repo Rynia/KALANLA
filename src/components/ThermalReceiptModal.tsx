@@ -30,7 +30,7 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
   totalSavedMonth,
   onClose,
 }) => {
-  const receiptRef = useRef<ViewShot>(null);
+  const receiptRef = useRef<any>(null);
   const [sharing, setSharing] = useState(false);
 
   if (!recipe) return null;
