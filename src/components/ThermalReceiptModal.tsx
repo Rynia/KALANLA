@@ -157,6 +157,17 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
                 <Text style={styles.ecoLabel}>HAZIRLIK SÜRESİ</Text>
                 <Text style={styles.ecoVal}>{receipt.durationMinutes} DAKİKA</Text>
               </View>
+
+              {/* DÜRÜM / KAHVE ENDEKSİ (ÖĞRENCİ PARASI GÖSTERGESİ) */}
+              <View style={styles.relatableIndexBox}>
+                <Text style={styles.relatableIndexTitle}>GERÇEK MUTFAK KAZANCI</Text>
+                <Text style={styles.relatableIndexText}>
+                  🌯 ~{(receipt.totalSavedTL / 110).toFixed(1)} Tavuk Dürüm Değerinde
+                </Text>
+                <Text style={styles.relatableIndexSub}>
+                  ☕ veya {(receipt.totalSavedTL / 70).toFixed(1)} Filtre Kahve Parası Cepte
+                </Text>
+              </View>
             </View>
 
             {/* Mockup Barcode */}
@@ -399,6 +410,38 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#0A0A0E',
     fontFamily: 'monospace',
+  },
+  relatableIndexBox: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#CBD5E1',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+  },
+  relatableIndexTitle: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#059669',
+    fontFamily: 'monospace',
+    letterSpacing: 1,
+    marginBottom: 2,
+  },
+  relatableIndexText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#0F172A',
+    fontFamily: 'monospace',
+  },
+  relatableIndexSub: {
+    fontSize: 9,
+    color: '#475569',
+    fontFamily: 'monospace',
+    marginTop: 1,
   },
   barcodeBox: {
     alignItems: 'center',
