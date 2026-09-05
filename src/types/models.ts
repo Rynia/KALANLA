@@ -16,6 +16,10 @@ export interface FoodItem {
   name: string;
   category: FoodCategory;
   amount: string;
+  /** Sayısal miktar (kısmi tüketim için) */
+  quantity?: number;
+  /** Birim: 'g' | 'kg' | 'Adet' | 'Demet' | 'ml' | 'L' */
+  unit?: string;
   location: StorageLocation;
   hoursLeft: number;
   riskPercentage: number;
@@ -28,6 +32,8 @@ export interface RequiredItem {
   name: string;
   rescued: boolean;
   isPantry?: boolean;
+  /** Tarifin tükettiği miktar, örn. '200g' veya '2' (kısmi tüketim için) */
+  consumeAmount?: string;
 }
 
 export interface RescueRecipe {
@@ -37,10 +43,14 @@ export interface RescueRecipe {
   durationMinutes: number;
   savedTL: number;
   matchPercentage: number;
+  /** Dinamik urgency skoru — recipeEngine tarafından hesaplanır */
+  urgencyScore?: number;
   calories: number;
   protein: string;
   imageUrl: string;
   matchedItemNames: string[];
+  /** Eksik malzeme isimleri — recipeEngine tarafından hesaplanır */
+  missingItemNames?: string[];
   requiredItemNames: RequiredItem[];
   instructions: string[];
   co2SavedKg: number;

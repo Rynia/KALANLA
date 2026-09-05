@@ -112,9 +112,9 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
     imageUrl: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600&auto=format&fit=crop&q=80',
     matchedItemNames: ['Taş Fırın Bayat Ekmek', 'Yarım Kaşar Peyniri', 'Salkım Domates'],
     requiredItemNames: [
-      { name: 'Bayat Ekmek', rescued: true },
-      { name: 'Kaşar Peyniri', rescued: true },
-      { name: 'Domates', rescued: true },
+      { name: 'Bayat Ekmek', rescued: true, consumeAmount: '1' },
+      { name: 'Kaşar Peyniri', rescued: true, consumeAmount: '150' },
+      { name: 'Domates', rescued: true, consumeAmount: '2' },
     ],
     instructions: [
       'Bayat ekmekleri 1.5 cm kalınlığında verev dilimleyin.',
@@ -138,8 +138,8 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
     imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&auto=format&fit=crop&q=80',
     matchedItemNames: ['Yarım Kaşar Peyniri', 'Salkım Domates', 'Köy Yumurtası'],
     requiredItemNames: [
-      { name: 'Kaşar Peyniri', rescued: true },
-      { name: 'Domates', rescued: true },
+      { name: 'Kaşar Peyniri', rescued: true, consumeAmount: '100' },
+      { name: 'Domates', rescued: true, consumeAmount: '2' },
       { name: 'Yumurta (Kiler)', rescued: false, isPantry: true },
     ],
     instructions: [
@@ -162,9 +162,9 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
     imageUrl: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=600&auto=format&fit=crop&q=80',
     matchedItemNames: ['Taş Fırın Bayat Ekmek', 'Dana Kıyma', 'Organik Süzme Yoğurt'],
     requiredItemNames: [
-      { name: 'Bayat Ekmek', rescued: true },
-      { name: 'Dana Kıyma', rescued: true },
-      { name: 'Süzme Yoğurt', rescued: true },
+      { name: 'Bayat Ekmek', rescued: true, consumeAmount: '1' },
+      { name: 'Dana Kıyma', rescued: true, consumeAmount: '200' },
+      { name: 'Süzme Yoğurt', rescued: true, consumeAmount: '200' },
     ],
     instructions: [
       'Bayat ekmekleri lokmalık küpler halinde doğrayıp fırında veya tavada altın rengi olana kadar çıtırlaştırın.',
@@ -186,7 +186,7 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
     imageUrl: 'https://images.unsplash.com/photo-1484723091739-00a699888947?w=600&auto=format&fit=crop&q=80',
     matchedItemNames: ['Taş Fırın Bayat Ekmek'],
     requiredItemNames: [
-      { name: 'Bayat Ekmek', rescued: true },
+      { name: 'Bayat Ekmek', rescued: true, consumeAmount: '1' },
       { name: 'Tarçın & Tereyağı', rescued: false, isPantry: true },
     ],
     instructions: [

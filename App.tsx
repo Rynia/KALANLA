@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -25,6 +25,8 @@ import {
   loadKitchenState,
   saveKitchenState,
 } from './src/storage/kitchenStorage';
+import { scoreRecipes, buildConsumptionPlan, applyConsumptionPlan } from './src/utils/recipeEngine';
+import { resolveFoodImage } from './src/utils/foodImageResolver';
 import { Header } from './src/components/Header';
 import { BottomNav } from './src/components/BottomNav';
 import { InventoryRadar } from './src/components/InventoryRadar';
@@ -37,7 +39,11 @@ import { RecipeDetailModal } from './src/components/RecipeDetailModal';
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('gor');
   const [foodItems, setFoodItems] = useState<FoodItem[]>(INITIAL_FOOD_ITEMS);
-  const [recipes] = useState<RescueRecipe[]>(INITIAL_RECIPES);
+  // Dinamik tarif listesi — foodItems her değiştiğinde yeniden skorlanır
+  const recipes = useMemo(
+    () => scoreRecipes(foodItems, INITIAL_RECIPES),
+    [foodItems],
+  );
   const [badges, setBadges] = useState<AchievementBadge[]>(INITIAL_BADGES);
 
   // Rescued metrics
@@ -109,6 +115,8 @@ export default function App() {
       ...newItem,
       id: `item-${Date.now()}`,
       addedAt: 'Şimdi',
+      // Ürün adından akıllı görsel çözümle — generic placeholder yerine gerçek fotoğraf
+      imageUrl: newItem.imageUrl || resolveFoodImage(newItem.name, newItem.category),
     };
     const nextList = [itemWithId, ...foodItems];
     setFoodItems(nextList);
@@ -122,25 +130,26 @@ export default function App() {
     persistState(nextList, rescuedTotalTL, rescuedCo2Kg, rescuedMealsCount, badges);
   };
 
-  // Cooking Recipe Interaction: Deducts items, increases savings, creates thermal receipt
+  // Cooking Recipe Interaction: Kısmi tüketim planı ile malzemeleri azalt/sil
   const handleCookRecipe = (recipe: RescueRecipe) => {
-    const matchedItemsToRemove: FoodItem[] = [];
-    recipe.requiredItemNames.forEach((req) => {
-      if (!req.isPantry) {
-        const found = foodItems.find(
-          (item) =>
-            item.name.toLocaleLowerCase('tr-TR').includes(req.name.toLocaleLowerCase('tr-TR')) ||
-            req.name.toLocaleLowerCase('tr-TR').includes(item.name.toLocaleLowerCase('tr-TR')),
-        );
-        if (found && !matchedItemsToRemove.some((m) => m.id === found.id)) {
-          matchedItemsToRemove.push(found);
-        }
-      }
-    });
+    // 1. Tüketim planı oluştur (kısmi tüketim desteği)
+    const plan = buildConsumptionPlan(recipe, foodItems);
+    const nextItems = applyConsumptionPlan(foodItems, plan);
 
-    const nextItems = foodItems.filter(
-      (item) => !matchedItemsToRemove.some((m) => m.id === item.id),
-    );
+    // 2. Fiş için tüketilen malzemeleri topla
+    const consumedItems: FoodItem[] = [
+      ...foodItems.filter((item) => plan.toRemove.includes(item.id)),
+      ...foodItems
+        .filter((item) => plan.toUpdate.some((u) => u.id === item.id))
+        .map((item) => {
+          const upd = plan.toUpdate.find((u) => u.id === item.id)!;
+          const consumedNum = parseFloat(item.amount) - parseFloat(upd.newAmount);
+          const unitMatch = item.amount.match(/[^\d.]+/);
+          const unit = unitMatch ? unitMatch[0].trim() : '';
+          return { ...item, amount: `${isNaN(consumedNum) ? '' : consumedNum}${unit}` };
+        }),
+    ];
+
     const nextTotal = rescuedTotalTL + recipe.savedTL;
     const nextCo2 = Number((rescuedCo2Kg + recipe.co2SavedKg).toFixed(2));
     const nextMeals = rescuedMealsCount + 1;
@@ -150,7 +159,7 @@ export default function App() {
     setRescuedCo2Kg(nextCo2);
     setRescuedMealsCount(nextMeals);
 
-    // Build authentic thermal receipt data matching reference
+    // 3. Termal fiş oluştur
     const now = new Date();
     const formattedDate = `${String(now.getDate()).padStart(2, '0')}.${String(
       now.getMonth() + 1,
@@ -159,19 +168,18 @@ export default function App() {
       now.getMinutes(),
     ).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
-    const receiptItems = matchedItemsToRemove.map((item) => ({
-      name: item.name,
-      amount: item.amount,
-      priceTL: item.priceTL,
-    }));
-
-    if (receiptItems.length === 0) {
-      receiptItems.push(
-        { name: 'Bayat Ekmek', amount: '250g', priceTL: 25 },
-        { name: 'Kaşar Peyniri', amount: '200g', priceTL: 120 },
-        { name: 'Salkım Domates', amount: '3 Adet', priceTL: 60 },
-      );
-    }
+    const receiptItems =
+      consumedItems.length > 0
+        ? consumedItems.map((item) => ({
+            name: item.name,
+            amount: item.amount,
+            priceTL: item.priceTL,
+          }))
+        : [
+            { name: 'Bayat Ekmek', amount: '250g', priceTL: 25 },
+            { name: 'Kaşar Peyniri', amount: '200g', priceTL: 120 },
+            { name: 'Salkım Domates', amount: '3 Adet', priceTL: 60 },
+          ];
 
     const newReceipt: ThermalReceiptData = {
       id: `rcp-${Date.now()}`,
@@ -188,14 +196,10 @@ export default function App() {
 
     setActiveReceipt(newReceipt);
 
-    // Unlock achievements
+    // 4. Başarımları güncelle
     const nextBadges = badges.map((badge) => {
       if (badge.id === 'badge-3') {
-        return {
-          ...badge,
-          unlocked: true,
-          progress: '4/5 İLERLEME',
-        };
+        return { ...badge, unlocked: true, progress: '4/5 İLERLEME' };
       }
       return badge;
     });

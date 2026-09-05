@@ -15,6 +15,7 @@ import * as Haptics from 'expo-haptics';
 import { FoodItem, FoodCategory, StorageLocation } from '../types/models';
 import { TURKISH_STAPLES, TurkishStapleSuggestion } from '../data/initialData';
 import { colors, spacing, radius } from '../theme/theme';
+import { resolveFoodImage } from '../utils/foodImageResolver';
 
 interface QuickAddModalProps {
   isOpen: boolean;
@@ -96,9 +97,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
       hoursLeft: hours,
       riskPercentage: risk,
       priceTL,
-      imageUrl:
-        imageUrl ||
-        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=80',
+      imageUrl: imageUrl || resolveFoodImage(finalName, category),
     });
 
     resetForm();
