@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Kalanla",
+    "slug": "kalanla",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#0D0D11"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rynia.kalanla"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0D0D11"
+      },
+      "package": "com.rynia.kalanla"
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
