@@ -1,93 +1,341 @@
-import { Ingredient, Recipe, CatalogIngredient } from '../types/models';
+import { FoodItem, RescueRecipe, AchievementBadge } from '../types/models';
 
-export const initialIngredients: Ingredient[] = [
-  { id: '1', name: 'Yarım Kaşar Peyniri', category: 'Süt Ürünleri', daysLeft: 1, value: 140, critical: true },
-  { id: '2', name: 'Bayat Ekmek (1 Adet)', category: 'Fırın', daysLeft: 1, value: 20, critical: true },
-  { id: '3', name: 'Yumuşamış Domates (3 Adet)', category: 'Sebze', daysLeft: 2, value: 45, critical: true },
-  { id: '4', name: 'Yarım Sıvı Krema', category: 'Süt Ürünleri', daysLeft: 2, value: 65, critical: true },
-  { id: '5', name: 'Yumurta (4 Adet)', category: 'Temel Gıda', daysLeft: 6, value: 40, critical: false },
-  { id: '6', name: 'Süzme Yoğurt', category: 'Süt Ürünleri', daysLeft: 5, value: 75, critical: false },
-];
-
-export const initialRecipes: Recipe[] = [
+export const INITIAL_FOOD_ITEMS: FoodItem[] = [
   {
-    id: 'r1',
-    title: 'Tavada Çıtır Kaşarlı Domatesli Ekmek',
-    timeMin: 9,
-    savings: 205,
-    rescueLevel: 'Acil',
-    ingredientsUsed: ['Bayat Ekmek', 'Kaşar Peyniri', 'Domates'],
-    description: 'Bayat ekmekleri dilimleyip tavada hafif tereyağında kızartın. Üzerine ezilmiş domates ve kaşarları ekleyip kapağını 3 dakika kapatın.'
+    id: 'item-1',
+    name: 'Yarım Kaşar Peyniri',
+    category: 'Süt Ürünü',
+    amount: '250g',
+    location: 'Buzdolabı',
+    hoursLeft: 18,
+    riskPercentage: 92,
+    priceTL: 120,
+    imageUrl: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&auto=format&fit=crop&q=80',
+    addedAt: '2 gün önce',
   },
   {
-    id: 'r2',
-    title: 'Kremalı Fırın Makarna & Peynir Graten',
-    timeMin: 14,
-    savings: 270,
-    rescueLevel: 'Öncelikli',
-    ingredientsUsed: ['Yarım Sıvı Krema', 'Kaşar Peyniri'],
-    description: 'Haşlanmış makarnayı yarım krema ve rendelenmiş kaşarla karıştırıp fırın kabına dökün. Üstü kızarana kadar 10 dakika fırınlayın.'
+    id: 'item-2',
+    name: 'Taş Fırın Bayat Ekmek',
+    category: 'Unlu Mamul',
+    amount: '1 Adet',
+    location: 'Kiler',
+    hoursLeft: 24,
+    riskPercentage: 85,
+    priceTL: 25,
+    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&auto=format&fit=crop&q=80',
+    addedAt: 'Dün',
   },
   {
-    id: 'r3',
-    title: '10 Dakikalık Pratik Domatesli Şakşuka Omlet',
-    timeMin: 8,
-    savings: 85,
-    rescueLevel: 'Acil',
-    ingredientsUsed: ['Domates', 'Yumurta'],
-    description: 'Yumuşamış domatesleri tavada zeytinyağı ile hafif ezin, yumurtaları kırıp karıştırın. Taze kekikle servis edin.'
+    id: 'item-3',
+    name: 'Salkım Domates',
+    category: 'Sebze',
+    amount: '3 Adet',
+    location: 'Buzdolabı',
+    hoursLeft: 36,
+    riskPercentage: 78,
+    priceTL: 60,
+    imageUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80',
+    addedAt: '3 gün önce',
+  },
+  {
+    id: 'item-4',
+    name: 'Organik Süzme Yoğurt',
+    category: 'Şarküteri',
+    amount: '500g',
+    location: 'Buzdolabı',
+    hoursLeft: 96,
+    riskPercentage: 45,
+    priceTL: 75,
+    imageUrl: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&auto=format&fit=crop&q=80',
+    addedAt: '5 gün önce',
+  },
+  {
+    id: 'item-5',
+    name: 'Dana Kıyma',
+    category: 'Et & Tavuk',
+    amount: '400g',
+    location: 'Dondurucu',
+    hoursLeft: 432,
+    riskPercentage: 15,
+    priceTL: 280,
+    imageUrl: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=400&auto=format&fit=crop&q=80',
+    addedAt: '1 hafta önce',
+  },
+  {
+    id: 'item-6',
+    name: 'Taze Maydanoz',
+    category: 'Sebze',
+    amount: '1 Demet',
+    location: 'Buzdolabı',
+    hoursLeft: 48,
+    riskPercentage: 70,
+    priceTL: 20,
+    imageUrl: 'https://images.unsplash.com/photo-1608797178974-15b35a61dd75?w=400&auto=format&fit=crop&q=80',
+    addedAt: '4 gün önce',
+  },
+  {
+    id: 'item-7',
+    name: 'Köy Yumurtası',
+    category: 'Kiler',
+    amount: '6 Adet',
+    location: 'Buzdolabı',
+    hoursLeft: 192,
+    riskPercentage: 25,
+    priceTL: 45,
+    imageUrl: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&auto=format&fit=crop&q=80',
+    addedAt: '3 gün önce',
+  },
+  {
+    id: 'item-8',
+    name: 'Gemlik Sele Zeytin',
+    category: 'Şarküteri',
+    amount: '300g',
+    location: 'Buzdolabı',
+    hoursLeft: 480,
+    riskPercentage: 10,
+    priceTL: 85,
+    imageUrl: 'https://images.unsplash.com/photo-1541014741259-de529411b96a?w=400&auto=format&fit=crop&q=80',
+    addedAt: '6 gün önce',
   }
 ];
 
-// Türk Mutfağı Sık Kullanılan Gıda Kataloğu (Hızlı Arama & Otomatik Tamamlama)
-export const commonIngredientsCatalog: CatalogIngredient[] = [
-  // Süt & Şarküteri
-  { name: 'Kaşar Peyniri', category: 'Süt Ürünleri', defaultDays: 4, defaultValue: 120, unit: '250g' },
-  { name: 'Beyaz Peynir', category: 'Süt Ürünleri', defaultDays: 5, defaultValue: 95, unit: '300g' },
-  { name: 'Süzme Yoğurt', category: 'Süt Ürünleri', defaultDays: 5, defaultValue: 65, unit: '500g' },
-  { name: 'Süt', category: 'Süt Ürünleri', defaultDays: 2, defaultValue: 35, unit: '1L' },
-  { name: 'Sıvı Krema', category: 'Süt Ürünleri', defaultDays: 2, defaultValue: 55, unit: '200ml' },
-  { name: 'Tereyağı', category: 'Süt Ürünleri', defaultDays: 14, defaultValue: 80, unit: '150g' },
-  { name: 'Lor Peyniri', category: 'Süt Ürünleri', defaultDays: 3, defaultValue: 45, unit: '250g' },
+export const INITIAL_RECIPES: RescueRecipe[] = [
+  {
+    id: 'recipe-1',
+    title: 'Tavada Çıtır Kaşarlı Domatesli Ekmek',
+    description: 'Bayat ekmek dilimlerini zeytinyağında çıtırdatıp eriyen kaşar ve közlenmiş domates dilimleriyle tavada 6 dakikada buluşturun.',
+    durationMinutes: 9,
+    savedTL: 205,
+    matchPercentage: 100,
+    calories: 340,
+    protein: '18g',
+    imageUrl: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600&auto=format&fit=crop&q=80',
+    matchedItemNames: ['Taş Fırın Bayat Ekmek', 'Yarım Kaşar Peyniri', 'Salkım Domates'],
+    requiredItemNames: [
+      { name: 'Bayat Ekmek', rescued: true },
+      { name: 'Kaşar Peyniri', rescued: true },
+      { name: 'Domates', rescued: true },
+    ],
+    instructions: [
+      'Bayat ekmekleri 1.5 cm kalınlığında verev dilimleyin.',
+      'Döküm tavayı kızdırın, tabanına az zeytinyağı gezdirip ekmeklerin bir yüzünü 2 dakika altın sarısı olana dek kızartın.',
+      'Çevirdiğiniz sıcak yüzeyin üzerine ince dilimlenmiş domatesleri ve bol rendelenmiş kaşar peynirini dizin.',
+      'Tavanın kapağını 3 dakika kapatıp peynirler fokurdayarak eriyene kadar kısık ateşte demlendirin.',
+      'Üzerine taze kekik veya pul biber serperek sıcak servis yapın.'
+    ],
+    co2SavedKg: 1.24,
+    isChefPick: true,
+  },
+  {
+    id: 'recipe-2',
+    title: 'Fırında Domatesli Peynirli Omlet / Menemen',
+    description: 'Kalan domates ve kaşarları iki adet yumurtayla harmanlayarak sıcak döküm tavada hafif sulu pişirin.',
+    durationMinutes: 12,
+    savedTL: 180,
+    matchPercentage: 85,
+    calories: 285,
+    protein: '14g',
+    imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&auto=format&fit=crop&q=80',
+    matchedItemNames: ['Yarım Kaşar Peyniri', 'Salkım Domates', 'Köy Yumurtası'],
+    requiredItemNames: [
+      { name: 'Kaşar Peyniri', rescued: true },
+      { name: 'Domates', rescued: true },
+      { name: 'Yumurta (Kiler)', rescued: false, isPantry: true },
+    ],
+    instructions: [
+      'Domateslerin kabuklarını soymadan iri küpler halinde doğrayın.',
+      'Tavada erittiğiniz tereyağında domatesleri suyunu hafif çekene kadar 4 dakika soteleyin.',
+      'Yumurtaları bir kapta çatalla hafifçe çırpıp domateslerin üzerine dökün.',
+      'Hemen ardından kaşar peyniri parçalarını ekleyin, karıştırmadan peynir sünene kadar pişirin.'
+    ],
+    co2SavedKg: 0.95,
+  },
+  {
+    id: 'recipe-3',
+    title: 'Yoğurt Soslu Kıymalı Bayat Ekmek Mantısı',
+    description: 'Fırında gevretilmiş çıtır ekmek küpleri üzerine sarımsaklı yoğurt ve baharatlı kıyma sosu gezdirilen efsane sıfır atık ziyafeti.',
+    durationMinutes: 14,
+    savedTL: 325,
+    matchPercentage: 95,
+    calories: 420,
+    protein: '24g',
+    imageUrl: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=600&auto=format&fit=crop&q=80',
+    matchedItemNames: ['Taş Fırın Bayat Ekmek', 'Dana Kıyma', 'Organik Süzme Yoğurt'],
+    requiredItemNames: [
+      { name: 'Bayat Ekmek', rescued: true },
+      { name: 'Dana Kıyma', rescued: true },
+      { name: 'Süzme Yoğurt', rescued: true },
+    ],
+    instructions: [
+      'Bayat ekmekleri lokmalık küpler halinde doğrayıp fırında veya tavada altın rengi olana kadar çıtırlaştırın.',
+      'Ayrı bir tavada kıymayı az soğan ve salçayla kavurun, karabiber ekleyin.',
+      'Süzme yoğurdu az ılık su ve ezilmiş sarımsakla pürüzsüz kıvama getirin.',
+      'Tabağa önce çıtır ekmekleri, üzerine sarımsaklı yoğurdu, en üste de sıcak kıymalı sosu ve tereyağında yakılmış naneyi dökün.'
+    ],
+    co2SavedKg: 2.10,
+  },
+  {
+    id: 'recipe-4',
+    title: 'Tarçınlı Çıtır Ekmek Dilimleri',
+    description: 'Kalan ekmek dilimlerini hafif tereyağı ve tarçınla fırınlayarak 7 dakikada çıtır sıfır atık tatlısına dönüştürün.',
+    durationMinutes: 7,
+    savedTL: 65,
+    matchPercentage: 70,
+    calories: 190,
+    protein: '4g',
+    imageUrl: 'https://images.unsplash.com/photo-1484723091739-00a699888947?w=600&auto=format&fit=crop&q=80',
+    matchedItemNames: ['Taş Fırın Bayat Ekmek'],
+    requiredItemNames: [
+      { name: 'Bayat Ekmek', rescued: true },
+      { name: 'Tarçın & Tereyağı', rescued: false, isPantry: true },
+    ],
+    instructions: [
+      'Bayat ekmek dilimlerine yumuşamış tereyağı sürün.',
+      'Üzerine tarçın ve az toz şeker serpiştirin.',
+      'Önceden ısıtılmış 200°C fırında 6-7 dakika çıtırlaşana kadar fırınlayın.'
+    ],
+    co2SavedKg: 0.35,
+  }
+];
 
-  // Sebze & Yeşillik
-  { name: 'Domates', category: 'Sebze', defaultDays: 3, defaultValue: 40, unit: '3 Adet' },
-  { name: 'Salatalık', category: 'Sebze', defaultDays: 4, defaultValue: 30, unit: '3 Adet' },
-  { name: 'Kuru Soğan', category: 'Sebze', defaultDays: 12, defaultValue: 25, unit: '3 Adet' },
-  { name: 'Patates', category: 'Sebze', defaultDays: 10, defaultValue: 35, unit: '4 Adet' },
-  { name: 'Biber (Sivri/Çarliston)', category: 'Sebze', defaultDays: 4, defaultValue: 30, unit: '4 Adet' },
-  { name: 'Maydanoz', category: 'Sebze', defaultDays: 2, defaultValue: 15, unit: '1 Demet' },
-  { name: 'Dereotu', category: 'Sebze', defaultDays: 2, defaultValue: 15, unit: '1 Demet' },
-  { name: 'Ispanak', category: 'Sebze', defaultDays: 2, defaultValue: 40, unit: '500g' },
-  { name: 'Mantar (Kültür)', category: 'Sebze', defaultDays: 2, defaultValue: 50, unit: '300g' },
-  { name: 'Kabak', category: 'Sebze', defaultDays: 3, defaultValue: 35, unit: '2 Adet' },
-  { name: 'Patlıcan', category: 'Sebze', defaultDays: 3, defaultValue: 40, unit: '2 Adet' },
-  { name: 'Havuç', category: 'Sebze', defaultDays: 7, defaultValue: 25, unit: '3 Adet' },
-  { name: 'Sarımsak', category: 'Sebze', defaultDays: 20, defaultValue: 20, unit: '1 Baş' },
-  { name: 'Karnabahar', category: 'Sebze', defaultDays: 4, defaultValue: 60, unit: '1 Adet' },
-  { name: 'Pırasa', category: 'Sebze', defaultDays: 4, defaultValue: 35, unit: '3 Dal' },
+export const INITIAL_BADGES: AchievementBadge[] = [
+  {
+    id: 'badge-1',
+    title: 'Sıfır Ziyan Ustası',
+    rank: 'ALTIN',
+    description: '4 gün ardışık kurtarma tamamlandı',
+    icon: '🛡️',
+    unlocked: true,
+  },
+  {
+    id: 'badge-2',
+    title: 'Dolap Hakimi',
+    rank: 'PLATİN',
+    description: 'Envanterinde hiç çürüyen gıda kalmadı',
+    icon: '👑',
+    unlocked: true,
+  },
+  {
+    id: 'badge-3',
+    title: 'Hızlı Şef',
+    rank: 'GÜMÜŞ',
+    description: '10 dk altı 5 kurtarma yemeği',
+    icon: '⚡',
+    unlocked: false,
+    progress: '3/5 İLERLEME',
+  }
+];
 
-  // Fırın & Ekmek
-  { name: 'Bayat Ekmek', category: 'Fırın', defaultDays: 1, defaultValue: 20, unit: '1 Adet' },
-  { name: 'Lavaş / Yufka', category: 'Fırın', defaultDays: 2, defaultValue: 30, unit: '2 Yaprak' },
-  { name: 'Tost Ekmeği', category: 'Fırın', defaultDays: 4, defaultValue: 35, unit: 'Yarım Paket' },
+export interface TurkishStapleSuggestion {
+  name: string;
+  category: FoodItem['category'];
+  icon: string;
+  defaultPrice: number;
+  defaultDays: number;
+  defaultAmount: number;
+  unit: string;
+  location: FoodItem['location'];
+}
 
-  // Et & Şarküteri
-  { name: 'Kıyma', category: 'Et & Şarküteri', defaultDays: 1, defaultValue: 180, unit: '300g' },
-  { name: 'Tavuk Göğsü', category: 'Et & Şarküteri', defaultDays: 1, defaultValue: 130, unit: '400g' },
-  { name: 'Sucuk', category: 'Et & Şarküteri', defaultDays: 8, defaultValue: 110, unit: '10 Dilim' },
-  { name: 'Sosis', category: 'Et & Şarküteri', defaultDays: 5, defaultValue: 60, unit: '5 Adet' },
-
-  // Temel Gıda
-  { name: 'Yumurta', category: 'Temel Gıda', defaultDays: 8, defaultValue: 40, unit: '4 Adet' },
-  { name: 'Pirinç (Haşlanmış/Artan)', category: 'Temel Gıda', defaultDays: 2, defaultValue: 25, unit: '1 Kase' },
-  { name: 'Makarna (Kalan)', category: 'Temel Gıda', defaultDays: 2, defaultValue: 25, unit: '1 Kase' },
-  { name: 'Domates Salçası', category: 'Temel Gıda', defaultDays: 14, defaultValue: 30, unit: '3 Kaşık' },
-  { name: 'Haşlanmış Nohut', category: 'Temel Gıda', defaultDays: 3, defaultValue: 30, unit: '1 Kase' },
-  { name: 'Kırmızı Mercimek', category: 'Temel Gıda', defaultDays: 30, defaultValue: 35, unit: '1 Bardak' },
-
-  // Meyve
-  { name: 'Limon', category: 'Meyve', defaultDays: 10, defaultValue: 20, unit: '2 Adet' },
-  { name: 'Elma', category: 'Meyve', defaultDays: 7, defaultValue: 30, unit: '3 Adet' },
-  { name: 'Muz (Kararmaya Yakın)', category: 'Meyve', defaultDays: 2, defaultValue: 45, unit: '2 Adet' },
+export const TURKISH_STAPLES: TurkishStapleSuggestion[] = [
+  {
+    name: 'Kaşar Peyniri',
+    category: 'Süt Ürünü',
+    icon: '🧀',
+    defaultPrice: 120,
+    defaultDays: 3,
+    defaultAmount: 250,
+    unit: 'g',
+    location: 'Buzdolabı',
+  },
+  {
+    name: 'Bayat Ekmek',
+    category: 'Unlu Mamul',
+    icon: '🥖',
+    defaultPrice: 25,
+    defaultDays: 2,
+    defaultAmount: 1,
+    unit: 'Adet',
+    location: 'Kiler',
+  },
+  {
+    name: 'Domates',
+    category: 'Sebze',
+    icon: '🍅',
+    defaultPrice: 35,
+    defaultDays: 4,
+    defaultAmount: 500,
+    unit: 'g',
+    location: 'Buzdolabı',
+  },
+  {
+    name: 'Süzme Yoğurt',
+    category: 'Şarküteri',
+    icon: '🥛',
+    defaultPrice: 65,
+    defaultDays: 5,
+    defaultAmount: 500,
+    unit: 'g',
+    location: 'Buzdolabı',
+  },
+  {
+    name: 'Dana Kıyma',
+    category: 'Et & Tavuk',
+    icon: '🥩',
+    defaultPrice: 220,
+    defaultDays: 2,
+    defaultAmount: 400,
+    unit: 'g',
+    location: 'Buzdolabı',
+  },
+  {
+    name: 'Taze Maydanoz',
+    category: 'Sebze',
+    icon: '🥬',
+    defaultPrice: 15,
+    defaultDays: 3,
+    defaultAmount: 1,
+    unit: 'Demet',
+    location: 'Buzdolabı',
+  },
+  {
+    name: 'Köy Yumurtası',
+    category: 'Kiler',
+    icon: '🥚',
+    defaultPrice: 50,
+    defaultDays: 10,
+    defaultAmount: 6,
+    unit: 'Adet',
+    location: 'Buzdolabı',
+  },
+  {
+    name: 'Sele Zeytin',
+    category: 'Şarküteri',
+    icon: '🫒',
+    defaultPrice: 85,
+    defaultDays: 25,
+    defaultAmount: 300,
+    unit: 'g',
+    location: 'Buzdolabı',
+  },
+  {
+    name: 'Çarliston Biber',
+    category: 'Sebze',
+    icon: '🫑',
+    defaultPrice: 30,
+    defaultDays: 4,
+    defaultAmount: 250,
+    unit: 'g',
+    location: 'Buzdolabı',
+  },
+  {
+    name: 'Kuru Soğan',
+    category: 'Sebze',
+    icon: '🧅',
+    defaultPrice: 20,
+    defaultDays: 14,
+    defaultAmount: 1,
+    unit: 'kg',
+    location: 'Kiler',
+  }
 ];

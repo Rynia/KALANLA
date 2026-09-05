@@ -1,7 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PersistedKitchenState } from '../types/models';
+import { FoodItem, AchievementBadge } from '../types/models';
 
-const STORAGE_KEY = '@kalanla/kitchen-state-v1';
+export interface PersistedKitchenState {
+  foodItems: FoodItem[];
+  rescuedTotalTL: number;
+  rescuedCo2Kg: number;
+  rescuedMealsCount: number;
+  badges?: AchievementBadge[];
+}
+
+const STORAGE_KEY = '@kalanla/kitchen-state-v2';
 
 export async function loadKitchenState(): Promise<PersistedKitchenState | null> {
   try {

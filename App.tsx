@@ -1,607 +1,328 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
-  Text,
   View,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
   StatusBar,
   Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 import {
-  Ingredient,
-  Recipe,
-  Tab,
+  TabType,
+  FoodItem,
+  RescueRecipe,
+  ThermalReceiptData,
+  AchievementBadge,
 } from './src/types/models';
-import { colors, spacing, radius } from './src/theme/theme';
-import { initialIngredients, initialRecipes } from './src/data/initialData';
+import {
+  INITIAL_FOOD_ITEMS,
+  INITIAL_RECIPES,
+  INITIAL_BADGES,
+} from './src/data/initialData';
 import {
   loadKitchenState,
   saveKitchenState,
 } from './src/storage/kitchenStorage';
-import {
-  Header,
-  StatsRadar,
-  IngredientCard,
-  RecipeCard,
-} from './src/components/KitchenComponents';
-import { AddIngredientModal } from './src/components/AddIngredientModal';
+import { Header } from './src/components/Header';
+import { BottomNav } from './src/components/BottomNav';
+import { InventoryRadar } from './src/components/InventoryRadar';
+import { RescueKitchen } from './src/components/RescueKitchen';
+import { EarningsTelemetry } from './src/components/EarningsTelemetry';
+import { QuickAddModal } from './src/components/QuickAddModal';
 import { ThermalReceiptModal } from './src/components/ThermalReceiptModal';
+import { RecipeDetailModal } from './src/components/RecipeDetailModal';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Tab>('see');
-  const [ingredients, setIngredients] = useState<Ingredient[]>(initialIngredients);
-  const [recipes] = useState<Recipe[]>(initialRecipes);
-  const [savedValue, setSavedValue] = useState(860);
-  const [completedRecipes, setCompletedRecipes] = useState(0);
+  const [activeTab, setActiveTab] = useState<TabType>('gor');
+  const [foodItems, setFoodItems] = useState<FoodItem[]>(INITIAL_FOOD_ITEMS);
+  const [recipes] = useState<RescueRecipe[]>(INITIAL_RECIPES);
+  const [badges, setBadges] = useState<AchievementBadge[]>(INITIAL_BADGES);
 
-  // Modals state
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [receiptRecipe, setReceiptRecipe] = useState<Recipe | null>(null);
-  const [lastSavedAmount, setLastSavedAmount] = useState(0);
+  // Rescued metrics
+  const [rescuedTotalTL, setRescuedTotalTL] = useState<number>(1120);
+  const [rescuedCo2Kg, setRescuedCo2Kg] = useState<number>(2.4);
+  const [rescuedMealsCount, setRescuedMealsCount] = useState<number>(12);
 
-  // Load persisted state on mount
+  // Modals
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [activeReceipt, setActiveReceipt] = useState<ThermalReceiptData | null>(null);
+  const [activeDetailRecipe, setActiveDetailRecipe] = useState<RescueRecipe | null>(null);
+
+  const urgentCount = foodItems.filter((i) => i.hoursLeft <= 48).length;
+
+  // Load state on mount
   useEffect(() => {
     async function hydrate() {
       const persisted = await loadKitchenState();
       if (persisted) {
-        if (persisted.ingredients) {
-          setIngredients(persisted.ingredients);
+        if (persisted.foodItems && persisted.foodItems.length > 0) {
+          setFoodItems(persisted.foodItems);
         }
-        if (typeof persisted.savedValue === 'number') {
-          setSavedValue(persisted.savedValue);
+        if (typeof persisted.rescuedTotalTL === 'number') {
+          setRescuedTotalTL(persisted.rescuedTotalTL);
         }
-        if (typeof persisted.completedRecipes === 'number') {
-          setCompletedRecipes(persisted.completedRecipes);
+        if (typeof persisted.rescuedCo2Kg === 'number') {
+          setRescuedCo2Kg(persisted.rescuedCo2Kg);
+        }
+        if (typeof persisted.rescuedMealsCount === 'number') {
+          setRescuedMealsCount(persisted.rescuedMealsCount);
+        }
+        if (persisted.badges) {
+          setBadges(persisted.badges);
         }
       }
     }
     hydrate();
   }, []);
 
-  // Save state when core values change
-  const persistCurrentState = (
-    nextIngredients: Ingredient[],
-    nextSaved: number,
-    nextCompleted: number,
+  // Save state helper
+  const persistState = (
+    nextItems: FoodItem[],
+    nextTotal: number,
+    nextCo2: number,
+    nextMeals: number,
+    nextBadges: AchievementBadge[],
   ) => {
     saveKitchenState({
-      ingredients: nextIngredients,
-      savedValue: nextSaved,
-      completedRecipes: nextCompleted,
+      foodItems: nextItems,
+      rescuedTotalTL: nextTotal,
+      rescuedCo2Kg: nextCo2,
+      rescuedMealsCount: nextMeals,
+      badges: nextBadges,
     });
   };
 
-  // Derived Kitchen Statistics
-  const stats = useMemo(() => {
-    const totalValue = ingredients.reduce((sum, item) => sum + item.value, 0);
-    const atRiskValue = ingredients
-      .filter((item) => item.daysLeft <= 2)
-      .reduce((sum, item) => sum + item.value, 0);
-    return {
-      totalValue,
-      atRiskValue,
-      savedValue,
+  // Handle Tab Switch (if center 'ekle' is clicked, open modal directly)
+  const handleTabChange = (tab: TabType) => {
+    if ((tab as any) === 'ekle') {
+      setIsAddModalOpen(true);
+    } else {
+      setActiveTab(tab);
+    }
+  };
+
+  // Add Item to Inventory
+  const handleAddItem = (newItem: Omit<FoodItem, 'id' | 'addedAt'>) => {
+    const itemWithId: FoodItem = {
+      ...newItem,
+      id: `item-${Date.now()}`,
+      addedAt: 'Şimdi',
     };
-  }, [ingredients, savedValue]);
+    const nextList = [itemWithId, ...foodItems];
+    setFoodItems(nextList);
+    persistState(nextList, rescuedTotalTL, rescuedCo2Kg, rescuedMealsCount, badges);
+  };
 
-  // Urgency sorted ingredients
-  const sortedIngredients = useMemo(() => {
-    return [...ingredients].sort((a, b) => a.daysLeft - b.daysLeft);
-  }, [ingredients]);
+  // Delete item from Inventory
+  const handleDeleteItem = (id: string) => {
+    const nextList = foodItems.filter((i) => i.id !== id);
+    setFoodItems(nextList);
+    persistState(nextList, rescuedTotalTL, rescuedCo2Kg, rescuedMealsCount, badges);
+  };
 
-  // Haptic feedback helpers
-  const triggerLightHaptic = async () => {
+  // Cooking Recipe Interaction: Deducts items, increases savings, creates thermal receipt
+  const handleCookRecipe = (recipe: RescueRecipe) => {
+    const matchedItemsToRemove: FoodItem[] = [];
+    recipe.requiredItemNames.forEach((req) => {
+      if (!req.isPantry) {
+        const found = foodItems.find(
+          (item) =>
+            item.name.toLocaleLowerCase('tr-TR').includes(req.name.toLocaleLowerCase('tr-TR')) ||
+            req.name.toLocaleLowerCase('tr-TR').includes(item.name.toLocaleLowerCase('tr-TR')),
+        );
+        if (found && !matchedItemsToRemove.some((m) => m.id === found.id)) {
+          matchedItemsToRemove.push(found);
+        }
+      }
+    });
+
+    const nextItems = foodItems.filter(
+      (item) => !matchedItemsToRemove.some((m) => m.id === item.id),
+    );
+    const nextTotal = rescuedTotalTL + recipe.savedTL;
+    const nextCo2 = Number((rescuedCo2Kg + recipe.co2SavedKg).toFixed(2));
+    const nextMeals = rescuedMealsCount + 1;
+
+    setFoodItems(nextItems);
+    setRescuedTotalTL(nextTotal);
+    setRescuedCo2Kg(nextCo2);
+    setRescuedMealsCount(nextMeals);
+
+    // Build authentic thermal receipt data matching reference
+    const now = new Date();
+    const formattedDate = `${String(now.getDate()).padStart(2, '0')}.${String(
+      now.getMonth() + 1,
+    ).padStart(2, '0')}.${now.getFullYear()}`;
+    const formattedTime = `${String(now.getHours()).padStart(2, '0')}:${String(
+      now.getMinutes(),
+    ).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+    const receiptItems = matchedItemsToRemove.map((item) => ({
+      name: item.name,
+      amount: item.amount,
+      priceTL: item.priceTL,
+    }));
+
+    if (receiptItems.length === 0) {
+      receiptItems.push(
+        { name: 'Bayat Ekmek', amount: '250g', priceTL: 25 },
+        { name: 'Kaşar Peyniri', amount: '200g', priceTL: 120 },
+        { name: 'Salkım Domates', amount: '3 Adet', priceTL: 60 },
+      );
+    }
+
+    const newReceipt: ThermalReceiptData = {
+      id: `rcp-${Date.now()}`,
+      date: formattedDate,
+      time: formattedTime,
+      txCode: `TR-IST-034 // #${Math.floor(1000 + Math.random() * 9000)}`,
+      recipeTitle: recipe.title,
+      items: receiptItems,
+      totalSavedTL: recipe.savedTL,
+      co2SavedKg: recipe.co2SavedKg,
+      durationMinutes: recipe.durationMinutes,
+      barcodeNumber: '8 690123 456789',
+    };
+
+    setActiveReceipt(newReceipt);
+
+    // Unlock achievements
+    const nextBadges = badges.map((badge) => {
+      if (badge.id === 'badge-3') {
+        return {
+          ...badge,
+          unlocked: true,
+          progress: '4/5 İLERLEME',
+        };
+      }
+      return badge;
+    });
+    setBadges(nextBadges);
+
+    persistState(nextItems, nextTotal, nextCo2, nextMeals, nextBadges);
+
     if (Platform.OS !== 'web') {
       try {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch (e) {}
     }
   };
 
-  const triggerSuccessHaptic = async () => {
-    if (Platform.OS !== 'web') {
-      try {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } catch (e) {}
-    }
-  };
+  // Open historical receipt preview from Earnings tab
+  const handleOpenReceiptFromEarnings = () => {
+    const now = new Date();
+    const formattedDate = `${String(now.getDate()).padStart(2, '0')}.${String(
+      now.getMonth() + 1,
+    ).padStart(2, '0')}.${now.getFullYear()}`;
+    const formattedTime = `${String(now.getHours()).padStart(2, '0')}:${String(
+      now.getMinutes(),
+    ).padStart(2, '0')}`;
 
-  // Tab change handler
-  const handleTabChange = (tab: Tab) => {
-    triggerLightHaptic();
-    setActiveTab(tab);
-  };
-
-  // Add new ingredient
-  const handleAddIngredient = (newIngredient: Ingredient) => {
-    const nextList = [newIngredient, ...ingredients];
-    setIngredients(nextList);
-    persistCurrentState(nextList, savedValue, completedRecipes);
-    triggerSuccessHaptic();
-  };
-
-  // Cook / rescue action with inventory deduction logic
-  const handleCookRecipe = (recipe: Recipe) => {
-    // 1. Identify used ingredients and deduct them from pantry
-    const usedNames = recipe.ingredientsUsed.map((u) => u.toLocaleLowerCase('tr-TR'));
-    
-    // Find matching ingredients to compute accurate rescued value
-    const matched = ingredients.filter((ing) =>
-      usedNames.some((u) => ing.name.toLocaleLowerCase('tr-TR').includes(u) || u.includes(ing.name.toLocaleLowerCase('tr-TR')))
-    );
-
-    const computedSavings = matched.length > 0
-      ? matched.reduce((sum, m) => sum + m.value, 0)
-      : recipe.savings;
-
-    // Remaining ingredients after cooking
-    const remaining = ingredients.filter(
-      (ing) => !matched.some((m) => m.id === ing.id)
-    );
-
-    const nextSaved = savedValue + computedSavings;
-    const nextCompleted = completedRecipes + 1;
-
-    setIngredients(remaining);
-    setLastSavedAmount(computedSavings);
-    setReceiptRecipe(recipe);
-    setSavedValue(nextSaved);
-    setCompletedRecipes(nextCompleted);
-    persistCurrentState(remaining, nextSaved, nextCompleted);
-
-    triggerSuccessHaptic();
+    setActiveReceipt({
+      id: 'rcp-historical',
+      date: formattedDate,
+      time: formattedTime,
+      txCode: 'TR-IST-034 // #8821',
+      recipeTitle: 'TAVADA ÇITIR KAŞARLI EKMEK',
+      items: [
+        { name: 'Bayat Ekmek', amount: '250g', priceTL: 25 },
+        { name: 'Kaşar Peyniri', amount: '200g', priceTL: 120 },
+        { name: 'Salkım Domates', amount: '3 Adet', priceTL: 60 },
+      ],
+      totalSavedTL: 205,
+      co2SavedKg: 1.24,
+      durationMinutes: 9,
+      barcodeNumber: '8 690123 456789',
+    });
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="#0A0A0E" />
 
-      {/* TOP BRAND HEADER */}
-      <Header />
+      {/* FIXED RYNIA OS TOP HEADER */}
+      <Header activeTab={activeTab} urgentCount={urgentCount} />
 
-      {/* VALUE & SPOILAGE RADAR */}
-      <StatsRadar
-        totalValue={stats.totalValue}
-        atRiskValue={stats.atRiskValue}
-        savedValue={stats.savedValue}
-      />
-
-      {/* NAVIGATION TABS */}
-      <View style={styles.tabBar}>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'see' && styles.tabButtonActive]}
-          onPress={() => handleTabChange('see')}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.tabText, activeTab === 'see' && styles.tabTextActive]}>
-            GÖR // Kalanlar ({ingredients.length})
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'cook' && styles.tabButtonActive]}
-          onPress={() => handleTabChange('cook')}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.tabText, activeTab === 'cook' && styles.tabTextActive]}>
-            PİŞİR // Kalanla Yap
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'savings' && styles.tabButtonActive]}
-          onPress={() => handleTabChange('savings')}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.tabText, activeTab === 'savings' && styles.tabTextActive]}>
-            KAZANCIN
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* MAIN SCROLLABLE CONTENT */}
+      {/* SCROLLABLE VIEWPORT */}
       <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
+        style={styles.viewport}
+        contentContainerStyle={styles.viewportContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* TAB 1: GÖR (KALANLAR) */}
-        {activeTab === 'see' && (
-          <View>
-            <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionTitle}>BUZDOLABINDA NE VAR?</Text>
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => {
-                  triggerLightHaptic();
-                  setIsAddModalOpen(true);
-                }}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.addButtonText}>+ Malzeme Ekle</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* EMPTY STATE */}
-            {ingredients.length === 0 ? (
-              <View style={styles.emptyCard}>
-                <Text style={styles.emptyIcon}>🥬</Text>
-                <Text style={styles.emptyTitle}>Dolabın tamamen tertemiz!</Text>
-                <Text style={styles.emptySubtitle}>
-                  Bozulma riski taşıyan hiçbir malzeme yok. Yeni aldığın ürünleri ekleyerek israf radarını başlat.
-                </Text>
-                <TouchableOpacity
-                  style={styles.emptyActionBtn}
-                  onPress={() => {
-                    triggerLightHaptic();
-                    setIsAddModalOpen(true);
-                  }}
-                  activeOpacity={0.85}
-                >
-                  <Text style={styles.emptyActionBtnText}>+ İlk Malzemeni Ekle</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <>
-                {/* SAFE STATE BANNER (When items exist but none are critical) */}
-                {stats.atRiskValue === 0 && (
-                  <View style={styles.safeBanner}>
-                    <Text style={styles.safeBannerText}>
-                      ✓ Şu an 48 saatlik risk altında malzeme yok. Mutfak kontrol altında!
-                    </Text>
-                  </View>
-                )}
-
-                {/* INGREDIENT LIST */}
-                {sortedIngredients.map((item) => (
-                  <IngredientCard key={item.id} item={item} />
-                ))}
-
-                {/* ACTION HERO BUTTON */}
-                {stats.atRiskValue > 0 ? (
-                  <TouchableOpacity
-                    style={styles.actionHeroButton}
-                    onPress={() => handleTabChange('cook')}
-                    activeOpacity={0.85}
-                  >
-                    <Text style={styles.actionHeroText}>
-                      ⚡ Riskteki ₺{stats.atRiskValue}'yi Kurtar →
-                    </Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    style={[styles.actionHeroButton, { borderColor: colors.border }]}
-                    onPress={() => handleTabChange('cook')}
-                    activeOpacity={0.85}
-                  >
-                    <Text style={[styles.actionHeroText, { color: colors.text }]}>
-                      🍳 Kalanlarla Akşam Yemeği Planla →
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </>
-            )}
-          </View>
+        {activeTab === 'gor' && (
+          <InventoryRadar
+            items={foodItems}
+            rescuedTotalTL={rescuedTotalTL}
+            rescuedCo2Kg={rescuedCo2Kg}
+            onDeleteItem={handleDeleteItem}
+            onNavigateToCook={() => setActiveTab('pisir')}
+            onOpenAddModal={() => setIsAddModalOpen(true)}
+          />
         )}
 
-        {/* TAB 2: PİŞİR (KALANLA YAP) */}
-        {activeTab === 'cook' && (
-          <View>
-            <Text style={styles.sectionTitle}>10-15 DAKİKALIK KURTARMA MENÜSÜ</Text>
-            <Text style={styles.sectionSubtitle}>
-              Dolabında bozulma riski olan malzemelerle anında pişirebileceğin sıfır-atık reçeteleri:
-            </Text>
-
-            {recipes.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                onCook={handleCookRecipe}
-              />
-            ))}
-          </View>
+        {activeTab === 'pisir' && (
+          <RescueKitchen
+            recipes={recipes}
+            inventory={foodItems}
+            onCookRecipe={handleCookRecipe}
+            onViewRecipeDetail={(recipe) => setActiveDetailRecipe(recipe)}
+          />
         )}
 
-        {/* TAB 3: KAZANCIN (TASARRUF RAPORU) */}
-        {activeTab === 'savings' && (
-          <View>
-            <Text style={styles.sectionTitle}>AYLIK BEREKET & TASARRUF RAPORU</Text>
-
-            <View style={styles.savingsHeroCard}>
-              <Text style={styles.savingsBigLabel}>
-                BU AY ÇÖPE GİTMEKTEN KURTARILAN TAHMİNİ DEĞER
-              </Text>
-              <Text style={styles.savingsBigValue}>₺{savedValue}</Text>
-              <Text style={styles.savingsHeroSub}>
-                Bu tutarla yaklaşık 3 market alışverişi veya 4 dışarı yemeği bedavaya geldi!
-              </Text>
-
-              <View style={styles.carbonBadgeRow}>
-                <Text style={styles.carbonBadgeText}>
-                  🌱 Engellenen Karbon Salınımı: ~{(savedValue * 0.045).toFixed(1)} kg CO₂e
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.metricsRow}>
-              <View style={styles.metricCard}>
-                <Text style={styles.metricCardValue}>{completedRecipes}</Text>
-                <Text style={styles.metricCardLabel}>Kurtarılan Öğün</Text>
-              </View>
-              <View style={styles.metricCard}>
-                <Text style={styles.metricCardValue}>{ingredients.length}</Text>
-                <Text style={styles.metricCardLabel}>Aktif Malzeme</Text>
-              </View>
-            </View>
-
-            <View style={styles.badgeRow}>
-              <View style={styles.badgeItem}>
-                <Text style={styles.badgeIcon}>🛡️</Text>
-                <Text style={styles.badgeTitle}>Sıfır Ziyan</Text>
-                <Text style={styles.badgeDesc}>4 gün ardışık kurtarma</Text>
-              </View>
-              <View style={styles.badgeItem}>
-                <Text style={styles.badgeIcon}>👑</Text>
-                <Text style={styles.badgeTitle}>Dolap Hakimi</Text>
-                <Text style={styles.badgeDesc}>6 öğün evde pişirildi</Text>
-              </View>
-            </View>
-          </View>
+        {activeTab === 'kazancin' && (
+          <EarningsTelemetry
+            rescuedTotalTL={rescuedTotalTL}
+            rescuedCo2Kg={rescuedCo2Kg}
+            rescuedMealsCount={rescuedMealsCount}
+            badges={badges}
+            onOpenReceipt={handleOpenReceiptFromEarnings}
+          />
         )}
       </ScrollView>
 
-      {/* AKILLI MALZEME EKLEME MODALI (AUTOCOMPLETE & QUICK ADD) */}
-      <AddIngredientModal
-        visible={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAddIngredient={handleAddIngredient}
+      {/* FIXED BOTTOM TAB NAVIGATION */}
+      <BottomNav
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        urgentCount={urgentCount}
       />
 
-      {/* TERMAL FİŞ & GÖRSEL PAYLAŞIM MODALI (VIEWSHOT + EXPO-SHARING) */}
+      {/* QUICK ADD INGREDIENT BOTTOM SHEET */}
+      <QuickAddModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddItem={handleAddItem}
+      />
+
+      {/* RECIPE DETAIL / STEP-BY-STEP MODAL */}
+      <RecipeDetailModal
+        recipe={activeDetailRecipe}
+        onClose={() => setActiveDetailRecipe(null)}
+        onCookRecipe={handleCookRecipe}
+      />
+
+      {/* PHOTOREALISTIC THERMAL RECEIPT MODAL */}
       <ThermalReceiptModal
-        visible={!!receiptRecipe}
-        recipe={receiptRecipe}
-        savedValue={lastSavedAmount}
-        totalSavedMonth={savedValue}
-        onClose={() => setReceiptRecipe(null)}
+        receipt={activeReceipt}
+        onClose={() => setActiveReceipt(null)}
       />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#0A0A0E',
   },
-  tabBar: {
-    flexDirection: 'row',
-    marginHorizontal: spacing.xl,
-    marginTop: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  tabButton: {
+  viewport: {
     flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: radius.sm,
   },
-  tabButtonActive: {
-    backgroundColor: colors.surfaceRaised,
-  },
-  tabText: {
-    color: colors.muted,
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  tabTextActive: {
-    color: colors.text,
-    fontWeight: '800',
-  },
-  content: {
-    flex: 1,
-    marginTop: spacing.md,
-  },
-  contentContainer: {
-    paddingHorizontal: spacing.xl,
-    paddingBottom: 60,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 1,
-    color: colors.text,
-    marginBottom: spacing.sm,
-  },
-  sectionSubtitle: {
-    fontSize: 13,
-    color: colors.muted,
-    marginBottom: spacing.lg,
-    lineHeight: 18,
-  },
-  addButton: {
-    backgroundColor: colors.emeraldSoft,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.emerald,
-  },
-  addButtonText: {
-    color: colors.emerald,
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  safeBanner: {
-    backgroundColor: colors.emeraldSoft,
-    borderWidth: 1,
-    borderColor: colors.emerald,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-  },
-  safeBannerText: {
-    color: colors.emerald,
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  emptyCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.xxl,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginTop: spacing.md,
-  },
-  emptyIcon: {
-    fontSize: 44,
-    marginBottom: spacing.sm,
-  },
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  emptySubtitle: {
-    fontSize: 13,
-    color: colors.muted,
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: spacing.lg,
-  },
-  emptyActionBtn: {
-    backgroundColor: colors.emerald,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: radius.md,
-  },
-  emptyActionBtnText: {
-    color: colors.background,
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  actionHeroButton: {
-    backgroundColor: colors.surfaceRaised,
-    paddingVertical: spacing.lg,
-    borderRadius: radius.md,
-    marginTop: spacing.sm,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  actionHeroText: {
-    color: colors.emerald,
-    fontSize: 14,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  savingsHeroCard: {
-    backgroundColor: colors.surface,
-    padding: spacing.xl,
-    borderRadius: radius.lg,
-    marginBottom: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  savingsBigLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.muted,
-    letterSpacing: 1,
-    marginBottom: spacing.sm,
-  },
-  savingsBigValue: {
-    fontSize: 38,
-    fontWeight: '900',
-    color: colors.emerald,
-    marginBottom: spacing.sm,
-  },
-  savingsHeroSub: {
-    fontSize: 13,
-    color: colors.muted,
-    lineHeight: 18,
-    marginBottom: spacing.md,
-  },
-  carbonBadgeRow: {
-    backgroundColor: colors.emeraldSoft,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: radius.sm,
-    alignSelf: 'flex-start',
-  },
-  carbonBadgeText: {
-    color: colors.emerald,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  metricsRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  metricCard: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-  },
-  metricCardValue: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  metricCardLabel: {
-    fontSize: 11,
-    color: colors.muted,
-    fontWeight: '600',
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  badgeItem: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-  },
-  badgeIcon: {
-    fontSize: 28,
-    marginBottom: spacing.xs,
-  },
-  badgeTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 2,
-  },
-  badgeDesc: {
-    fontSize: 11,
-    color: colors.muted,
-    textAlign: 'center',
+  viewportContent: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 24,
   },
 });
