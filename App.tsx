@@ -36,6 +36,10 @@ import { EarningsTelemetry } from './src/components/EarningsTelemetry';
 import { QuickAddModal } from './src/components/QuickAddModal';
 import { ThermalReceiptModal } from './src/components/ThermalReceiptModal';
 import { RecipeDetailModal } from './src/components/RecipeDetailModal';
+import { VisionScanModal } from './src/components/VisionScanModal';
+import { StudentVerifyModal } from './src/components/StudentVerifyModal';
+import { UserSubscription } from './src/types/subscription';
+import { loadSubscription, INITIAL_SUBSCRIPTION } from './src/services/entitlements';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('gor');
@@ -57,8 +61,13 @@ export default function App() {
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isVisionModalOpen, setIsVisionModalOpen] = useState<boolean>(false);
+  const [isStudentModalOpen, setIsStudentModalOpen] = useState<boolean>(false);
   const [activeReceipt, setActiveReceipt] = useState<ThermalReceiptData | null>(null);
   const [activeDetailRecipe, setActiveDetailRecipe] = useState<RescueRecipe | null>(null);
+
+  // Subscription / Paket Yönetimi
+  const [subscription, setSubscription] = useState<UserSubscription>(INITIAL_SUBSCRIPTION);
 
   const urgentCount = useMemo(
     () => foodItems.filter((i) => i.hoursLeft <= 48).length,
@@ -89,6 +98,10 @@ export default function App() {
         if (Array.isArray(persisted.badges)) {
           setBadges(persisted.badges);
         }
+      }
+      const loadedSub = await loadSubscription();
+      if (!cancelled) {
+        setSubscription(loadedSub);
       }
       setIsHydrated(true);
     }
@@ -136,6 +149,20 @@ export default function App() {
     };
     setFoodItems((prev) => [itemWithId, ...prev]);
     // Debounced useEffect persist eder — manuel çağrıya gerek yok
+  };
+
+  // Add Batch Items from AI Vision Scanner
+  const handleAddBatchItems = (newItems: Omit<FoodItem, 'id' | 'addedAt'>[]) => {
+    const now = Date.now();
+    const batchWithIds: FoodItem[] = newItems.map((item, idx) => ({
+      ...item,
+      id: `item-vision-${now}-${idx}`,
+      addedAt: 'Kamera',
+      addedTimestamp: now,
+      estimatedShelfLifeHours: item.hoursLeft,
+      imageUrl: item.imageUrl || resolveFoodImage(item.name, item.category),
+    }));
+    setFoodItems((prev) => [...batchWithIds, ...prev]);
   };
 
   // Delete item from Inventory
@@ -311,6 +338,29 @@ export default function App() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddItem={handleAddItem}
+        onOpenVisionScan={() => setIsVisionModalOpen(true)}
+      />
+
+      {/* AI VISION CAMERA SCAN MODAL */}
+      <VisionScanModal
+        isOpen={isVisionModalOpen}
+        onClose={() => setIsVisionModalOpen(false)}
+        onAddBatchItems={handleAddBatchItems}
+        subscription={subscription}
+        onSubscriptionUpdate={setSubscription}
+        onOpenStudentVerify={() => {
+          setIsVisionModalOpen(false);
+          setIsStudentModalOpen(true);
+        }}
+      />
+
+      {/* UNIVERSITY STUDENT VERIFICATION MODAL (.edu.tr) */}
+      <StudentVerifyModal
+        isOpen={isStudentModalOpen}
+        onClose={() => setIsStudentModalOpen(false)}
+        onVerified={(updatedSub) => {
+          setSubscription(updatedSub);
+        }}
       />
 
       {/* RECIPE DETAIL / STEP-BY-STEP MODAL */}

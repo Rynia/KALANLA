@@ -14,6 +14,8 @@
     "expo": "~57.0.20",
     "expo-asset": "~57.0.16",
     "expo-haptics": "~57.0.2",
+    "expo-image-manipulator": "~57.0.8",
+    "expo-image-picker": "~57.0.12",
     "expo-sharing": "~57.0.18",
     "expo-status-bar": "~57.0.1",
     "lucide-react-native": "^0.475.0",

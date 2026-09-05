@@ -10,7 +10,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { X, Plus, Minus } from 'lucide-react-native';
+import { X, Plus, Minus, Camera } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { FoodItem, FoodCategory, StorageLocation } from '../types/models';
 import { TURKISH_STAPLES, TurkishStapleSuggestion } from '../data/initialData';
@@ -21,6 +21,7 @@ interface QuickAddModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddItem: (item: Omit<FoodItem, 'id' | 'addedAt'>) => void;
+  onOpenVisionScan?: () => void;
 }
 
 const CATEGORIES: FoodCategory[] = [
@@ -39,6 +40,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
   isOpen,
   onClose,
   onAddItem,
+  onOpenVisionScan,
 }) => {
   const [search, setSearch] = useState('');
   const [name, setName] = useState('');
@@ -124,13 +126,26 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
           <View style={styles.handlePill} />
 
           <View style={styles.headerRow}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.headerTitle}>Dolaba Malzeme Ekle</Text>
-              <Text style={styles.headerSub}>Türk mutfağından hızlı ara veya özelleştir</Text>
+              <Text style={styles.headerSub}>Türk mutfağından hızlı ara veya kamerayla tara</Text>
             </View>
-            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-              <X size={18} color="#94A3B8" />
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              {onOpenVisionScan && (
+                <TouchableOpacity
+                  style={[styles.closeBtn, { backgroundColor: 'rgba(16, 185, 129, 0.15)', borderWidth: 1, borderColor: '#10B981' }]}
+                  onPress={() => {
+                    onClose();
+                    onOpenVisionScan();
+                  }}
+                >
+                  <Camera size={16} color="#10B981" />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+                <X size={18} color="#94A3B8" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
