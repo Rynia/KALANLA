@@ -6,18 +6,14 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  TextInput,
-  Modal,
   StatusBar,
   Platform,
-  Alert,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 import {
   Ingredient,
   Recipe,
-  IngredientCategory,
   Tab,
 } from './src/types/models';
 import { colors, spacing, radius } from './src/theme/theme';
@@ -32,16 +28,8 @@ import {
   IngredientCard,
   RecipeCard,
 } from './src/components/KitchenComponents';
-
-const CATEGORIES: IngredientCategory[] = [
-  'Süt Ürünleri',
-  'Sebze',
-  'Fırın',
-  'Temel Gıda',
-  'Meyve',
-  'Et & Şarküteri',
-  'Genel',
-];
+import { AddIngredientModal } from './src/components/AddIngredientModal';
+import { ThermalReceiptModal } from './src/components/ThermalReceiptModal';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('see');
@@ -50,23 +38,17 @@ export default function App() {
   const [savedValue, setSavedValue] = useState(860);
   const [completedRecipes, setCompletedRecipes] = useState(0);
 
-  // New Ingredient Modal State
-  const [modalVisible, setModalVisible] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newCategory, setNewCategory] = useState<IngredientCategory>('Genel');
-  const [newDays, setNewDays] = useState('3');
-  const [newValue, setNewValue] = useState('50');
-
-  // Thermal Receipt Modal State
-  const [receiptVisible, setReceiptVisible] = useState(false);
-  const [lastRecipe, setLastRecipe] = useState<Recipe | null>(null);
+  // Modals state
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [receiptRecipe, setReceiptRecipe] = useState<Recipe | null>(null);
+  const [lastSavedAmount, setLastSavedAmount] = useState(0);
 
   // Load persisted state on mount
   useEffect(() => {
     async function hydrate() {
       const persisted = await loadKitchenState();
       if (persisted) {
-        if (persisted.ingredients && persisted.ingredients.length > 0) {
+        if (persisted.ingredients) {
           setIngredients(persisted.ingredients);
         }
         if (typeof persisted.savedValue === 'number') {
@@ -135,49 +117,43 @@ export default function App() {
   };
 
   // Add new ingredient
-  const handleAddIngredient = () => {
-    if (!newName.trim()) {
-      Alert.alert('Eksik Bilgi', 'Lütfen malzeme adını girin.');
-      return;
-    }
-
-    const days = parseInt(newDays, 10) || 3;
-    const val = parseInt(newValue, 10) || 40;
-
-    const newItem: Ingredient = {
-      id: Date.now().toString(),
-      name: newName.trim(),
-      category: newCategory,
-      daysLeft: days,
-      value: val,
-      critical: days <= 2,
-    };
-
-    const nextList = [newItem, ...ingredients];
+  const handleAddIngredient = (newIngredient: Ingredient) => {
+    const nextList = [newIngredient, ...ingredients];
     setIngredients(nextList);
     persistCurrentState(nextList, savedValue, completedRecipes);
     triggerSuccessHaptic();
-
-    // Reset form
-    setNewName('');
-    setNewCategory('Genel');
-    setNewDays('3');
-    setNewValue('50');
-    setModalVisible(false);
   };
 
-  // Cook / rescue action
+  // Cook / rescue action with inventory deduction logic
   const handleCookRecipe = (recipe: Recipe) => {
-    const nextSaved = savedValue + recipe.savings;
+    // 1. Identify used ingredients and deduct them from pantry
+    const usedNames = recipe.ingredientsUsed.map((u) => u.toLocaleLowerCase('tr-TR'));
+    
+    // Find matching ingredients to compute accurate rescued value
+    const matched = ingredients.filter((ing) =>
+      usedNames.some((u) => ing.name.toLocaleLowerCase('tr-TR').includes(u) || u.includes(ing.name.toLocaleLowerCase('tr-TR')))
+    );
+
+    const computedSavings = matched.length > 0
+      ? matched.reduce((sum, m) => sum + m.value, 0)
+      : recipe.savings;
+
+    // Remaining ingredients after cooking
+    const remaining = ingredients.filter(
+      (ing) => !matched.some((m) => m.id === ing.id)
+    );
+
+    const nextSaved = savedValue + computedSavings;
     const nextCompleted = completedRecipes + 1;
 
-    setLastRecipe(recipe);
+    setIngredients(remaining);
+    setLastSavedAmount(computedSavings);
+    setReceiptRecipe(recipe);
     setSavedValue(nextSaved);
     setCompletedRecipes(nextCompleted);
-    persistCurrentState(ingredients, nextSaved, nextCompleted);
+    persistCurrentState(remaining, nextSaved, nextCompleted);
 
     triggerSuccessHaptic();
-    setReceiptVisible(true);
   };
 
   return (
@@ -242,7 +218,7 @@ export default function App() {
                 style={styles.addButton}
                 onPress={() => {
                   triggerLightHaptic();
-                  setModalVisible(true);
+                  setIsAddModalOpen(true);
                 }}
                 activeOpacity={0.8}
               >
@@ -250,19 +226,65 @@ export default function App() {
               </TouchableOpacity>
             </View>
 
-            {sortedIngredients.map((item) => (
-              <IngredientCard key={item.id} item={item} />
-            ))}
+            {/* EMPTY STATE */}
+            {ingredients.length === 0 ? (
+              <View style={styles.emptyCard}>
+                <Text style={styles.emptyIcon}>🥬</Text>
+                <Text style={styles.emptyTitle}>Dolabın tamamen tertemiz!</Text>
+                <Text style={styles.emptySubtitle}>
+                  Bozulma riski taşıyan hiçbir malzeme yok. Yeni aldığın ürünleri ekleyerek israf radarını başlat.
+                </Text>
+                <TouchableOpacity
+                  style={styles.emptyActionBtn}
+                  onPress={() => {
+                    triggerLightHaptic();
+                    setIsAddModalOpen(true);
+                  }}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.emptyActionBtnText}>+ İlk Malzemeni Ekle</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                {/* SAFE STATE BANNER (When items exist but none are critical) */}
+                {stats.atRiskValue === 0 && (
+                  <View style={styles.safeBanner}>
+                    <Text style={styles.safeBannerText}>
+                      ✓ Şu an 48 saatlik risk altında malzeme yok. Mutfak kontrol altında!
+                    </Text>
+                  </View>
+                )}
 
-            <TouchableOpacity
-              style={styles.actionHeroButton}
-              onPress={() => handleTabChange('cook')}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.actionHeroText}>
-                ⚡ Riskteki ₺{stats.atRiskValue}'yi Kurtar →
-              </Text>
-            </TouchableOpacity>
+                {/* INGREDIENT LIST */}
+                {sortedIngredients.map((item) => (
+                  <IngredientCard key={item.id} item={item} />
+                ))}
+
+                {/* ACTION HERO BUTTON */}
+                {stats.atRiskValue > 0 ? (
+                  <TouchableOpacity
+                    style={styles.actionHeroButton}
+                    onPress={() => handleTabChange('cook')}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={styles.actionHeroText}>
+                      ⚡ Riskteki ₺{stats.atRiskValue}'yi Kurtar →
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={[styles.actionHeroButton, { borderColor: colors.border }]}
+                    onPress={() => handleTabChange('cook')}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={[styles.actionHeroText, { color: colors.text }]}>
+                      🍳 Kalanlarla Akşam Yemeği Planla →
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
           </View>
         )}
 
@@ -271,7 +293,7 @@ export default function App() {
           <View>
             <Text style={styles.sectionTitle}>10-15 DAKİKALIK KURTARMA MENÜSÜ</Text>
             <Text style={styles.sectionSubtitle}>
-              Dolabında bozulma riski olan malzemelerle anında pişirebileceğin şef yemekleri:
+              Dolabında bozulma riski olan malzemelerle anında pişirebileceğin sıfır-atık reçeteleri:
             </Text>
 
             {recipes.map((recipe) => (
@@ -297,6 +319,12 @@ export default function App() {
               <Text style={styles.savingsHeroSub}>
                 Bu tutarla yaklaşık 3 market alışverişi veya 4 dışarı yemeği bedavaya geldi!
               </Text>
+
+              <View style={styles.carbonBadgeRow}>
+                <Text style={styles.carbonBadgeText}>
+                  🌱 Engellenen Karbon Salınımı: ~{(savedValue * 0.045).toFixed(1)} kg CO₂e
+                </Text>
+              </View>
             </View>
 
             <View style={styles.metricsRow}>
@@ -326,118 +354,21 @@ export default function App() {
         )}
       </ScrollView>
 
-      {/* NEW INGREDIENT MODAL */}
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>Yeni Malzeme Ekle</Text>
+      {/* AKILLI MALZEME EKLEME MODALI (AUTOCOMPLETE & QUICK ADD) */}
+      <AddIngredientModal
+        visible={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddIngredient={handleAddIngredient}
+      />
 
-            <Text style={styles.inputLabel}>Malzeme Adı</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Örn: 2 Paket Mantar"
-              placeholderTextColor={colors.muted}
-              value={newName}
-              onChangeText={setNewName}
-            />
-
-            <Text style={styles.inputLabel}>Kategori</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.categoryPickerRow}
-            >
-              {CATEGORIES.map((cat) => (
-                <TouchableOpacity
-                  key={cat}
-                  style={[
-                    styles.catChip,
-                    newCategory === cat && styles.catChipActive,
-                  ]}
-                  onPress={() => setNewCategory(cat)}
-                >
-                  <Text
-                    style={[
-                      styles.catChipText,
-                      newCategory === cat && styles.catChipTextActive,
-                    ]}
-                  >
-                    {cat}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            <View style={{ flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm }}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.inputLabel}>Kaç Gün Kaldı?</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  value={newDays}
-                  onChangeText={setNewDays}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.inputLabel}>Tahmini Değeri (TL)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  value={newValue}
-                  onChangeText={setNewValue}
-                />
-              </View>
-            </View>
-
-            <View style={styles.modalButtonsRow}>
-              <TouchableOpacity
-                style={[styles.modalBtn, styles.modalBtnCancel]}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.modalBtnText}>İptal</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalBtn, styles.modalBtnSave]}
-                onPress={handleAddIngredient}
-              >
-                <Text style={[styles.modalBtnText, { color: colors.background, fontWeight: '800' }]}>
-                  Ekle
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* THERMAL RECEIPT MODAL */}
-      <Modal visible={receiptVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.thermalReceipt}>
-            <Text style={styles.thermalHeader}>*** KALANLA KURTARMA FİŞİ ***</Text>
-            <Text style={styles.thermalSub}>RYNIA STUDIOS // ZERO WASTE ENGINE</Text>
-            <View style={styles.thermalDivider} />
-
-            <Text style={styles.thermalItemTitle}>{lastRecipe?.title}</Text>
-            <Text style={styles.thermalDetail}>
-              Süre: {lastRecipe?.timeMin} Dk · Dışarı Sipariş Engellendi
-            </Text>
-
-            <View style={styles.thermalDivider} />
-            <Text style={styles.thermalSavingBig}>KURTARILAN: ₺{lastRecipe?.savings}</Text>
-            <Text style={styles.thermalTotal}>TOPLAM BİRİKİM: ₺{savedValue}</Text>
-
-            <View style={styles.thermalDivider} />
-            <Text style={styles.thermalFooter}>"Ne kaldıysa, ondan başla."</Text>
-
-            <TouchableOpacity
-              style={styles.thermalCloseBtn}
-              onPress={() => setReceiptVisible(false)}
-            >
-              <Text style={styles.thermalCloseText}>Kapat & Devam Et</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {/* TERMAL FİŞ & GÖRSEL PAYLAŞIM MODALI (VIEWSHOT + EXPO-SHARING) */}
+      <ThermalReceiptModal
+        visible={!!receiptRecipe}
+        recipe={receiptRecipe}
+        savedValue={lastSavedAmount}
+        totalSavedMonth={savedValue}
+        onClose={() => setReceiptRecipe(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -503,17 +434,68 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   addButton: {
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: colors.emeraldSoft,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.emerald,
   },
   addButtonText: {
     color: colors.emerald,
     fontSize: 12,
+    fontWeight: '800',
+  },
+  safeBanner: {
+    backgroundColor: colors.emeraldSoft,
+    borderWidth: 1,
+    borderColor: colors.emerald,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  safeBannerText: {
+    color: colors.emerald,
+    fontSize: 12,
     fontWeight: '700',
+    textAlign: 'center',
+  },
+  emptyCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.xxl,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginTop: spacing.md,
+  },
+  emptyIcon: {
+    fontSize: 44,
+    marginBottom: spacing.sm,
+  },
+  emptyTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    color: colors.muted,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: spacing.lg,
+  },
+  emptyActionBtn: {
+    backgroundColor: colors.emerald,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: radius.md,
+  },
+  emptyActionBtnText: {
+    color: colors.background,
+    fontSize: 14,
+    fontWeight: '800',
   },
   actionHeroButton: {
     backgroundColor: colors.surfaceRaised,
@@ -555,6 +537,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.muted,
     lineHeight: 18,
+    marginBottom: spacing.md,
+  },
+  carbonBadgeRow: {
+    backgroundColor: colors.emeraldSoft,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: radius.sm,
+    alignSelf: 'flex-start',
+  },
+  carbonBadgeText: {
+    color: colors.emerald,
+    fontSize: 11,
+    fontWeight: '700',
   },
   metricsRow: {
     flexDirection: 'row',
@@ -608,168 +603,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.muted,
     textAlign: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
-  },
-  modalBox: {
-    width: '100%',
-    maxWidth: 420,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: spacing.lg,
-  },
-  inputLabel: {
-    fontSize: 12,
-    color: colors.muted,
-    marginBottom: 6,
-    fontWeight: '600',
-  },
-  input: {
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: 12,
-    color: colors.text,
-    fontSize: 14,
-    marginBottom: spacing.md,
-  },
-  categoryPickerRow: {
-    flexDirection: 'row',
-    marginBottom: spacing.md,
-  },
-  catChip: {
-    backgroundColor: colors.surfaceRaised,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: radius.full,
-    marginRight: 6,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  catChipActive: {
-    backgroundColor: colors.emeraldSoft,
-    borderColor: colors.emerald,
-  },
-  catChipText: {
-    fontSize: 12,
-    color: colors.muted,
-    fontWeight: '600',
-  },
-  catChipTextActive: {
-    color: colors.emerald,
-    fontWeight: '700',
-  },
-  modalButtonsRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginTop: spacing.md,
-  },
-  modalBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: radius.md,
-    alignItems: 'center',
-  },
-  modalBtnCancel: {
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  modalBtnSave: {
-    backgroundColor: colors.emerald,
-  },
-  modalBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  thermalReceipt: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: '#F3F4F6',
-    borderRadius: radius.sm,
-    padding: spacing.xl,
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-  },
-  thermalHeader: {
-    fontSize: 14,
-    fontWeight: '900',
-    textAlign: 'center',
-    letterSpacing: 1.5,
-    color: '#111827',
-    marginBottom: 2,
-  },
-  thermalSub: {
-    fontSize: 9,
-    textAlign: 'center',
-    color: '#6B7280',
-    letterSpacing: 1,
-    marginBottom: spacing.md,
-    fontWeight: '700',
-  },
-  thermalDivider: {
-    height: 1,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderStyle: 'dashed',
-    marginVertical: spacing.md,
-  },
-  thermalItemTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#111827',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  thermalDetail: {
-    fontSize: 11,
-    color: '#4B5563',
-    textAlign: 'center',
-  },
-  thermalSavingBig: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#047857',
-    textAlign: 'center',
-    marginVertical: 4,
-  },
-  thermalTotal: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#374151',
-    textAlign: 'center',
-  },
-  thermalFooter: {
-    fontSize: 11,
-    fontStyle: 'italic',
-    textAlign: 'center',
-    color: '#6B7280',
-    marginBottom: spacing.lg,
-  },
-  thermalCloseBtn: {
-    backgroundColor: '#111827',
-    paddingVertical: 12,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-  },
-  thermalCloseText: {
-    color: '#F9FAFB',
-    fontSize: 13,
-    fontWeight: '800',
   },
 });

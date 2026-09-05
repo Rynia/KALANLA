@@ -14,6 +14,15 @@ export interface Ingredient {
   daysLeft: number;
   value: number;
   critical: boolean;
+  unit?: string;
+}
+
+export interface CatalogIngredient {
+  name: string;
+  category: IngredientCategory;
+  defaultDays: number;
+  defaultValue: number;
+  unit?: string;
 }
 
 export interface Recipe {

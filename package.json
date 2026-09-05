@@ -14,12 +14,14 @@
     "expo": "~52.0.37",
     "expo-asset": "~11.0.5",
     "expo-haptics": "~14.0.1",
+    "expo-sharing": "~13.0.1",
     "expo-status-bar": "~2.0.1",
     "lucide-react-native": "^0.475.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "0.76.7",
     "react-native-svg": "15.8.0",
+    "react-native-view-shot": "~4.0.3",
     "react-native-web": "~0.19.13"
   },
   "devDependencies": {
