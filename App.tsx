@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   Platform,
 } from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 
 import {
@@ -239,8 +239,9 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A0A0E" />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="light-content" backgroundColor="#0A0A0E" />
 
       {/* FIXED RYNIA OS TOP HEADER */}
       <Header activeTab={activeTab} urgentCount={urgentCount} />
@@ -308,7 +309,8 @@ export default function App() {
         receipt={activeReceipt}
         onClose={() => setActiveReceipt(null)}
       />
-    </SafeAreaView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
