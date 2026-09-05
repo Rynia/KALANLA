@@ -1,6 +1,7 @@
 // src/utils/recipeEngine.ts
 // Dinamik tarif eşleştirme ve sıralama motoru
 import { FoodItem, RescueRecipe } from '../types/models';
+import { synthesizeRecipeFromInventory } from './syntheticChefEngine';
 
 function normalize(text: string): string {
   return text
@@ -118,12 +119,25 @@ export function scoreRecipes(inventory: FoodItem[], recipes: RescueRecipe[]): Re
     };
   });
 
+  // Sıralama: eşleşme oranı > aciliyet skoru > kurtarılan TL
   scored.sort((a, b) => {
     if (b.matchPercentage !== a.matchPercentage) return b.matchPercentage - a.matchPercentage;
     if ((b.urgencyScore ?? 0) !== (a.urgencyScore ?? 0))
       return (b.urgencyScore ?? 0) - (a.urgencyScore ?? 0);
     return b.savedTL - a.savedTL;
   });
+
+  // SENTETİK ŞEF DEVREDE: Eğer en yüksek eşleşme %75'in altındaysa veya dolapta malzeme varken
+  // hiçbir tarif %100 değilse, eldeki malzemelerle deterministik %100 uyumlu bir şef tarifi üret!
+  if (inventory.length > 0) {
+    const bestMatch = scored[0]?.matchPercentage ?? 0;
+    if (bestMatch < 100) {
+      const synthetic = synthesizeRecipeFromInventory(inventory);
+      if (synthetic) {
+        return [synthetic, ...scored];
+      }
+    }
+  }
 
   return scored;
 }

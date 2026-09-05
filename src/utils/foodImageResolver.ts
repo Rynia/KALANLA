@@ -70,7 +70,7 @@ const FOOD_IMAGE_MAP: Record<string, string> = {
   makarna:     'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=400&auto=format&fit=crop&q=80',
   pirinc:      'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=400&auto=format&fit=crop&q=80',
   bulgur:      'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&auto=format&fit=crop&q=80',
-  // Meyveler
+  // Meyveler & Egzotikler
   elma:        'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&auto=format&fit=crop&q=80',
   muz:         'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400&auto=format&fit=crop&q=80',
   portakal:    'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&auto=format&fit=crop&q=80',
@@ -80,6 +80,28 @@ const FOOD_IMAGE_MAP: Record<string, string> = {
   karpuz:      'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&auto=format&fit=crop&q=80',
   seftali:     'https://images.unsplash.com/photo-1595546070645-73e6a5db9e5a?w=400&auto=format&fit=crop&q=80',
   armut:       'https://images.unsplash.com/photo-1561136594-7f68813d8019?w=400&auto=format&fit=crop&q=80',
+  avokado:     'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400&auto=format&fit=crop&q=80',
+  mango:       'https://images.unsplash.com/photo-1553279768-865429fa0078?w=400&auto=format&fit=crop&q=80',
+  ejder:       'https://images.unsplash.com/photo-1527325678964-54921661f888?w=400&auto=format&fit=crop&q=80',
+  pitaya:      'https://images.unsplash.com/photo-1527325678964-54921661f888?w=400&auto=format&fit=crop&q=80',
+  recel:       'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&auto=format&fit=crop&q=80',
+  marmelat:    'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&auto=format&fit=crop&q=80',
+  bal:         'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&auto=format&fit=crop&q=80',
+
+  // Balıklar & Deniz Ürünleri
+  barbun:      'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&auto=format&fit=crop&q=80',
+  karagoz:     'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&auto=format&fit=crop&q=80',
+  istavrit:    'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=400&auto=format&fit=crop&q=80',
+  hamsi:       'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=400&auto=format&fit=crop&q=80',
+  karides:     'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=400&auto=format&fit=crop&q=80',
+
+  // Yöresel Sebzeler
+  borulce:     'https://images.unsplash.com/photo-1587735243615-c03f25aaff15?w=400&auto=format&fit=crop&q=80',
+  semizotu:    'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&auto=format&fit=crop&q=80',
+  roka:        'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&auto=format&fit=crop&q=80',
+  tere:        'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&auto=format&fit=crop&q=80',
+  kuskonmaz:   'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=400&auto=format&fit=crop&q=80',
+
   // Kiler
   yumurta:     'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&auto=format&fit=crop&q=80',
   nohut:       'https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=400&auto=format&fit=crop&q=80',
