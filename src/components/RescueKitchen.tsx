@@ -44,7 +44,9 @@ export const RescueKitchen: React.FC<RescueKitchenProps> = ({
           <View style={styles.matchStatLeft}>
             <Sparkles size={14} color="#10B981" />
             <Text style={styles.matchStatText}>
-              {urgentCount} Kritik Malzeme Eşleşti
+              {recipes.filter((r) => r.matchPercentage > 0).length > 0
+                ? `${recipes.filter((r) => r.matchPercentage > 0).length} Tarif Pişirilmeye Hazır`
+                : `${urgentCount} Kritik Malzeme Beklemede`}
             </Text>
           </View>
           <View style={styles.matchStatPill}>

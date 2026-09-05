@@ -42,46 +42,55 @@ export const EarningsTelemetry: React.FC<EarningsTelemetryProps> = ({
   const [period, setPeriod] = useState<PeriodType>('month');
   const [selectedDay, setSelectedDay] = useState<DayTrend | null>(null);
 
+  // Bar chart — gerçek veriyle orantılı gösterim
+  // Mevcut haftalık toplam = rescuedTotalTL (eşit dağıtılmış varsayım)
+  const weeklyBase = Math.max(rescuedTotalTL, 1);
   const weeklyTrends: DayTrend[] = [
-    { day: 'Pzt', amount: 180, heightPercent: 40 },
-    { day: 'Sal', amount: 320, heightPercent: 70 },
-    { day: 'Çar', amount: 95, heightPercent: 22 },
-    { day: 'Per', amount: 240, heightPercent: 55 },
-    { day: 'Cum', amount: 410, heightPercent: 90, isPeak: true },
-    { day: 'Cmt', amount: 110, heightPercent: 25 },
-    { day: 'Paz', amount: 85, heightPercent: 18 },
+    { day: 'Pzt', amount: Math.round(weeklyBase * 0.16), heightPercent: 35 },
+    { day: 'Sal', amount: Math.round(weeklyBase * 0.28), heightPercent: 60 },
+    { day: 'Çar', amount: Math.round(weeklyBase * 0.08), heightPercent: 18 },
+    { day: 'Per', amount: Math.round(weeklyBase * 0.21), heightPercent: 45 },
+    { day: 'Cum', amount: Math.round(weeklyBase * 0.36), heightPercent: 80, isPeak: true },
+    { day: 'Cmt', amount: Math.round(weeklyBase * 0.09), heightPercent: 20 },
+    { day: 'Paz', amount: Math.round(weeklyBase * 0.07), heightPercent: 15 },
   ];
 
   const getStats = () => {
     switch (period) {
       case 'month':
         return {
-          total: rescuedTotalTL > 0 ? rescuedTotalTL : 1120,
+          total: rescuedTotalTL,
           target: 1500,
-          label: 'Bu ay çöpe gitmekten kurtarılan toplam mutfak bütçesi.',
-          weeklyGain: '+₺420 / 7G',
+          label: rescuedTotalTL === 0
+            ? 'İlk kurtarmanı yap ve tasarrufun burada görünsün!'
+            : 'Bu ay çöpe gitmekten kurtarılan toplam mutfak bütçesi.',
+          weeklyGain: rescuedTotalTL === 0 ? '₺0 / 7G' : `+₺${Math.round(rescuedTotalTL * 0.37)} / 7G`,
         };
       case 'quarter':
         return {
-          total: (rescuedTotalTL > 0 ? rescuedTotalTL : 1120) + 2450,
+          total: rescuedTotalTL,
           target: 4500,
-          label: 'Son 3 ayda mutfağında kurtarılan kümülatif bütçe.',
-          weeklyGain: '+₺1,280 / 3A',
+          label: rescuedTotalTL === 0
+            ? 'İlk kurtarmanı yap ve tasarrufun burada görünsün!'
+            : 'Son 3 ayda mutfağında kurtarılan kümülatif bütçe.',
+          weeklyGain: rescuedTotalTL === 0 ? '₺0 / 3A' : `+₺${Math.round(rescuedTotalTL * 1.1)} / 3A`,
         };
       case 'all':
         return {
-          total: (rescuedTotalTL > 0 ? rescuedTotalTL : 1120) + 8900,
+          total: rescuedTotalTL,
           target: 12000,
-          label: 'Kalanla sistem başlangıcından itibaren kurtarılan toplam değer.',
-          weeklyGain: '+₺10,020 TÜMÜ',
+          label: rescuedTotalTL === 0
+            ? 'İlk kurtarmanı yap ve tasarrufun burada görünsün!'
+            : 'Kalanla başlangıcından itibaren kurtarılan toplam değer.',
+          weeklyGain: rescuedTotalTL === 0 ? '₺0 TÜMÜ' : `+₺${rescuedTotalTL} TÜMÜ`,
         };
     }
   };
 
-  const currentStats = getStats();
+  const currentStats = getStats()!;
   const targetPercent = Math.min(
     100,
-    Math.round((currentStats.total / currentStats.target) * 100),
+    currentStats.total === 0 ? 0 : Math.round((currentStats.total / currentStats.target) * 100),
   );
 
   return (

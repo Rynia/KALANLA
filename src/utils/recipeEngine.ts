@@ -1,4 +1,4 @@
-﻿// src/utils/recipeEngine.ts
+// src/utils/recipeEngine.ts
 // Dinamik tarif eşleştirme ve sıralama motoru
 import { FoodItem, RescueRecipe } from '../types/models';
 
@@ -31,17 +31,29 @@ function isMatch(itemName: string, requiredName: string): boolean {
   const itemTokens = normItem.split(/\s+/);
   const reqTokens = normReq.split(/\s+/);
 
-  // Gereklilik token'larının tamamı ürün adında var mı?
-  const reqInItem = reqTokens.every(
-    (rt) => rt.length >= 3 && itemTokens.some((it) => it === rt || it.includes(rt)),
-  );
-  if (reqInItem) return true;
+  // Korumalı false-positive çiftleri
+  const falsePairs: [string, string][] = [
+    ['su', 'sucuk'],
+    ['bal', 'balik'],
+  ];
 
-  // Ürün token'larının en az biri gereklilik adında tam geçiyor mu?
-  const itemInReq = itemTokens.some(
-    (it) => it.length >= 3 && reqTokens.some((rt) => rt === it),
-  );
-  return itemInReq;
+  for (const it of itemTokens) {
+    for (const rt of reqTokens) {
+      if (it === rt) return true;
+
+      // 2 harf veya daha uzun kök eşleşmesi (örn. 'et' <-> 'dana et', 'patates' <-> 'patatesler')
+      if (it.length >= 2 && rt.length >= 2) {
+        const isFalsePair = falsePairs.some(
+          ([a, b]) => (it === a && rt === b) || (it === b && rt === a),
+        );
+        if (!isFalsePair && (it.startsWith(rt) || rt.startsWith(it))) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
 }
 
 function findMatch(required: string, inventory: FoodItem[], claimedIds: Set<string>): FoodItem | undefined {

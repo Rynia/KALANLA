@@ -47,10 +47,10 @@ export default function App() {
   );
   const [badges, setBadges] = useState<AchievementBadge[]>(INITIAL_BADGES);
 
-  // Rescued metrics
-  const [rescuedTotalTL, setRescuedTotalTL] = useState<number>(1120);
-  const [rescuedCo2Kg, setRescuedCo2Kg] = useState<number>(2.4);
-  const [rescuedMealsCount, setRescuedMealsCount] = useState<number>(12);
+  // Rescued metrics — yeni kurulum için 0'dan başlar, AsyncStorage'dan yüklenir
+  const [rescuedTotalTL, setRescuedTotalTL] = useState<number>(0);
+  const [rescuedCo2Kg, setRescuedCo2Kg] = useState<number>(0);
+  const [rescuedMealsCount, setRescuedMealsCount] = useState<number>(0);
 
   // Fix 2: Hydration flag — kullanıcı işlemleri yükleme tamamlanana kadar persist edilmez
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
