@@ -1,4 +1,4 @@
-﻿// src/services/visionInventoryService.ts
+// src/services/visionInventoryService.ts
 // Gemini 2.5 Flash ile Fotoğraftan Mutfak Envanteri Çıkarıcı & Yerel Simülatör
 import * as ImageManipulator from 'expo-image-manipulator';
 import { FoodCategory, StorageLocation } from '../types/models';
@@ -47,23 +47,36 @@ export async function detectFoodItemsFromImage(
   // Eğer API anahtarı tanımlıysa canlı Gemini 2.5 Flash modeline sor
   if (apiKey && apiKey.trim().length > 10) {
     try {
-      const prompt = `Sen profesyonel bir Türk mutfağı ve buzdolabı denetim uzmanısın.
-Bu fotoğraftaki (buzdolabı rafı, tezgah veya poşet) tüm yenilebilir gıda maddelerini tespit et.
-Yalnızca geçerli bir JSON formatında şu şemaya göre yanıt ver, fazladan hiçbir metin yazma:
+      const prompt = `Sen Türk evlerindeki buzdolabı, dondurucu ve tezgah düzenini çok iyi bilen kıdemli bir Mutfak Envanteri Denetçisisin.
+Fotoğraftaki yenilebilir tüm gıda maddelerini tespit et.
+
+ÖNEMLİ KURALLAR:
+1. Buzdolabı raflarını, plastik saklama kaplarını, kavanoz camını veya tencereleri gıda sayma; içlerindeki yiyeceği tahmin et (örn: tencere -> Kalan Ev Yemeği).
+2. Şeffaf poşetlerdeki sebzeleri (maydanoz, domates, biber) ve sarı/loş ışık altındaki peynir bloklarını formundan tanı.
+3. Kısmi görünen veya arka plandaki malzemeleri de dahil et.
+4. Yalnızca geçerli ve saf bir JSON nesnesi döndür:
 {
   "items": [
     {
-      "name": "Domates",
+      "name": "Salkım Domates",
       "category": "Sebze",
       "amount": "4 Adet",
       "location": "Buzdolabı",
       "daysLeft": 4,
       "priceTL": 40
+    },
+    {
+      "name": "Tost Kaşarı",
+      "category": "Süt Ürünü",
+      "amount": "350g",
+      "location": "Buzdolabı",
+      "daysLeft": 14,
+      "priceTL": 120
     }
   ]
 }
-Kategori değerleri yalnızca şunlar olabilir: Süt Ürünü, Sebze, Meyve, Et & Tavuk, Şarküteri, Unlu Mamul, Kiler.
-Konum değerleri: Buzdolabı, Dondurucu, Kiler.`;
+Kategori değerleri: Süt Ürünü, Sebze, Meyve, Et & Tavuk, Şarküteri, Unlu Mamul, Kiler.
+Konum: Buzdolabı, Dondurucu, Kiler.`;
 
       const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
         method: 'POST',

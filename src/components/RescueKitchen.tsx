@@ -92,27 +92,38 @@ export const RescueKitchen: React.FC<RescueKitchenProps> = ({
               {recipe.description}
             </Text>
 
-            {/* Ingredients Tags */}
+            {/* Ingredients Tags: Kurtarılanlar (Yeşil ✓), Kiler Malzemesi (Nötr •), Eksikler (Kırmızı ✕) */}
             <View style={styles.tagsContainer}>
-              {recipe.requiredItemNames.map((item, idx) => (
-                <View
-                  key={idx}
-                  style={[
-                    styles.ingTag,
-                    item.rescued ? styles.ingTagRescued : styles.ingTagPantry,
-                  ]}
-                >
-                  <Text
+              {recipe.requiredItemNames.map((item, idx) => {
+                const isMissing = !item.rescued && !item.isPantry;
+                return (
+                  <View
+                    key={idx}
                     style={[
-                      styles.ingTagText,
-                      item.rescued ? styles.ingTagTextRescued : styles.ingTagTextPantry,
+                      styles.ingTag,
+                      item.rescued
+                        ? styles.ingTagRescued
+                        : isMissing
+                        ? styles.ingTagMissing
+                        : styles.ingTagPantry,
                     ]}
                   >
-                    {item.rescued ? '✓ ' : '• '}
-                    {item.name}
-                  </Text>
-                </View>
-              ))}
+                    <Text
+                      style={[
+                        styles.ingTagText,
+                        item.rescued
+                          ? styles.ingTagTextRescued
+                          : isMissing
+                          ? styles.ingTagTextMissing
+                          : styles.ingTagTextPantry,
+                      ]}
+                    >
+                      {item.rescued ? '✓ ' : isMissing ? '✕ Eksik: ' : '• '}
+                      {item.name}
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
 
             {/* Actions */}
@@ -345,6 +356,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#1C1C24',
     borderColor: '#262633',
   },
+  ingTagMissing: {
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    borderColor: 'rgba(239, 68, 68, 0.25)',
+  },
   ingTagText: {
     fontSize: 10,
     fontWeight: '600',
@@ -354,6 +369,9 @@ const styles = StyleSheet.create({
   },
   ingTagTextPantry: {
     color: '#94A3B8',
+  },
+  ingTagTextMissing: {
+    color: '#F87171',
   },
   actionsRow: {
     flexDirection: 'row',
