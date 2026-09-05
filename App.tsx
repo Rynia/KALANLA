@@ -27,6 +27,7 @@ import {
 } from './src/storage/kitchenStorage';
 import { scoreRecipes, buildConsumptionPlan, applyConsumptionPlan } from './src/utils/recipeEngine';
 import { resolveFoodImage } from './src/utils/foodImageResolver';
+import { rehydrateItems } from './src/utils/timeUtils';
 import { Header } from './src/components/Header';
 import { BottomNav } from './src/components/BottomNav';
 import { InventoryRadar } from './src/components/InventoryRadar';
@@ -51,20 +52,30 @@ export default function App() {
   const [rescuedCo2Kg, setRescuedCo2Kg] = useState<number>(2.4);
   const [rescuedMealsCount, setRescuedMealsCount] = useState<number>(12);
 
+  // Fix 2: Hydration flag — kullanıcı işlemleri yükleme tamamlanana kadar persist edilmez
+  const [isHydrated, setIsHydrated] = useState<boolean>(false);
+
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [activeReceipt, setActiveReceipt] = useState<ThermalReceiptData | null>(null);
   const [activeDetailRecipe, setActiveDetailRecipe] = useState<RescueRecipe | null>(null);
 
-  const urgentCount = foodItems.filter((i) => i.hoursLeft <= 48).length;
+  const urgentCount = useMemo(
+    () => foodItems.filter((i) => i.hoursLeft <= 48).length,
+    [foodItems],
+  );
 
-  // Load state on mount
+  // Fix 2: Hydration — iptal edilebilir async, race condition önlenir
   useEffect(() => {
+    let cancelled = false;
     async function hydrate() {
       const persisted = await loadKitchenState();
+      if (cancelled) return;
       if (persisted) {
-        if (persisted.foodItems && persisted.foodItems.length > 0) {
-          setFoodItems(persisted.foodItems);
+        // Fix 1: Array.isArray ile boş liste de doğru şekilde yüklenir
+        if (Array.isArray(persisted.foodItems)) {
+          // Fix 3: Yüklenen ürünlerin hoursLeft'i gerçek zamana göre güncellenir
+          setFoodItems(rehydrateItems(persisted.foodItems));
         }
         if (typeof persisted.rescuedTotalTL === 'number') {
           setRescuedTotalTL(persisted.rescuedTotalTL);
@@ -75,30 +86,31 @@ export default function App() {
         if (typeof persisted.rescuedMealsCount === 'number') {
           setRescuedMealsCount(persisted.rescuedMealsCount);
         }
-        if (persisted.badges) {
+        if (Array.isArray(persisted.badges)) {
           setBadges(persisted.badges);
         }
       }
+      setIsHydrated(true);
     }
     hydrate();
+    return () => { cancelled = true; };
   }, []);
 
-  // Save state helper
-  const persistState = (
-    nextItems: FoodItem[],
-    nextTotal: number,
-    nextCo2: number,
-    nextMeals: number,
-    nextBadges: AchievementBadge[],
-  ) => {
-    saveKitchenState({
-      foodItems: nextItems,
-      rescuedTotalTL: nextTotal,
-      rescuedCo2Kg: nextCo2,
-      rescuedMealsCount: nextMeals,
-      badges: nextBadges,
-    });
-  };
+  // Fix 7: Debounced persist — state değiştiğinde 500ms sonra tek yazma işlemi
+  // Fire-and-forget çağrıların race condition'ını önler
+  useEffect(() => {
+    if (!isHydrated) return; // Hydration tamamlanmadan yazmaz
+    const timeout = setTimeout(() => {
+      saveKitchenState({
+        foodItems,
+        rescuedTotalTL,
+        rescuedCo2Kg,
+        rescuedMealsCount,
+        badges,
+      });
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [foodItems, rescuedTotalTL, rescuedCo2Kg, rescuedMealsCount, badges, isHydrated]);
 
   // Handle Tab Switch (if center 'ekle' is clicked, open modal directly)
   const handleTabChange = (tab: TabType) => {
@@ -111,23 +123,24 @@ export default function App() {
 
   // Add Item to Inventory
   const handleAddItem = (newItem: Omit<FoodItem, 'id' | 'addedAt'>) => {
+    const now = Date.now();
     const itemWithId: FoodItem = {
       ...newItem,
-      id: `item-${Date.now()}`,
+      id: `item-${now}`,
       addedAt: 'Şimdi',
-      // Ürün adından akıllı görsel çözümle — generic placeholder yerine gerçek fotoğraf
+      // Fix 3: Zaman damgası ile dinamik hoursLeft hesabı için
+      addedTimestamp: now,
+      estimatedShelfLifeHours: newItem.hoursLeft,
+      // Ürün adından akıllı görsel çözümle
       imageUrl: newItem.imageUrl || resolveFoodImage(newItem.name, newItem.category),
     };
-    const nextList = [itemWithId, ...foodItems];
-    setFoodItems(nextList);
-    persistState(nextList, rescuedTotalTL, rescuedCo2Kg, rescuedMealsCount, badges);
+    setFoodItems((prev) => [itemWithId, ...prev]);
+    // Debounced useEffect persist eder — manuel çağrıya gerek yok
   };
 
   // Delete item from Inventory
   const handleDeleteItem = (id: string) => {
-    const nextList = foodItems.filter((i) => i.id !== id);
-    setFoodItems(nextList);
-    persistState(nextList, rescuedTotalTL, rescuedCo2Kg, rescuedMealsCount, badges);
+    setFoodItems((prev) => prev.filter((i) => i.id !== id));
   };
 
   // Cooking Recipe Interaction: Kısmi tüketim planı ile malzemeleri azalt/sil
@@ -204,8 +217,7 @@ export default function App() {
       return badge;
     });
     setBadges(nextBadges);
-
-    persistState(nextItems, nextTotal, nextCo2, nextMeals, nextBadges);
+    // Debounced useEffect persist eder
 
     if (Platform.OS !== 'web') {
       try {

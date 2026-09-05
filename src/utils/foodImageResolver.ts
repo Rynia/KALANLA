@@ -1,4 +1,4 @@
-﻿// src/utils/foodImageResolver.ts
+// src/utils/foodImageResolver.ts
 // Türkçe karakter duyarlı, genişletilebilir görsel eşleştirme motoru
 import { FoodCategory } from '../types/models';
 
@@ -115,9 +115,17 @@ export function resolveFoodImage(name: string, category?: FoodCategory): string 
     return FOOD_IMAGE_MAP[normalizedName];
   }
 
-  // 2. Kısmi eşleşme
+  // 2. Token-based tam kelime eşleşmesi (min 3 karakter)
+  const nameTokens = normalizedName.split(/\s+/);
+  for (const token of nameTokens) {
+    if (token.length >= 3 && FOOD_IMAGE_MAP[token]) {
+      return FOOD_IMAGE_MAP[token];
+    }
+  }
+
+  // 3. Kısmi eşleşme — sadece isim anahtar kelimeyi içeriyor mu? (tek yönlü, min 3 harf)
   for (const [keyword, url] of Object.entries(FOOD_IMAGE_MAP)) {
-    if (normalizedName.includes(keyword) || keyword.includes(normalizedName)) {
+    if (keyword.length >= 3 && normalizedName.includes(keyword)) {
       return url;
     }
   }

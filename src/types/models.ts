@@ -21,11 +21,16 @@ export interface FoodItem {
   /** Birim: 'g' | 'kg' | 'Adet' | 'Demet' | 'ml' | 'L' */
   unit?: string;
   location: StorageLocation;
+  /** Kalan saat — eski veri için fallback, dinamik hesap için bkz. getEffectiveHoursLeft() */
   hoursLeft: number;
   riskPercentage: number;
   priceTL: number;
   imageUrl: string;
   addedAt: string;
+  /** Unix timestamp (ms) — yeni eklenen ürünler için zorunlu */
+  addedTimestamp?: number;
+  /** Tahmini raf ömrü saat cinsinden — addedTimestamp ile birlikte kullanılır */
+  estimatedShelfLifeHours?: number;
 }
 
 export interface RequiredItem {
