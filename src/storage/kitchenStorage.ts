@@ -1,4 +1,4 @@
-﻿import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FoodItem, AchievementBadge } from '../types/models';
 import { rehydrateItems } from '../utils/timeUtils';
 
@@ -10,7 +10,7 @@ export interface PersistedKitchenState {
   badges?: AchievementBadge[];
 }
 
-const STORAGE_KEY = '@kalanla/kitchen-state-v2';
+const STORAGE_KEY = '@kalanla/kitchen-state-v3';
 
 /**
  * Fix 8: Runtime schema validation.
