@@ -37,6 +37,7 @@ import { QuickAddModal } from './src/components/QuickAddModal';
 import { ThermalReceiptModal } from './src/components/ThermalReceiptModal';
 import { RecipeDetailModal } from './src/components/RecipeDetailModal';
 import { VisionScanModal } from './src/components/VisionScanModal';
+import { ReceiptScanModal } from './src/components/ReceiptScanModal';
 import { StudentVerifyModal } from './src/components/StudentVerifyModal';
 import { UserSubscription } from './src/types/subscription';
 import { loadSubscription, INITIAL_SUBSCRIPTION } from './src/services/entitlements';
@@ -62,6 +63,7 @@ export default function App() {
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [isVisionModalOpen, setIsVisionModalOpen] = useState<boolean>(false);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState<boolean>(false);
   const [isStudentModalOpen, setIsStudentModalOpen] = useState<boolean>(false);
   const [activeReceipt, setActiveReceipt] = useState<ThermalReceiptData | null>(null);
   const [activeDetailRecipe, setActiveDetailRecipe] = useState<RescueRecipe | null>(null);
@@ -339,6 +341,14 @@ export default function App() {
         onClose={() => setIsAddModalOpen(false)}
         onAddItem={handleAddItem}
         onOpenVisionScan={() => setIsVisionModalOpen(true)}
+        onOpenReceiptScan={() => setIsReceiptModalOpen(true)}
+      />
+
+      {/* MARKET RECEIPT OCR SCAN MODAL */}
+      <ReceiptScanModal
+        isOpen={isReceiptModalOpen}
+        onClose={() => setIsReceiptModalOpen(false)}
+        onAddBatchItems={handleAddBatchItems}
       />
 
       {/* AI VISION CAMERA SCAN MODAL */}

@@ -10,7 +10,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { X, Plus, Minus, Camera } from 'lucide-react-native';
+import { X, Plus, Minus, Camera, Receipt } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { FoodItem, FoodCategory, StorageLocation } from '../types/models';
 import { TURKISH_STAPLES, TurkishStapleSuggestion } from '../data/initialData';
@@ -22,6 +22,7 @@ interface QuickAddModalProps {
   onClose: () => void;
   onAddItem: (item: Omit<FoodItem, 'id' | 'addedAt'>) => void;
   onOpenVisionScan?: () => void;
+  onOpenReceiptScan?: () => void;
 }
 
 const CATEGORIES: FoodCategory[] = [
@@ -41,6 +42,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
   onClose,
   onAddItem,
   onOpenVisionScan,
+  onOpenReceiptScan,
 }) => {
   const [search, setSearch] = useState('');
   const [name, setName] = useState('');
@@ -131,6 +133,17 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               <Text style={styles.headerSub}>Türk mutfağından hızlı ara veya kamerayla tara</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              {onOpenReceiptScan && (
+                <TouchableOpacity
+                  style={[styles.closeBtn, { backgroundColor: 'rgba(59, 130, 246, 0.15)', borderWidth: 1, borderColor: '#3B82F6' }]}
+                  onPress={() => {
+                    onClose();
+                    onOpenReceiptScan();
+                  }}
+                >
+                  <Receipt size={16} color="#60A5FA" />
+                </TouchableOpacity>
+              )}
               {onOpenVisionScan && (
                 <TouchableOpacity
                   style={[styles.closeBtn, { backgroundColor: 'rgba(16, 185, 129, 0.15)', borderWidth: 1, borderColor: '#10B981' }]}
