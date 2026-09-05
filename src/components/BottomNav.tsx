@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Platform } from 'react-native';
-import { Package, PlusCircle, ChefHat, TrendingUp } from 'lucide-react-native';
+import { Package, PlusCircle, ChefHat, TrendingUp, ShieldCheck } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { TabType } from '../types/models';
 import { colors, spacing, radius } from '../theme/theme';
@@ -9,12 +9,14 @@ interface BottomNavProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
   urgentCount: number;
+  onOpenPackages?: () => void;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   onTabChange,
   urgentCount,
+  onOpenPackages,
 }) => {
   const handlePress = (tab: TabType) => {
     if (Platform.OS !== 'web') {
@@ -87,6 +89,18 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           KAZANCIN
         </Text>
       </TouchableOpacity>
+
+      {/* Tab 5: PAKETLER */}
+      {onOpenPackages && (
+        <TouchableOpacity
+          style={styles.tabItem}
+          onPress={onOpenPackages}
+          activeOpacity={0.7}
+        >
+          <ShieldCheck size={20} color="#64748B" strokeWidth={1.8} />
+          <Text style={styles.tabLabel}>PAKETLER</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

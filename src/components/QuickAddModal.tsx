@@ -10,12 +10,13 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { X, Plus, Minus, Camera, Receipt } from 'lucide-react-native';
+import { X, Plus, Minus, Camera, Receipt, Sparkles } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { FoodItem, FoodCategory, StorageLocation } from '../types/models';
 import { TURKISH_STAPLES, TurkishStapleSuggestion } from '../data/initialData';
 import { colors, spacing, radius } from '../theme/theme';
 import { resolveFoodImage } from '../utils/foodImageResolver';
+import { findTypoSuggestion } from '../utils/fuzzyMatch';
 
 interface QuickAddModalProps {
   isOpen: boolean;
@@ -61,6 +62,12 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
       s.name.toLocaleLowerCase('tr-TR').includes(lower),
     );
   }, [search]);
+
+  // "Şunu mu demek istediniz?" fuzzy typo önerisi
+  const typoSuggestion = useMemo(() => {
+    if (!search.trim() || filteredStaples.length > 0) return null;
+    return findTypoSuggestion(search);
+  }, [search, filteredStaples]);
 
   const handleSelectStaple = (staple: TurkishStapleSuggestion) => {
     if (Platform.OS !== 'web') {
@@ -174,6 +181,27 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               }}
               autoFocus
             />
+
+            {/* "Şunu mu demek istediniz?" Akıllı Yazım Düzeltici */}
+            {typoSuggestion && (
+              <TouchableOpacity
+                style={styles.suggestionBanner}
+                onPress={() => {
+                  handleSelectStaple(typoSuggestion);
+                  setSearch(typoSuggestion.name);
+                }}
+                activeOpacity={0.8}
+              >
+                <Sparkles size={14} color="#10B981" />
+                <Text style={styles.suggestionText}>
+                  Şunu mu demek istediniz:{' '}
+                  <Text style={styles.suggestionHighlight}>
+                    {typoSuggestion.icon} {typoSuggestion.name}
+                  </Text>{' '}
+                  [✓ Onayla]
+                </Text>
+              </TouchableOpacity>
+            )}
 
             {/* Quick Staples Carousel */}
             <Text style={styles.sectionLabel}>SIK KULLANILAN GIDALAR</Text>
@@ -326,11 +354,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#0A0A0E',
     color: '#F8FAFC',
     borderRadius: radius.md,
-    padding: 12,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
     fontSize: 14,
     borderWidth: 1,
     borderColor: '#262633',
+    marginBottom: spacing.sm,
+  },
+  suggestionBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
     marginBottom: spacing.md,
+  },
+  suggestionText: {
+    fontSize: 12,
+    color: '#94A3B8',
+    fontWeight: '600',
+  },
+  suggestionHighlight: {
+    color: '#10B981',
+    fontWeight: '800',
   },
   sectionLabel: {
     fontSize: 10,

@@ -39,6 +39,7 @@ import { RecipeDetailModal } from './src/components/RecipeDetailModal';
 import { VisionScanModal } from './src/components/VisionScanModal';
 import { ReceiptScanModal } from './src/components/ReceiptScanModal';
 import { StudentVerifyModal } from './src/components/StudentVerifyModal';
+import { PackagesModal } from './src/components/PackagesModal';
 import { UserSubscription } from './src/types/subscription';
 import { loadSubscription, INITIAL_SUBSCRIPTION } from './src/services/entitlements';
 
@@ -65,6 +66,7 @@ export default function App() {
   const [isVisionModalOpen, setIsVisionModalOpen] = useState<boolean>(false);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState<boolean>(false);
   const [isStudentModalOpen, setIsStudentModalOpen] = useState<boolean>(false);
+  const [isPackagesModalOpen, setIsPackagesModalOpen] = useState<boolean>(false);
   const [activeReceipt, setActiveReceipt] = useState<ThermalReceiptData | null>(null);
   const [activeDetailRecipe, setActiveDetailRecipe] = useState<RescueRecipe | null>(null);
 
@@ -333,6 +335,18 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         urgentCount={urgentCount}
+        onOpenPackages={() => setIsPackagesModalOpen(true)}
+      />
+
+      {/* PACKAGES / ABONELİK KARŞILAŞTIRMA MODALI */}
+      <PackagesModal
+        isOpen={isPackagesModalOpen}
+        onClose={() => setIsPackagesModalOpen(false)}
+        subscription={subscription}
+        onOpenStudentVerify={() => {
+          setIsPackagesModalOpen(false);
+          setIsStudentModalOpen(true);
+        }}
       />
 
       {/* QUICK ADD INGREDIENT BOTTOM SHEET */}
