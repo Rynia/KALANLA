@@ -11,12 +11,12 @@
   "dependencies": {
     "@expo/metro-runtime": "~57.0.15",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "expo": "~57.0.20",
+    "expo": "~57.0.22",
     "expo-asset": "~57.0.16",
-    "expo-haptics": "~57.0.2",
-    "expo-image-manipulator": "~57.0.8",
-    "expo-image-picker": "~57.0.12",
-    "expo-sharing": "~57.0.18",
+    "expo-haptics": "~57.0.3",
+    "expo-image-manipulator": "~57.0.17",
+    "expo-image-picker": "~57.0.17",
+    "expo-sharing": "~57.0.19",
     "expo-status-bar": "~57.0.1",
     "lucide-react-native": "^0.475.0",
     "react": "19.2.3",
@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
-    "typescript": "^7.0.2"
+    "typescript": "^5.3.3"
   },
   "private": true
 }
