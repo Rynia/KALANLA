@@ -38,12 +38,23 @@ export const SMART_DEFAULTS_MAP: Record<string, SmartDefaultConfig> = {
   et: { category: 'Et & Tavuk', location: 'Buzdolabı', recommendedDays: 3, defaultAmount: 500, unit: 'g' },
   sucuk: { category: 'Şarküteri', location: 'Buzdolabı', recommendedDays: 14, defaultAmount: 200, unit: 'g' },
 
-  // Unlu Mamul & Kiler
+  // Unlu Mamul & Hamur & Kiler
+  un: { category: 'Kiler', location: 'Kiler', recommendedDays: 180, defaultAmount: 1, unit: 'kg' },
+  yufka: { category: 'Unlu Mamul', location: 'Buzdolabı', recommendedDays: 4, defaultAmount: 3, unit: 'Adet' },
   ekmek: { category: 'Unlu Mamul', location: 'Kiler', recommendedDays: 2, defaultAmount: 1, unit: 'Adet' },
-  makarna: { category: 'Kiler', location: 'Kiler', recommendedDays: 90, defaultAmount: 1, unit: 'Paket' },
-  pirinc: { category: 'Kiler', location: 'Kiler', recommendedDays: 90, defaultAmount: 1, unit: 'Paket' },
-  mercimek: { category: 'Kiler', location: 'Kiler', recommendedDays: 90, defaultAmount: 1, unit: 'Paket' },
-  salca: { category: 'Kiler', location: 'Buzdolabı', recommendedDays: 25, defaultAmount: 1, unit: 'Kavanoz' }
+  lavas: { category: 'Unlu Mamul', location: 'Kiler', recommendedDays: 7, defaultAmount: 1, unit: 'Paket' },
+  makarna: { category: 'Kiler', location: 'Kiler', recommendedDays: 180, defaultAmount: 1, unit: 'Paket' },
+  pirinc: { category: 'Kiler', location: 'Kiler', recommendedDays: 180, defaultAmount: 1, unit: 'Paket' },
+  bulgur: { category: 'Kiler', location: 'Kiler', recommendedDays: 180, defaultAmount: 1, unit: 'Paket' },
+  mercimek: { category: 'Kiler', location: 'Kiler', recommendedDays: 180, defaultAmount: 1, unit: 'Paket' },
+  nohut: { category: 'Kiler', location: 'Kiler', recommendedDays: 180, defaultAmount: 1, unit: 'Paket' },
+  sehriye: { category: 'Kiler', location: 'Kiler', recommendedDays: 180, defaultAmount: 1, unit: 'Paket' },
+  salca: { category: 'Kiler', location: 'Buzdolabı', recommendedDays: 30, defaultAmount: 1, unit: 'Kavanoz' },
+  kabak: { category: 'Sebze', location: 'Buzdolabı', recommendedDays: 5, defaultAmount: 2, unit: 'Adet' },
+  patlican: { category: 'Sebze', location: 'Buzdolabı', recommendedDays: 5, defaultAmount: 2, unit: 'Adet' },
+  dereotu: { category: 'Sebze', location: 'Buzdolabı', recommendedDays: 4, defaultAmount: 1, unit: 'Demet' },
+  lor: { category: 'Süt Ürünü', location: 'Buzdolabı', recommendedDays: 5, defaultAmount: 250, unit: 'g' },
+  sivi_yag: { category: 'Kiler', location: 'Kiler', recommendedDays: 180, defaultAmount: 1, unit: 'Litre' },
 };
 
 /**

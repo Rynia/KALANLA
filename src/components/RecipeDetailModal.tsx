@@ -8,7 +8,7 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import { X, Clock, Flame, Dumbbell } from 'lucide-react-native';
+import { X, Clock, Flame, Dumbbell, Users, CheckCircle2, AlertCircle } from 'lucide-react-native';
 import { RescueRecipe } from '../types/models';
 import { colors, spacing, radius } from '../theme/theme';
 
@@ -53,6 +53,12 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
             <Text style={styles.desc}>{recipe.description}</Text>
 
             <View style={styles.macrosRow}>
+              {recipe.portion && (
+                <View style={[styles.macroPill, { borderColor: colors.emerald, backgroundColor: 'rgba(34, 197, 94, 0.12)' }]}>
+                  <Users size={14} color={colors.emerald} />
+                  <Text style={[styles.macroText, { color: colors.emerald }]}>{recipe.portion}</Text>
+                </View>
+              )}
               <View style={styles.macroPill}>
                 <Clock size={14} color="#10B981" />
                 <Text style={styles.macroText}>{recipe.durationMinutes} Dk</Text>
@@ -67,8 +73,35 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
               </View>
             </View>
 
+            {/* Malzemeler ve Net Ölçüler (Ev Hanımı & Anne Reçetesi) */}
+            <Text style={styles.sectionTitle}>GEREKLİ MALZEMELER & NET ÖLÇÜLER</Text>
+            <View style={styles.ingredientsBox}>
+              {recipe.requiredItemNames.map((item, idx) => (
+                <View key={idx} style={styles.ingredientRow}>
+                  <View style={styles.ingIconWrapper}>
+                    {item.rescued ? (
+                      <CheckCircle2 size={15} color={colors.emerald} />
+                    ) : (
+                      <AlertCircle size={15} color={colors.amber} />
+                    )}
+                  </View>
+                  <View style={styles.ingTextCol}>
+                    <Text style={styles.ingName}>{item.name}</Text>
+                    <Text style={styles.ingMeasure}>
+                      {item.exactMeasure || `${item.consumeAmount || '1'} birim`}
+                    </Text>
+                  </View>
+                  {item.rescued && (
+                    <View style={styles.inStockBadge}>
+                      <Text style={styles.inStockText}>Kilerde Var ✓</Text>
+                    </View>
+                  )}
+                </View>
+              ))}
+            </View>
+
             {/* Step-by-Step Instructions */}
-            <Text style={styles.sectionTitle}>ADIM ADIM PİŞİRME</Text>
+            <Text style={styles.sectionTitle}>ADIM ADIM HAZIRLANIŞ</Text>
             <View style={styles.instructionsList}>
               {recipe.instructions.map((step, idx) => (
                 <View key={idx} style={styles.stepRow}>
@@ -215,6 +248,50 @@ const styles = StyleSheet.create({
     color: '#E2E8F0',
     fontSize: 13,
     lineHeight: 19,
+  },
+  ingredientsBox: {
+    backgroundColor: '#161412',
+    borderRadius: radius.md,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: '#26221E',
+    marginBottom: spacing.xl,
+    gap: 10,
+  },
+  ingredientRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  ingIconWrapper: {
+    width: 20,
+    alignItems: 'center',
+  },
+  ingTextCol: {
+    flex: 1,
+  },
+  ingName: {
+    color: '#FDFBF7',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  ingMeasure: {
+    color: '#A8A29E',
+    fontSize: 12,
+    marginTop: 1,
+  },
+  inStockBadge: {
+    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.3)',
+  },
+  inStockText: {
+    color: '#22C55E',
+    fontSize: 10,
+    fontWeight: '700',
   },
   cookBtn: {
     backgroundColor: '#10B981',

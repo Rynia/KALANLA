@@ -39,6 +39,8 @@ export interface RequiredItem {
   isPantry?: boolean;
   /** Tarifin tükettiği miktar, örn. '200g' veya '2' (kısmi tüketim için) */
   consumeAmount?: string;
+  /** Anneler için net mutfak ölçüsü: örn. '2.5 su bardağı', 'Yarım demet' */
+  exactMeasure?: string;
 }
 
 export interface RescueRecipe {
@@ -60,6 +62,8 @@ export interface RescueRecipe {
   instructions: string[];
   co2SavedKg: number;
   isChefPick?: boolean;
+  /** Kaç kişilik bereketli sofra: örn. '3-4 Kişilik' */
+  portion?: string;
 }
 
 export interface ThermalReceiptData {
