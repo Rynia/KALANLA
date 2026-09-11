@@ -34,6 +34,23 @@ export const LegalFooter: React.FC<LegalFooterProps> = ({ onResetData }) => {
       </Text>
 
       <TouchableOpacity
+        style={styles.supportButton}
+        onPress={() => {
+          Alert.alert(
+            '☕ Geliştiriciye Destek Ol',
+            'KALANLA sıfır atık mutfak vizyonuyla bağımsız olarak geliştirilmektedir. Bize destek olmak ister misiniz?',
+            [
+              { text: 'Daha Sonra', style: 'cancel' },
+              { text: 'Teşekkürler ❤️', onPress: () => {} }
+            ]
+          );
+        }}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.supportButtonText}>☕ Geliştiriciye Bir Kahve Ismarla</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         style={styles.resetButton}
         onPress={() => setShowConfirmModal(true)}
         activeOpacity={0.7}
@@ -118,6 +135,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 16,
     maxWidth: 320,
+  },
+  supportButton: {
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.25)',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: radius.full,
+    marginTop: spacing.md,
+  },
+  supportButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.emerald,
   },
   resetButton: {
     flexDirection: 'row',

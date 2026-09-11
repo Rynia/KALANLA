@@ -14,7 +14,8 @@
       "bundleIdentifier": "com.rynia.kalanla",
       "infoPlist": {
         "NSCameraUsageDescription": "KALANLA, buzdolabınızdaki yiyecekleri tespit etmek ve raf ömürlerini takip edebilmek için kameranızı kullanır.",
-        "NSPhotoLibraryUsageDescription": "KALANLA, galerinizdeki buzdolabı fotoğraflarını seçerek envantere aktarabilmeniz için fotoğraflarınıza erişir."
+        "NSPhotoLibraryUsageDescription": "KALANLA, galerinizdeki buzdolabı fotoğraflarını seçerek envantere aktarabilmeniz için fotoğraflarınıza erişir.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -29,6 +30,11 @@
     },
     "plugins": [
       "expo-asset"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "52e7c7ee-2222-4c22-b673-d7957248e93f"
+      }
+    }
   }
 }
