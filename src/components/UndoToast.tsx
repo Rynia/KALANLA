@@ -30,18 +30,18 @@ export const UndoToast: React.FC<UndoToastProps> = ({
     const intervalTime = 50;
     const step = (intervalTime / durationMs) * 100;
 
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev <= 0) {
-          clearInterval(timer);
-          onDismiss();
-          return 0;
-        }
-        return prev - step;
-      });
+    const progressTimer = setInterval(() => {
+      setProgress((prev) => Math.max(0, prev - step));
     }, intervalTime);
 
-    return () => clearInterval(timer);
+    const dismissTimer = setTimeout(() => {
+      onDismiss();
+    }, durationMs);
+
+    return () => {
+      clearInterval(progressTimer);
+      clearTimeout(dismissTimer);
+    };
   }, [isVisible, durationMs, onDismiss]);
 
   if (!isVisible) return null;
