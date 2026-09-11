@@ -21,6 +21,7 @@ interface InventoryRadarProps {
   onDeleteItem: (id: string) => void;
   onNavigateToCook: () => void;
   onOpenAddModal: () => void;
+  onPopulateDemoItems?: () => void;
 }
 
 type FilterType = 'all' | 'urgent' | 'week' | 'fresh';
@@ -31,6 +32,7 @@ export const InventoryRadar: React.FC<InventoryRadarProps> = ({
   onDeleteItem,
   onNavigateToCook,
   onOpenAddModal,
+  onPopulateDemoItems,
 }) => {
   const [filter, setFilter] = useState<FilterType>('all');
 
@@ -203,13 +205,31 @@ export const InventoryRadar: React.FC<InventoryRadarProps> = ({
       {filteredItems.length === 0 ? (
         <View style={styles.emptyBox}>
           <Text style={styles.emptyIcon}>🥬</Text>
-          <Text style={styles.emptyTitle}>Bu filtrede gıda bulunamadı</Text>
-          <Text style={styles.emptySubtitle}>
-            Yeni malzeme ekleyerek mutfak radarını zenginleştir.
+          <Text style={styles.emptyTitle}>
+            {items.length === 0 ? 'Dolabın Henüz Boş' : 'Bu filtrede gıda bulunamadı'}
           </Text>
-          <TouchableOpacity style={styles.emptyAddBtn} onPress={onOpenAddModal}>
-            <Text style={styles.emptyAddBtnText}>+ Malzeme Ekle</Text>
-          </TouchableOpacity>
+          <Text style={styles.emptySubtitle}>
+            {items.length === 0
+              ? 'Malzemelerini fotoğraflayarak veya manuel ekleyerek sıfır israf mutfağını başlat.'
+              : 'Yeni malzeme ekleyerek mutfak radarını zenginleştir.'}
+          </Text>
+
+          <View style={{ width: '100%', gap: 10, marginTop: 12 }}>
+            <TouchableOpacity style={styles.emptyAddBtn} onPress={onOpenAddModal}>
+              <Text style={styles.emptyAddBtnText}>+ Malzeme Ekle</Text>
+            </TouchableOpacity>
+
+            {items.length === 0 && onPopulateDemoItems && (
+              <TouchableOpacity
+                style={styles.demoLoadBtn}
+                onPress={onPopulateDemoItems}
+                activeOpacity={0.85}
+              >
+                <Sparkles size={16} color={colors.emerald} />
+                <Text style={styles.demoLoadBtnText}>🧪 Örnek Dolap ile Keşfet (Demo)</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       ) : (
         filteredItems.map((item) => (
@@ -527,5 +547,22 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 13,
     fontFamily: 'monospace',
+  },
+  demoLoadBtn: {
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: radius.md,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  demoLoadBtnText: {
+    color: colors.text,
+    fontWeight: '700',
+    fontSize: 13,
   },
 });

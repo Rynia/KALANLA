@@ -29,7 +29,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* Tab 1: GÖR */}
+      {/* Tab 1: Dolabım */}
       <TouchableOpacity
         style={styles.tabItem}
         onPress={() => handlePress('gor')}
@@ -37,18 +37,18 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       >
         <Package
           size={20}
-          color={activeTab === 'gor' ? '#10B981' : '#64748B'}
+          color={activeTab === 'gor' ? colors.emerald : colors.faint}
           strokeWidth={activeTab === 'gor' ? 2.5 : 1.8}
         />
         <Text style={[styles.tabLabel, activeTab === 'gor' && styles.tabLabelActive]}>
-          GÖR
+          Dolabım
         </Text>
         {urgentCount > 0 && activeTab !== 'gor' && (
           <View style={styles.dotBadge} />
         )}
       </TouchableOpacity>
 
-      {/* Tab 2: PİŞİR */}
+      {/* Tab 2: Pişir */}
       <TouchableOpacity
         style={styles.tabItem}
         onPress={() => handlePress('pisir')}
@@ -56,25 +56,24 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       >
         <ChefHat
           size={20}
-          color={activeTab === 'pisir' ? '#10B981' : '#64748B'}
+          color={activeTab === 'pisir' ? colors.emerald : colors.faint}
           strokeWidth={activeTab === 'pisir' ? 2.5 : 1.8}
         />
         <Text style={[styles.tabLabel, activeTab === 'pisir' && styles.tabLabelActive]}>
-          PİŞİR
+          Pişir
         </Text>
       </TouchableOpacity>
 
-      {/* Tab 3: EKLE (Center Action Button) */}
+      {/* Quick Center Action: EKLE */}
       <TouchableOpacity
-        style={styles.centerAddBtn}
+        style={styles.centerButton}
         onPress={() => handlePress('ekle' as any)}
         activeOpacity={0.85}
       >
-        <PlusCircle size={22} color="#0A0A0E" strokeWidth={2.5} />
-        <Text style={styles.centerAddText}>EKLE</Text>
+        <PlusCircle size={28} color="#FFFFFF" strokeWidth={2.2} />
       </TouchableOpacity>
 
-      {/* Tab 4: KAZANCIN */}
+      {/* Tab 3: Kazancın */}
       <TouchableOpacity
         style={styles.tabItem}
         onPress={() => handlePress('kazancin')}
@@ -82,11 +81,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       >
         <TrendingUp
           size={20}
-          color={activeTab === 'kazancin' ? '#10B981' : '#64748B'}
+          color={activeTab === 'kazancin' ? colors.emerald : colors.faint}
           strokeWidth={activeTab === 'kazancin' ? 2.5 : 1.8}
         />
         <Text style={[styles.tabLabel, activeTab === 'kazancin' && styles.tabLabelActive]}>
-          KAZANCIN
+          Kazancın
         </Text>
       </TouchableOpacity>
 
@@ -110,11 +109,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    backgroundColor: '#0E0E14',
+    backgroundColor: colors.surface,
     paddingVertical: 10,
     paddingHorizontal: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: '#1F1F28',
+    borderTopColor: colors.border,
   },
   tabItem: {
     alignItems: 'center',
@@ -126,13 +125,27 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#64748B',
+    color: colors.faint,
     marginTop: 4,
-    fontFamily: 'monospace',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   tabLabelActive: {
-    color: '#10B981',
+    color: colors.emerald,
+    fontWeight: '800',
+  },
+  centerButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.terracotta,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.terracotta,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
+    marginHorizontal: 4,
   },
   dotBadge: {
     position: 'absolute',

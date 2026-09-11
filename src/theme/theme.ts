@@ -1,20 +1,30 @@
 export const colors = {
-  background: '#0D0D11',
-  surface: '#16161C',
-  surfaceRaised: '#1C1C23',
-  border: '#292A33',
-  borderMuted: '#1F1F24',
-  text: '#F5F5F7',
-  muted: '#92939C',
-  faint: '#5D5F68',
-  emerald: '#10B981',
-  emeraldSoft: '#113D32',
-  risk: '#EF4444',
-  riskSoft: '#421F27',
-  amber: '#F59E0B',
-  amberSoft: '#44321A',
-  titanium: '#C8CCD2',
+  background: '#141210',      // Kavrulmuş Sıcak Moka
+  surface: '#1E1B18',         // Fırınlanmış Kestane
+  surfaceRaised: '#282420',   // Yükseltilmiş Kart/Modal
+  border: '#36302A',          // Mat Sıcak Sınır
+  borderMuted: '#26221D',     // İnce Mat Çizgi
+  text: '#FDFBF7',            // Sıcak Süt Beyazı
+  muted: '#D6D3D1',           // Keten Taşı
+  faint: '#A8A29E',           // Soluk Keten
+  emerald: '#22C55E',         // Bahçe Fesleğeni (Tazelik & Kazanç)
+  emeraldSoft: '#163320',     // Yumuşak Fesleğen Zemin
+  risk: '#E85D3D',            // Olgun Domates (Acil Öncelikli)
+  riskSoft: '#381D17',        // Yumuşak Domates Zemin
+  amber: '#F59E0B',           // Çıtır Ekmek Sarısı
+  amberSoft: '#3D2D18',
+  terracotta: '#D13A22',      // Sıcak Terracotta İmzası
+  titanium: '#D6D3D1',
   white: '#FFFFFF',
+
+  // Warm Tech 2.0 semantic aliases
+  surfaceCard: '#1E1B18',
+  borderSubtle: '#36302A',
+  textPrimary: '#FDFBF7',
+  textMuted: '#D6D3D1',
+  accentEmerald: '#22C55E',
+  brandTerracotta: '#D13A22',
+  bgDark: '#141210',
 } as const;
 
 export const spacing = {

@@ -98,3 +98,21 @@ export interface CatalogIngredient {
   location: StorageLocation;
   imageUrl?: string;
 }
+
+export interface InventoryTransaction {
+  id: string;
+  type: 'recipe-consume';
+  status: 'committed' | 'reversed' | 'expired';
+  recipeId: string;
+  recipeTitle: string;
+  consumedItems: {
+    itemId: string;
+    itemSnapshot: FoodItem; // Tükenen ürünün orijinal ID, görsel ve değerini korur (ChatGPT & Gemini kuralı)
+    wasCompletelyRemoved: boolean;
+    previousAmount: string;
+  }[];
+  savedTL: number;
+  co2SavedKg: number;
+  createdAt: number;
+}
+

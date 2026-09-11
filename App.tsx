@@ -5,6 +5,7 @@ import {
   ScrollView,
   StatusBar,
   Platform,
+  Alert,
 } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -15,6 +16,7 @@ import {
   RescueRecipe,
   ThermalReceiptData,
   AchievementBadge,
+  InventoryTransaction,
 } from './src/types/models';
 import {
   INITIAL_FOOD_ITEMS,
@@ -40,6 +42,9 @@ import { VisionScanModal } from './src/components/VisionScanModal';
 import { ReceiptScanModal } from './src/components/ReceiptScanModal';
 import { StudentVerifyModal } from './src/components/StudentVerifyModal';
 import { PackagesModal } from './src/components/PackagesModal';
+import { UndoToast } from './src/components/UndoToast';
+import { LegalFooter } from './src/components/LegalFooter';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { UserSubscription } from './src/types/subscription';
 import { loadSubscription, INITIAL_SUBSCRIPTION } from './src/services/entitlements';
 
@@ -69,6 +74,10 @@ export default function App() {
   const [isPackagesModalOpen, setIsPackagesModalOpen] = useState<boolean>(false);
   const [activeReceipt, setActiveReceipt] = useState<ThermalReceiptData | null>(null);
   const [activeDetailRecipe, setActiveDetailRecipe] = useState<RescueRecipe | null>(null);
+
+  // ChatGPT & Gemini Kuralı: Idempotent Transaction Undo State
+  const [lastTransaction, setLastTransaction] = useState<InventoryTransaction | null>(null);
+  const [isUndoVisible, setIsUndoVisible] = useState<boolean>(false);
 
   // Subscription / Paket Yönetimi
   const [subscription, setSubscription] = useState<UserSubscription>(INITIAL_SUBSCRIPTION);
@@ -176,6 +185,31 @@ export default function App() {
 
   // Cooking Recipe Interaction: Kısmi tüketim planı ile malzemeleri azalt/sil
   const handleCookRecipe = (recipe: RescueRecipe) => {
+    // Edge Case Koruma: Tarifteki zorunlu (kiler dışı) eksik malzemeleri tespit et
+    const missingNonPantry = recipe.requiredItemNames.filter(
+      (req) => !req.isPantry && !foodItems.some((item) => item.name.toLocaleLowerCase('tr-TR').includes(req.name.toLocaleLowerCase('tr-TR')))
+    );
+
+    if (missingNonPantry.length > 0) {
+      const missingNames = missingNonPantry.map((m) => m.name).join(', ');
+      Alert.alert(
+        'Eksik Malzeme Var',
+        `Bu tarif için dolabınızda "${missingNames}" bulunamadı. Yine de elinizdeki mevcut malzemeler dolaptan düşülsün mü?`,
+        [
+          { text: 'Vazgeç', style: 'cancel' },
+          {
+            text: 'Devam Et',
+            onPress: () => executeCookingTransaction(recipe),
+          },
+        ]
+      );
+      return;
+    }
+
+    executeCookingTransaction(recipe);
+  };
+
+  const executeCookingTransaction = (recipe: RescueRecipe) => {
     // 1. Tüketim planı oluştur (kısmi tüketim desteği)
     const plan = buildConsumptionPlan(recipe, foodItems);
     const nextItems = applyConsumptionPlan(foodItems, plan);
@@ -193,6 +227,41 @@ export default function App() {
           return { ...item, amount: `${isNaN(consumedNum) ? '' : consumedNum}${unit}` };
         }),
     ];
+
+    // 2.5 ChatGPT & Gemini Kuralı: Idempotent Transaction Kaydı
+    const transactionConsumed = [
+      ...foodItems
+        .filter((item) => plan.toRemove.includes(item.id))
+        .map((item) => ({
+          itemId: item.id,
+          itemSnapshot: { ...item }, // Orijinal ID, imageUrl ve meta verisini korur
+          wasCompletelyRemoved: true,
+          previousAmount: item.amount,
+        })),
+      ...foodItems
+        .filter((item) => plan.toUpdate.some((u) => u.id === item.id))
+        .map((item) => ({
+          itemId: item.id,
+          itemSnapshot: { ...item },
+          wasCompletelyRemoved: false,
+          previousAmount: item.amount,
+        })),
+    ];
+
+    const tx: InventoryTransaction = {
+      id: `tx-${Date.now()}`,
+      type: 'recipe-consume',
+      status: 'committed',
+      recipeId: recipe.id,
+      recipeTitle: recipe.title,
+      consumedItems: transactionConsumed,
+      savedTL: recipe.savedTL,
+      co2SavedKg: recipe.co2SavedKg,
+      createdAt: Date.now(),
+    };
+
+    setLastTransaction(tx);
+    setIsUndoVisible(true);
 
     const nextTotal = rescuedTotalTL + recipe.savedTL;
     const nextCo2 = Number((rescuedCo2Kg + recipe.co2SavedKg).toFixed(2));
@@ -257,6 +326,52 @@ export default function App() {
     }
   };
 
+  // ChatGPT & Gemini Kuralı: Idempotent Undo Transaction Handler
+  const handleUndoCook = () => {
+    if (!lastTransaction || lastTransaction.status !== 'committed') return;
+
+    // Yalnızca bu transaction'ın tükettiği kalemleri geri yükle (başka tarifleri veya eklenenleri ezmez)
+    setFoodItems((prevItems) => {
+      let restored = [...prevItems];
+
+      lastTransaction.consumedItems.forEach((ci) => {
+        if (ci.wasCompletelyRemoved) {
+          // Orijinal snapshottan geri koy
+          restored = [ci.itemSnapshot, ...restored];
+        } else {
+          // Güncellenen ürünün miktarını eski haline getir
+          restored = restored.map((item) =>
+            item.id === ci.itemId ? { ...item, amount: ci.previousAmount } : item
+          );
+        }
+      });
+
+      return restored;
+    });
+
+    // Telemetriyi ve birikimleri tersine çevir
+    setRescuedTotalTL((prev) => Math.max(0, prev - lastTransaction.savedTL));
+    setRescuedCo2Kg((prev) => Math.max(0, Number((prev - lastTransaction.co2SavedKg).toFixed(2))));
+    setRescuedMealsCount((prev) => Math.max(0, prev - 1));
+
+    // Idempotency: İşlem durumunu reversed olarak işaretle, tekrar çalışmasını engelle
+    setLastTransaction((prev) => (prev ? { ...prev, status: 'reversed' } : null));
+    setIsUndoVisible(false);
+    setActiveReceipt(null);
+  };
+
+  // Local-First / Guest Data Reset (Apple & Store kurallarına uygun yerel sıfırlama)
+  const handleResetAllData = () => {
+    setFoodItems([]);
+    setRescuedTotalTL(0);
+    setRescuedCo2Kg(0);
+    setRescuedMealsCount(0);
+    setActiveReceipt(null);
+    setActiveDetailRecipe(null);
+    setLastTransaction(null);
+    setIsUndoVisible(false);
+  };
+
   // Open historical receipt preview from Earnings tab
   const handleOpenReceiptFromEarnings = () => {
     const now = new Date();
@@ -286,9 +401,10 @@ export default function App() {
   };
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="light-content" backgroundColor="#0A0A0E" />
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.safeArea}>
+          <StatusBar barStyle="light-content" backgroundColor="#141210" />
 
       {/* FIXED RYNIA OS TOP HEADER */}
       <Header activeTab={activeTab} urgentCount={urgentCount} />
@@ -307,6 +423,14 @@ export default function App() {
             onDeleteItem={handleDeleteItem}
             onNavigateToCook={() => setActiveTab('pisir')}
             onOpenAddModal={() => setIsAddModalOpen(true)}
+            onPopulateDemoItems={() => {
+              setFoodItems(INITIAL_FOOD_ITEMS);
+              if (Platform.OS !== 'web') {
+                try {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                } catch (e) {}
+              }
+            }}
           />
         )}
 
@@ -328,6 +452,9 @@ export default function App() {
             onOpenReceipt={handleOpenReceiptFromEarnings}
           />
         )}
+
+        {/* Food Safety Notice & Local Data Reset */}
+        <LegalFooter onResetData={handleResetAllData} />
       </ScrollView>
 
       {/* FIXED BOTTOM TAB NAVIGATION */}
@@ -376,6 +503,7 @@ export default function App() {
           setIsVisionModalOpen(false);
           setIsStudentModalOpen(true);
         }}
+        onOpenQuickAdd={() => setIsAddModalOpen(true)}
       />
 
       {/* UNIVERSITY STUDENT VERIFICATION MODAL (.edu.tr) */}
@@ -399,15 +527,24 @@ export default function App() {
         receipt={activeReceipt}
         onClose={() => setActiveReceipt(null)}
       />
-      </SafeAreaView>
-    </SafeAreaProvider>
+
+      {/* DYNAMIC 5-SECOND TRANSACTIONAL UNDO TOAST */}
+      <UndoToast
+        isVisible={isUndoVisible}
+        recipeTitle={lastTransaction?.recipeTitle || ''}
+        onUndo={handleUndoCook}
+        onDismiss={() => setIsUndoVisible(false)}
+      />
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0A0A0E',
+    backgroundColor: '#141210',
   },
   viewport: {
     flex: 1,

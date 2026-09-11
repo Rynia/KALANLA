@@ -9,6 +9,7 @@ import {
   ScrollView,
   Platform,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { X, Plus, Minus, Camera, Receipt, Sparkles } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -16,6 +17,7 @@ import { FoodItem, FoodCategory, StorageLocation } from '../types/models';
 import { TURKISH_STAPLES, TurkishStapleSuggestion } from '../data/initialData';
 import { colors, spacing, radius } from '../theme/theme';
 import { resolveFoodImage } from '../utils/foodImageResolver';
+import { resolveSmartDefaults } from '../data/smartDefaults';
 import { findTypoSuggestion } from '../utils/fuzzyMatch';
 
 interface QuickAddModalProps {
@@ -76,11 +78,23 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
       } catch (e) {}
     }
     setName(staple.name);
-    setCategory(staple.category);
-    setLocation(staple.location);
-    setAmountVal(staple.defaultAmount);
-    setUnit(staple.unit);
-    setDays(staple.defaultDays);
+    setSearch(staple.name);
+
+    // ChatGPT Kuralı: Akıllı varsayılanlar yalnızca kullanıcı kartı seçtiğinde devreye girer
+    const smart = resolveSmartDefaults(staple.name);
+    if (smart) {
+      setCategory(smart.category);
+      setLocation(smart.location);
+      setAmountVal(smart.defaultAmount);
+      setUnit(smart.unit);
+      setDays(smart.recommendedDays);
+    } else {
+      setCategory(staple.category);
+      setLocation(staple.location);
+      setAmountVal(staple.defaultAmount);
+      setUnit(staple.unit);
+      setDays(staple.defaultDays);
+    }
     setPriceTL(staple.defaultPrice);
   };
 
@@ -129,7 +143,10 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
 
   return (
     <Modal visible={isOpen} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalBackdrop}>
+      <KeyboardAvoidingView 
+        style={styles.modalBackdrop} 
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <View style={styles.sheetContainer}>
           {/* Drag handle */}
           <View style={styles.handlePill} />
@@ -287,18 +304,22 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
                 </View>
               </View>
             </View>
+          </ScrollView>
 
-            {/* Primary Action Button */}
+          {/* Sticky Bottom Action Button (Asla klavyenin altına kaymaz, her zaman başparmak hizasında sabit) */}
+          <View style={styles.fixedBottomContainer}>
             <TouchableOpacity
               style={styles.submitBtn}
               onPress={handleSubmit}
               activeOpacity={0.85}
             >
-              <Text style={styles.submitBtnText}>Dolaba Ekle ✓</Text>
+              <Text style={styles.submitBtnText}>
+                {name.trim() || search.trim() ? `"${name.trim() || search.trim()}" Ekle ✓` : 'Dolaba Ekle ✓'}
+              </Text>
             </TouchableOpacity>
-          </ScrollView>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -313,10 +334,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#14141A',
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
-    padding: spacing.xl,
-    maxHeight: '90%',
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
+    maxHeight: '85%',
     borderWidth: 1,
     borderColor: '#262633',
+    flexDirection: 'column',
   },
   handlePill: {
     width: 40,
@@ -482,12 +506,23 @@ const styles = StyleSheet.create({
     color: '#F8FAFC',
     fontFamily: 'monospace',
   },
+  fixedBottomContainer: {
+    paddingTop: spacing.sm,
+    paddingBottom: Platform.OS === 'ios' ? spacing.md : spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: '#1F1F28',
+    backgroundColor: '#14141A',
+  },
   submitBtn: {
     backgroundColor: '#10B981',
     paddingVertical: 14,
     borderRadius: radius.md,
     alignItems: 'center',
-    marginBottom: spacing.lg,
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   submitBtnText: {
     color: '#0A0A0E',

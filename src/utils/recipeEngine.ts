@@ -183,7 +183,7 @@ export function buildConsumptionPlan(
       toRemove.push(found.id);
     } else {
       const unitMatch = found.amount.match(/[^\d.]+/);
-      const unit = unitMatch ? unitMatch[0].trim() : '';
+      const unit = unitMatch ? unitMatch[0] : '';
       toUpdate.push({ id: found.id, newAmount: `${Math.round(remaining * 10) / 10}${unit}` });
     }
   });

@@ -7,17 +7,25 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "backgroundColor": "#0D0D11"
+      "backgroundColor": "#141210"
     },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.rynia.kalanla"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.rynia.kalanla",
+      "infoPlist": {
+        "NSCameraUsageDescription": "KALANLA, buzdolabınızdaki yiyecekleri tespit etmek ve raf ömürlerini takip edebilmek için kameranızı kullanır.",
+        "NSPhotoLibraryUsageDescription": "KALANLA, galerinizdeki buzdolabı fotoğraflarını seçerek envantere aktarabilmeniz için fotoğraflarınıza erişir."
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0D0D11"
+        "backgroundColor": "#141210"
       },
-      "package": "com.rynia.kalanla"
+      "package": "com.rynia.kalanla",
+      "targetSdkVersion": 36,
+      "permissions": [
+        "CAMERA"
+      ]
     },
     "plugins": [
       "expo-asset"

@@ -1,8 +1,9 @@
 // src/services/visionInventoryService.ts
-// Gemini 2.5 Flash ile Fotoğraftan Mutfak Envanteri Çıkarıcı & Yerel Simülatör
+// AI ile Fotoğraftan Mutfak Envanteri Çıkarıcı & Deterministik Doğrulama
 import * as ImageManipulator from 'expo-image-manipulator';
 import { FoodCategory, StorageLocation } from '../types/models';
 import { resolveFoodImage } from '../utils/foodImageResolver';
+import { normalizeUnit, ACTIVE_VISION_PROVIDER } from './vision/types';
 
 export interface DetectedFoodItem {
   id: string;
@@ -17,15 +18,39 @@ export interface DetectedFoodItem {
   selected: boolean;
 }
 
+const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
+const SYSTEM_PROMPT = `Sen Türk evlerindeki buzdolabı, dondurucu ve kiler düzenini çok iyi bilen kıdemli bir Mutfak Envanteri Denetçisisin.
+Fotoğraftaki yenilebilir tüm gıda maddelerini tespit et.
+
+ÖNEMLİ KURALLAR:
+1. Buzdolabı raflarını, plastik saklama kaplarını, kavanoz camını, klavyeyi, masayı veya tencereleri gıda sayma; içlerindeki yiyeceği tahmin et.
+2. Görselde yenilebilir hiçbir gıda maddesi yoksa items dizisini tamamen boş bırak: { "items": [] }.
+3. Yalnızca geçerli ve saf bir JSON nesnesi döndür:
+{
+  "items": [
+    {
+      "name": "Salkım Domates",
+      "category": "Sebze",
+      "amount": "4 Adet",
+      "location": "Buzdolabı",
+      "daysLeft": 4,
+      "priceTL": 40
+    }
+  ]
+}
+Kategori değerleri: Süt Ürünü, Sebze, Meyve, Et & Tavuk, Şarküteri, Unlu Mamul, Kiler.
+Konum: Buzdolabı, Dondurucu, Kiler.`;
+
 /**
- * Görseli mobil performans ve yapay zeka için 1024px'e küçültüp base64 yapar.
+ * Görseli mobil performans, bellek sızıntısını önleme ve EXIF oryantasyonunu
+ * düzeltmek için 1280px'e normalize edip sıkıştırır.
  */
 export async function compressAndBase64(imageUri: string): Promise<string> {
   const manipResult = await ImageManipulator.manipulateAsync(
     imageUri,
-    [{ resize: { width: 1024 } }],
+    [{ resize: { width: 1280 } }],
     { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true }
   );
 
@@ -37,88 +62,113 @@ export async function compressAndBase64(imageUri: string): Promise<string> {
 }
 
 /**
- * Gemini API Anahtarı ile veya Çevrimdışı Akıllı Ayrıştırıcı ile
- * fotoğraftaki yiyecekleri tespit eder.
+ * Fotoğraftaki yiyecekleri OpenAI (gpt-4o-mini) veya yapılandırılmış sağlayıcı ile analiz eder.
+ * Apple Store Guideline 2.3 kuralı gereğince:
+ * Başarısızlık, timeout veya görselde gıda olmaması durumunda ASLA sahte mock malzeme üretmez.
+ * Deterministik olarak boş dizi [] döner.
  */
 export async function detectFoodItemsFromImage(
   base64Data: string,
   apiKey?: string
 ): Promise<DetectedFoodItem[]> {
-  // Eğer API anahtarı tanımlıysa canlı Gemini 2.5 Flash modeline sor
-  if (apiKey && apiKey.trim().length > 10) {
-    try {
-      const prompt = `Sen Türk evlerindeki buzdolabı, dondurucu ve tezgah düzenini çok iyi bilen kıdemli bir Mutfak Envanteri Denetçisisin.
-Fotoğraftaki yenilebilir tüm gıda maddelerini tespit et.
+  if (!apiKey || apiKey.trim().length < 5) {
+    // API anahtarı girilmediğinde deterministik boş durum (Apple 2.3 uyumlu, sahte veri yok)
+    return [];
+  }
 
-ÖNEMLİ KURALLAR:
-1. Buzdolabı raflarını, plastik saklama kaplarını, kavanoz camını veya tencereleri gıda sayma; içlerindeki yiyeceği tahmin et (örn: tencere -> Kalan Ev Yemeği).
-2. Şeffaf poşetlerdeki sebzeleri (maydanoz, domates, biber) ve sarı/loş ışık altındaki peynir bloklarını formundan tanı.
-3. Kısmi görünen veya arka plandaki malzemeleri de dahil et.
-4. Yalnızca geçerli ve saf bir JSON nesnesi döndür:
-{
-  "items": [
-    {
-      "name": "Salkım Domates",
-      "category": "Sebze",
-      "amount": "4 Adet",
-      "location": "Buzdolabı",
-      "daysLeft": 4,
-      "priceTL": 40
-    },
-    {
-      "name": "Tost Kaşarı",
-      "category": "Süt Ürünü",
-      "amount": "350g",
-      "location": "Buzdolabı",
-      "daysLeft": 14,
-      "priceTL": 120
-    }
-  ]
-}
-Kategori değerleri: Süt Ürünü, Sebze, Meyve, Et & Tavuk, Şarküteri, Unlu Mamul, Kiler.
-Konum: Buzdolabı, Dondurucu, Kiler.`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 saniye katı timeout (Apple 4.2 kuralı)
 
-      const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
+  try {
+    // 1. OPENAI GPT-4o-mini Engine (Production Provider)
+    if (ACTIVE_VISION_PROVIDER === 'openai') {
+      const response = await fetch(OPENAI_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        signal: controller.signal,
         body: JSON.stringify({
-          contents: [
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
             {
-              parts: [
-                { text: prompt },
+              role: 'user',
+              content: [
+                { type: 'text', text: 'Bu buzdolabındaki/mutfaktaki malzemeleri JSON olarak çıkar.' },
                 {
-                  inline_data: {
-                    mime_type: 'image/jpeg',
-                    data: base64Data,
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:image/jpeg;base64,${base64Data}`,
                   },
                 },
               ],
             },
           ],
-          generationConfig: {
-            temperature: 0.2,
-          },
+          response_format: { type: 'json_object' },
+          max_tokens: 800,
         }),
       });
 
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
-        const cleanJson = text.replace(/```json|```/g, '').trim();
-        const parsed = JSON.parse(cleanJson);
-
+        const content = data.choices?.[0]?.message?.content ?? '{}';
+        const parsed = JSON.parse(content);
         if (Array.isArray(parsed.items) && parsed.items.length > 0) {
           return mapToDetectedFoodItems(parsed.items);
         }
       }
-    } catch (e) {
-      console.warn('[Vision] Gemini call failed, falling back to simulated detector:', e);
+      return [];
     }
+
+    // 2. GEMINI ENGINE FALLBACK (Eğer Gemini seçildiyse)
+    const geminiUrl = `${GEMINI_ENDPOINT}?key=${apiKey}`;
+    const response = await fetch(geminiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: SYSTEM_PROMPT },
+              {
+                inline_data: {
+                  mime_type: 'image/jpeg',
+                  data: base64Data,
+                },
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.2,
+        },
+      }),
+    });
+
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      const data = await response.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
+      const cleanJson = text.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
+
+      if (Array.isArray(parsed.items) && parsed.items.length > 0) {
+        return mapToDetectedFoodItems(parsed.items);
+      }
+    }
+  } catch (e: any) {
+    clearTimeout(timeoutId);
+    console.warn('[Vision] Vision API isteği başarısız oldu veya zaman aşımına uğradı:', e?.message || e);
   }
 
-  // Çevrimdışı / API Anahtarsız Yedek Simülasyon
-  // Kullanıcı sistemi test ederken hemen 4-5 gerçekçi malzeme tespit eder
-  return getSimulatedDetection();
+  // Apple Guideline 2.3: Sahte veri yok, temiz boş durum
+  return [];
 }
 
 function mapToDetectedFoodItems(rawItems: any[]): DetectedFoodItem[] {
@@ -131,7 +181,7 @@ function mapToDetectedFoodItems(rawItems: any[]): DetectedFoodItem[] {
       id: `detected-${Date.now()}-${index}`,
       name: item.name || 'Gıda Maddesi',
       category: (item.category as FoodCategory) || 'Sebze',
-      amount: item.amount || '1 Adet',
+      amount: normalizeUnit(item.amount || '1 Adet'),
       location: (item.location as StorageLocation) || 'Buzdolabı',
       hoursLeft: hours,
       riskPercentage: risk,
@@ -140,26 +190,4 @@ function mapToDetectedFoodItems(rawItems: any[]): DetectedFoodItem[] {
       selected: true,
     };
   });
-}
-
-function getSimulatedDetection(): DetectedFoodItem[] {
-  const sampleStaples = [
-    { name: 'Salkım Domates', category: 'Sebze' as FoodCategory, amount: '4 Adet', days: 3, price: 45, location: 'Buzdolabı' as StorageLocation },
-    { name: 'Kaşar Peyniri', category: 'Süt Ürünü' as FoodCategory, amount: '350g', days: 4, price: 130, location: 'Buzdolabı' as StorageLocation },
-    { name: 'Çarliston Biber', category: 'Sebze' as FoodCategory, amount: '250g', days: 3, price: 30, location: 'Buzdolabı' as StorageLocation },
-    { name: 'Köy Yumurtası', category: 'Kiler' as FoodCategory, amount: '6 Adet', days: 8, price: 45, location: 'Buzdolabı' as StorageLocation },
-  ];
-
-  return sampleStaples.map((s, idx) => ({
-    id: `simulated-${Date.now()}-${idx}`,
-    name: s.name,
-    category: s.category,
-    amount: s.amount,
-    location: s.location,
-    hoursLeft: s.days * 24,
-    riskPercentage: s.days <= 2 ? 90 : 70,
-    priceTL: s.price,
-    imageUrl: resolveFoodImage(s.name, s.category),
-    selected: true,
-  }));
 }

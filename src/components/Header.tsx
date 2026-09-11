@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ urgentCount }) => {
         <View style={styles.brandRow}>
           <Text style={styles.brandTitle}>KALANLA</Text>
           <View style={styles.osBadge}>
-            <Text style={styles.osBadgeText}>RYNIA // OS</Text>
+            <Text style={styles.osBadgeText}>KITCHEN OS</Text>
           </View>
         </View>
         <Text style={styles.tagline}>"Ne kaldıysa, ondan başla."</Text>
@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({ urgentCount }) => {
         </View>
         {urgentCount > 0 ? (
           <View style={styles.urgentBadge}>
-            <Text style={styles.urgentBadgeText}>⚡ {urgentCount} RİSKTE</Text>
+            <Text style={styles.urgentBadgeText}>⚡ {urgentCount} ÖNCELİKLİ</Text>
           </View>
         ) : (
           <View style={styles.safeBadge}>

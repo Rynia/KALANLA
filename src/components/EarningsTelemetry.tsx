@@ -4,6 +4,7 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import {
   ShoppingCart,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react-native';
 import { AchievementBadge } from '../types/models';
 import { colors, spacing, radius } from '../theme/theme';
+import { calculateDurumIndex } from '../utils/durumIndex';
 
 interface EarningsTelemetryProps {
   rescuedTotalTL: number;
@@ -42,8 +44,9 @@ export const EarningsTelemetry: React.FC<EarningsTelemetryProps> = ({
   const [period, setPeriod] = useState<PeriodType>('month');
   const [selectedDay, setSelectedDay] = useState<DayTrend | null>(null);
 
+  const durumStats = calculateDurumIndex(rescuedTotalTL);
+
   // Bar chart — gerçek veriyle orantılı gösterim
-  // Mevcut haftalık toplam = rescuedTotalTL (eşit dağıtılmış varsayım)
   const weeklyBase = Math.max(rescuedTotalTL, 1);
   const weeklyTrends: DayTrend[] = [
     { day: 'Pzt', amount: Math.round(weeklyBase * 0.16), heightPercent: 35 },
@@ -134,11 +137,35 @@ export const EarningsTelemetry: React.FC<EarningsTelemetryProps> = ({
         {/* Target Progress Bar */}
         <View style={styles.progressContainer}>
           <View style={styles.progressHeader}>
-            <Text style={styles.progressLabel}>AYLIK HEDEF</Text>
+            <Text style={styles.progressLabel}>HEDEF</Text>
             <Text style={styles.progressValue}>%{targetPercent} TAMAMLANDI</Text>
           </View>
           <View style={styles.progressBarTrack}>
             <View style={[styles.progressBarFill, { width: `${targetPercent}%` }]} />
+          </View>
+        </View>
+      </View>
+
+      {/* 2.5 DÜRÜM & KAHVE ENDEKSİ KARTI (2026 GERÇEK MUTFAK KAZANCI) */}
+      <View style={styles.durumCard}>
+        <View style={styles.durumHeader}>
+          <View style={styles.durumTitleRow}>
+            <Text style={styles.durumEmoji}>{durumStats.badgeEmoji}</Text>
+            <View>
+              <Text style={styles.durumTitle}>{durumStats.title.toUpperCase()}</Text>
+              <Text style={styles.durumSub}>{durumStats.description}</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.durumEquivRow}>
+          <View style={styles.durumEquivBox}>
+            <Text style={styles.durumEquivVal}>🌯 ~{durumStats.durumCount}</Text>
+            <Text style={styles.durumEquivLbl}>Tavuk Dürüm</Text>
+          </View>
+          <View style={styles.durumDivider} />
+          <View style={styles.durumEquivBox}>
+            <Text style={styles.durumEquivVal}>☕ ~{durumStats.kahveCount}</Text>
+            <Text style={styles.durumEquivLbl}>Filtre Kahve</Text>
           </View>
         </View>
       </View>
@@ -190,21 +217,21 @@ export const EarningsTelemetry: React.FC<EarningsTelemetryProps> = ({
       {/* 4. Financial & Environmental Impact Matrix */}
       <View style={styles.impactMatrix}>
         <View style={styles.impactItem}>
-          <ShoppingCart size={18} color="#10B981" />
-          <Text style={styles.impactTitle}>3 Market Alışverişi</Text>
+          <ShoppingCart size={18} color={colors.accentEmerald} />
+          <Text style={styles.impactTitle}>~{Math.max(1, Math.round(rescuedTotalTL / 400))} Sepet</Text>
           <Text style={styles.impactSubtitle}>Bedavaya geldi</Text>
         </View>
 
         <View style={styles.impactItem}>
-          <Leaf size={18} color="#10B981" />
+          <Leaf size={18} color={colors.accentEmerald} />
           <Text style={styles.impactTitle}>~{rescuedCo2Kg} kg CO₂e</Text>
           <Text style={styles.impactSubtitle}>Karbon önlendi</Text>
         </View>
 
         <View style={styles.impactItem}>
-          <UtensilsCrossed size={18} color="#10B981" />
-          <Text style={styles.impactTitle}>{rescuedMealsCount} Kurtarılan</Text>
-          <Text style={styles.impactSubtitle}>Öğün pişirildi</Text>
+          <UtensilsCrossed size={18} color={colors.accentEmerald} />
+          <Text style={styles.impactTitle}>{rescuedMealsCount} Öğün</Text>
+          <Text style={styles.impactSubtitle}>Kurtarıldı</Text>
         </View>
       </View>
 
@@ -244,7 +271,7 @@ export const EarningsTelemetry: React.FC<EarningsTelemetryProps> = ({
         onPress={onOpenReceipt}
         activeOpacity={0.85}
       >
-        <Receipt size={18} color="#0A0A0E" />
+        <Receipt size={18} color="#141210" />
         <Text style={styles.openReceiptText}>Son Dijital Termal Fişi Aç 📄</Text>
       </TouchableOpacity>
     </View>
@@ -257,11 +284,11 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   cardHeader: {
-    backgroundColor: '#14141A',
+    backgroundColor: colors.surfaceCard,
     borderRadius: radius.lg,
-    padding: spacing.lg,
+    padding: spacing.md,
     borderWidth: 1,
-    borderColor: '#1F1F28',
+    borderColor: colors.borderSubtle,
     marginBottom: spacing.md,
   },
   headerTop: {
@@ -273,114 +300,170 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#94A3B8',
-    fontFamily: 'monospace',
+    color: colors.textMuted,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
     letterSpacing: 1,
   },
   readyBadge: {
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    backgroundColor: 'rgba(34, 197, 94, 0.15)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
   readyBadgeText: {
-    color: '#10B981',
+    color: colors.accentEmerald,
     fontSize: 9,
     fontWeight: '800',
-    fontFamily: 'monospace',
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
   },
   periodTabs: {
     flexDirection: 'row',
-    backgroundColor: '#0A0A0E',
+    backgroundColor: colors.bgDark,
     padding: 3,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: '#262633',
+    borderColor: colors.borderSubtle,
     gap: 4,
   },
   periodBtn: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 6,
     alignItems: 'center',
-    borderRadius: radius.sm,
+    borderRadius: radius.sm - 2,
   },
   periodBtnActive: {
-    backgroundColor: '#1C1C26',
+    backgroundColor: colors.surfaceCard,
   },
   periodBtnText: {
     fontSize: 10,
-    color: '#64748B',
+    color: colors.textMuted,
     fontWeight: '700',
-    fontFamily: 'monospace',
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
   },
   periodBtnTextActive: {
-    color: '#10B981',
+    color: colors.textPrimary,
   },
   heroMetricCard: {
-    backgroundColor: '#14141A',
+    backgroundColor: colors.surfaceCard,
     borderRadius: radius.lg,
-    padding: spacing.xl,
+    padding: spacing.lg,
     borderWidth: 1,
-    borderColor: '#1F1F28',
+    borderColor: colors.borderSubtle,
     marginBottom: spacing.md,
   },
   heroSubLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#94A3B8',
+    fontSize: 9,
+    fontWeight: '800',
+    color: colors.textMuted,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
     letterSpacing: 1,
-    fontFamily: 'monospace',
-    marginBottom: 4,
   },
   heroValue: {
-    fontSize: 38,
+    fontSize: 32,
     fontWeight: '900',
-    color: '#10B981',
-    fontFamily: 'monospace',
-    marginBottom: 6,
+    color: colors.accentEmerald,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
+    marginVertical: 4,
   },
   heroDesc: {
     fontSize: 12,
-    color: '#64748B',
-    lineHeight: 16,
-    marginBottom: spacing.lg,
+    color: colors.textMuted,
+    marginBottom: spacing.md,
   },
   progressContainer: {
-    gap: 6,
+    gap: 4,
   },
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
   progressLabel: {
-    fontSize: 10,
-    color: '#64748B',
-    fontFamily: 'monospace',
-    fontWeight: '700',
+    fontSize: 9,
+    color: colors.textMuted,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
   },
   progressValue: {
-    fontSize: 10,
-    color: '#10B981',
-    fontFamily: 'monospace',
+    fontSize: 9,
     fontWeight: '800',
+    color: colors.accentEmerald,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
   },
   progressBarTrack: {
     height: 6,
-    backgroundColor: '#0A0A0E',
+    backgroundColor: colors.bgDark,
     borderRadius: 3,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#10B981',
+    backgroundColor: colors.accentEmerald,
+    borderRadius: 3,
+  },
+  durumCard: {
+    backgroundColor: colors.surfaceCard,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.brandTerracotta,
+    marginBottom: spacing.md,
+  },
+  durumHeader: {
+    marginBottom: 8,
+  },
+  durumTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  durumEmoji: {
+    fontSize: 24,
+  },
+  durumTitle: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: colors.brandTerracotta,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
+    letterSpacing: 1,
+  },
+  durumSub: {
+    fontSize: 11,
+    color: colors.textMuted,
+    marginTop: 1,
+  },
+  durumEquivRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: colors.bgDark,
+    paddingVertical: 10,
+    borderRadius: radius.md,
+    marginTop: 4,
+  },
+  durumEquivBox: {
+    alignItems: 'center',
+  },
+  durumEquivVal: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: colors.textPrimary,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
+  },
+  durumEquivLbl: {
+    fontSize: 9,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  durumDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: colors.borderSubtle,
   },
   chartCard: {
-    backgroundColor: '#14141A',
+    backgroundColor: colors.surfaceCard,
     borderRadius: radius.lg,
     padding: spacing.lg,
     borderWidth: 1,
-    borderColor: '#1F1F28',
+    borderColor: colors.borderSubtle,
     marginBottom: spacing.md,
   },
   chartHeader: {
@@ -392,14 +475,14 @@ const styles = StyleSheet.create({
   chartTitle: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#94A3B8',
-    fontFamily: 'monospace',
+    color: colors.textMuted,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
   },
   chartGain: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#10B981',
-    fontFamily: 'monospace',
+    color: colors.accentEmerald,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
   },
   barsRow: {
     flexDirection: 'row',
@@ -417,42 +500,42 @@ const styles = StyleSheet.create({
   barTrack: {
     width: 14,
     height: 75,
-    backgroundColor: '#0A0A0E',
+    backgroundColor: colors.bgDark,
     borderRadius: 2,
     justifyContent: 'flex-end',
     overflow: 'hidden',
   },
   barFill: {
     width: '100%',
-    backgroundColor: '#2A2A38',
+    backgroundColor: colors.borderSubtle,
   },
   barFillPeak: {
-    backgroundColor: '#10B981',
+    backgroundColor: colors.accentEmerald,
   },
   barFillSelected: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.textPrimary,
   },
   barDayText: {
     fontSize: 10,
-    color: '#64748B',
+    color: colors.textMuted,
     marginTop: 6,
-    fontFamily: 'monospace',
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
   },
   barDayTextActive: {
-    color: '#F8FAFC',
+    color: colors.textPrimary,
     fontWeight: '800',
   },
   selectedDayBadge: {
     marginTop: spacing.md,
-    backgroundColor: '#0A0A0E',
+    backgroundColor: colors.bgDark,
     padding: spacing.sm,
     borderRadius: radius.sm,
     alignItems: 'center',
   },
   selectedDayText: {
-    color: '#10B981',
+    color: colors.accentEmerald,
     fontSize: 11,
-    fontFamily: 'monospace',
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
     fontWeight: '700',
   },
   impactMatrix: {
@@ -462,39 +545,39 @@ const styles = StyleSheet.create({
   },
   impactItem: {
     flex: 1,
-    backgroundColor: '#14141A',
+    backgroundColor: colors.surfaceCard,
     borderRadius: radius.md,
     padding: spacing.md,
     borderWidth: 1,
-    borderColor: '#1F1F28',
+    borderColor: colors.borderSubtle,
     alignItems: 'center',
     gap: 4,
   },
   impactTitle: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#F8FAFC',
+    color: colors.textPrimary,
     textAlign: 'center',
     marginTop: 2,
   },
   impactSubtitle: {
     fontSize: 9,
-    color: '#64748B',
+    color: colors.textMuted,
     textAlign: 'center',
   },
   badgesCard: {
-    backgroundColor: '#14141A',
+    backgroundColor: colors.surfaceCard,
     borderRadius: radius.lg,
     padding: spacing.lg,
     borderWidth: 1,
-    borderColor: '#1F1F28',
+    borderColor: colors.borderSubtle,
     marginBottom: spacing.md,
   },
   badgesCardTitle: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#94A3B8',
-    fontFamily: 'monospace',
+    color: colors.textMuted,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
     marginBottom: spacing.md,
   },
   badgesList: {
@@ -520,7 +603,7 @@ const styles = StyleSheet.create({
   badgeName: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#F8FAFC',
+    color: colors.textPrimary,
   },
   rankBadge: {
     paddingHorizontal: 6,
@@ -539,15 +622,15 @@ const styles = StyleSheet.create({
   rankText: {
     fontSize: 8,
     fontWeight: '900',
-    fontFamily: 'monospace',
-    color: '#F8FAFC',
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
+    color: colors.textPrimary,
   },
   badgeDesc: {
     fontSize: 11,
-    color: '#64748B',
+    color: colors.textMuted,
   },
   openReceiptBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: colors.accentEmerald,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -556,7 +639,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   openReceiptText: {
-    color: '#0A0A0E',
+    color: '#141210',
     fontSize: 14,
     fontWeight: '900',
   },
