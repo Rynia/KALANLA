@@ -64,6 +64,19 @@ export const VisionScanModal: React.FC<VisionScanModalProps> = ({
     }
 
     try {
+      // Google Play Prominent Disclosure (Kamera Belirgin Açıklaması)
+      const proceed = await new Promise<boolean>((resolve) => {
+        Alert.alert(
+          'Kamera Erişimi ve Gizlilik',
+          'KALANLA, buzdolabınızdaki yiyecekleri tespit etmek için kameranızı kullanır. Çekilen fotoğraflar yalnızca anlık malzeme ayrıştırma için işlenir ve sunucularımızda saklanmaz.',
+          [
+            { text: 'Vazgeç', style: 'cancel', onPress: () => resolve(false) },
+            { text: 'Devam Et', onPress: () => resolve(true) },
+          ]
+        );
+      });
+      if (!proceed) return;
+
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('İzin Gerekli', 'Buzdolabınızı fotoğraflayabilmek için kamera izni vermelisiniz.');
