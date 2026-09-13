@@ -5,10 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
-    "splash": {
-      "backgroundColor": "#141210"
-    },
+    "icon": "./assets/icon.png",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.rynia.kalanla",
@@ -20,10 +17,11 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#141210"
       },
       "package": "com.rynia.kalanla",
-      "targetSdkVersion": 36,
+      "versionCode": 1,
       "permissions": [
         "CAMERA"
       ]

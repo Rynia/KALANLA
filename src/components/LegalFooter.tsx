@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Modal, Alert, Platform } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Modal, Alert, Platform, Linking } from 'react-native';
 import { ShieldAlert, Trash2, AlertTriangle, X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { COPY } from '../constants/copy';
@@ -57,6 +57,14 @@ export const LegalFooter: React.FC<LegalFooterProps> = ({ onResetData }) => {
       >
         <Trash2 size={13} color={colors.risk} />
         <Text style={styles.resetButtonText}>{COPY.actions.reset}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.privacyButton}
+        onPress={() => Linking.openURL('https://ryniastudios.netlify.app/privacy.html')}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.privacyButtonText}>Gizlilik Politikası (Privacy Policy) ↗</Text>
       </TouchableOpacity>
 
       <Text style={styles.versionText}>
@@ -164,10 +172,20 @@ const styles = StyleSheet.create({
     color: colors.risk,
     textDecorationLine: 'underline',
   },
+  privacyButton: {
+    marginTop: spacing.md,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+  },
+  privacyButtonText: {
+    fontSize: 11,
+    color: colors.faint,
+    textDecorationLine: 'underline',
+  },
   versionText: {
     fontSize: 10,
-    color: colors.border,
-    marginTop: spacing.sm,
+    color: colors.faint,
+    marginTop: spacing.xs,
     letterSpacing: 0.5,
   },
   modalOverlay: {
