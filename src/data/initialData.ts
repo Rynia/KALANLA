@@ -428,7 +428,7 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
     matchPercentage: 0,
     calories: 290,
     protein: '7g',
-    imageUrl: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=600&auto=format&fit=crop&q=80',
     matchedItemNames: [],
     portion: '4 Kişilik (12 Adet)',
     requiredItemNames: [
@@ -509,7 +509,7 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
     matchPercentage: 0,
     calories: 180,
     protein: '5g',
-    imageUrl: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=600&auto=format&fit=crop&q=80',
     matchedItemNames: [],
     portion: '4 Kişilik Bereketli Tencere',
     requiredItemNames: [

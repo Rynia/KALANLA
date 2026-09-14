@@ -23,6 +23,7 @@ import {
   detectFoodItemsFromImage,
   DetectedFoodItem,
 } from '../services/visionInventoryService';
+import { FoodImage } from './FoodImage';
 import {
   canPerformVisionScan,
   getRemainingScans,
@@ -286,7 +287,12 @@ export const VisionScanModal: React.FC<VisionScanModalProps> = ({
                     onPress={() => toggleItemSelect(item.id)}
                     activeOpacity={0.8}
                   >
-                    <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+                    <FoodImage
+                      source={item.imageUrl}
+                      name={item.name}
+                      category={item.category}
+                      style={styles.itemImage}
+                    />
                     <View style={styles.itemInfo}>
                       <Text style={styles.itemName}>{item.name}</Text>
                       <Text style={styles.itemMeta}>

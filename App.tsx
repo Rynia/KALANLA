@@ -45,6 +45,7 @@ import { PackagesModal } from './src/components/PackagesModal';
 import { UndoToast } from './src/components/UndoToast';
 import { LegalFooter } from './src/components/LegalFooter';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
+import { AnimatedSplashScreen } from './src/components/AnimatedSplashScreen';
 import { UserSubscription } from './src/types/subscription';
 import { loadSubscription, INITIAL_SUBSCRIPTION } from './src/services/entitlements';
 
@@ -65,6 +66,7 @@ export default function App() {
 
   // Fix 2: Hydration flag — kullanıcı işlemleri yükleme tamamlanana kadar persist edilmez
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
+  const [showSplash, setShowSplash] = useState<boolean>(true);
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
@@ -535,6 +537,13 @@ export default function App() {
         onUndo={handleUndoCook}
         onDismiss={() => setIsUndoVisible(false)}
       />
+
+      {/* CINEMATIC WARM TECH ANIMATED SPLASH SCREEN */}
+      {showSplash && (
+        <AnimatedSplashScreen
+          onAnimationFinish={() => setShowSplash(false)}
+        />
+      )}
         </SafeAreaView>
       </SafeAreaProvider>
     </ErrorBoundary>

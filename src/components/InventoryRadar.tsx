@@ -13,6 +13,7 @@ import { Trash2, AlertTriangle, Sparkles, ChevronRight, Plus } from 'lucide-reac
 import * as Haptics from 'expo-haptics';
 import { FoodItem } from '../types/models';
 import { colors, spacing, radius } from '../theme/theme';
+import { FoodImage } from './FoodImage';
 
 interface InventoryRadarProps {
   items: FoodItem[];
@@ -235,13 +236,13 @@ export const InventoryRadar: React.FC<InventoryRadarProps> = ({
         filteredItems.map((item) => (
           <View key={item.id} style={styles.itemCard}>
             {/* Thumbnail */}
-            {item.imageUrl ? (
-              <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
-            ) : (
-              <View style={[styles.itemImage, styles.placeholderImage]}>
-                <Text style={{ fontSize: 20 }}>🍴</Text>
-              </View>
-            )}
+            <FoodImage
+              source={item.imageUrl}
+              name={item.name}
+              category={item.category}
+              style={styles.itemImage}
+              defaultEmoji="🥬"
+            />
 
             {/* Content */}
             <View style={styles.itemContent}>

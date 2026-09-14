@@ -9,6 +9,7 @@ import {
 import { Sparkles, ChefHat, Clock, Flame, ChevronRight } from 'lucide-react-native';
 import { RescueRecipe, FoodItem } from '../types/models';
 import { colors, spacing, radius } from '../theme/theme';
+import { FoodImage } from './FoodImage';
 
 interface RescueKitchenProps {
   recipes: RescueRecipe[];
@@ -61,7 +62,11 @@ export const RescueKitchen: React.FC<RescueKitchenProps> = ({
           {/* Dish Image Banner */}
           {recipe.imageUrl && (
             <View style={styles.imageContainer}>
-              <Image source={{ uri: recipe.imageUrl }} style={styles.recipeImage} />
+              <FoodImage
+                source={recipe.imageUrl}
+                name={recipe.title}
+                style={styles.recipeImage}
+              />
               {recipe.isChefPick && (
                 <View style={styles.chefPickBadge}>
                   <ChefHat size={12} color="#0A0A0E" />
@@ -70,6 +75,9 @@ export const RescueKitchen: React.FC<RescueKitchenProps> = ({
               )}
               <View style={styles.matchPillBadge}>
                 <Text style={styles.matchPillText}>%{recipe.matchPercentage} EŞLEŞME</Text>
+              </View>
+              <View style={styles.sampleBadge}>
+                <Text style={styles.sampleBadgeText}>Örnek sunum</Text>
               </View>
             </View>
           )}
@@ -283,6 +291,24 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     fontFamily: 'monospace',
+  },
+  sampleBadge: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: 'rgba(10, 10, 14, 0.72)',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  sampleBadgeText: {
+    color: '#94A3B8',
+    fontSize: 9,
+    fontWeight: '600',
+    fontFamily: 'monospace',
+    letterSpacing: 0.3,
   },
   cardBody: {
     padding: spacing.lg,

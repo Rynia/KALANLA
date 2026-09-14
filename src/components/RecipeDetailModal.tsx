@@ -8,9 +8,10 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import { X, Clock, Flame, Dumbbell, Users, CheckCircle2, AlertCircle } from 'lucide-react-native';
+import { Clock, Flame, Dumbbell, ChefHat, Check, X, Users, CheckCircle2, AlertCircle } from 'lucide-react-native';
 import { RescueRecipe } from '../types/models';
 import { colors, spacing, radius } from '../theme/theme';
+import { FoodImage } from './FoodImage';
 
 interface RecipeDetailModalProps {
   recipe: RescueRecipe | null;
@@ -37,12 +38,19 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
           {/* Header Image */}
           {recipe.imageUrl && (
             <View style={styles.imageBox}>
-              <Image source={{ uri: recipe.imageUrl }} style={styles.headerImage} />
+              <FoodImage
+                source={recipe.imageUrl}
+                name={recipe.title}
+                style={styles.headerImage}
+              />
               <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
                 <X size={18} color="#F8FAFC" />
               </TouchableOpacity>
               <View style={styles.savingsPill}>
                 <Text style={styles.savingsPillText}>+₺{recipe.savedTL} CEPTE</Text>
+              </View>
+              <View style={styles.sampleBadge}>
+                <Text style={styles.sampleBadgeText}>Örnek sunum</Text>
               </View>
             </View>
           )}
@@ -173,6 +181,24 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '900',
     fontFamily: 'monospace',
+  },
+  sampleBadge: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    backgroundColor: 'rgba(10, 10, 14, 0.72)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  sampleBadgeText: {
+    color: '#94A3B8',
+    fontSize: 9,
+    fontWeight: '600',
+    fontFamily: 'monospace',
+    letterSpacing: 0.3,
   },
   contentScroll: {
     padding: spacing.xl,

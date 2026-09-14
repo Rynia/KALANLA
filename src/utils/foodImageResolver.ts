@@ -1,9 +1,12 @@
 // src/utils/foodImageResolver.ts
-// Türkçe karakter duyarlı, genişletilebilir görsel eşleştirme motoru
+// KALANLA Yerel + Uzak Görsel Çözümleyici Motoru
+// Öncelik: Kullanıcının indirdiği doğrulanmış yerel görseller (assets/food/ingredients ve assets/food/recipes)
+import { ImageSourcePropType } from 'react-native';
 import { FoodCategory } from '../types/models';
+import { INGREDIENT_ASSETS, RECIPE_ASSETS } from '../data/foodAssets';
 
 /** Türkçe karakter normalize + lowercase helper */
-function normalize(text: string): string {
+export function normalizeTurkish(text: string): string {
   return text
     .toLocaleLowerCase('tr-TR')
     .replace(/ğ/g, 'g')
@@ -14,149 +17,284 @@ function normalize(text: string): string {
     .replace(/ç/g, 'c');
 }
 
-/** Anahtar kelime → Unsplash URL haritası */
-const FOOD_IMAGE_MAP: Record<string, string> = {
-  // Süt Ürünleri
-  kasar:       'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&auto=format&fit=crop&q=80',
-  peynir:      'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&auto=format&fit=crop&q=80',
-  yogurt:      'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&auto=format&fit=crop&q=80',
-  suzme:       'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&auto=format&fit=crop&q=80',
-  sut:         'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=400&auto=format&fit=crop&q=80',
-  kefir:       'https://images.unsplash.com/photo-1606168094336-48f8b0b0b0d7?w=400&auto=format&fit=crop&q=80',
-  tereyagi:    'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=400&auto=format&fit=crop&q=80',
-  krema:       'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&auto=format&fit=crop&q=80',
-  // Sebzeler
-  domates:     'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80',
-  salatalik:   'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=400&auto=format&fit=crop&q=80',
-  biber:       'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=400&auto=format&fit=crop&q=80',
-  charliston:  'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=400&auto=format&fit=crop&q=80',
-  patlican:    'https://images.unsplash.com/photo-1659469891728-41e96aa1c27c?w=400&auto=format&fit=crop&q=80',
-  patates:     'https://images.unsplash.com/photo-1508313880080-c4bef0730395?w=400&auto=format&fit=crop&q=80',
-  havuc:       'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&auto=format&fit=crop&q=80',
-  mantar:      'https://images.unsplash.com/photo-1504545102780-26774c1bb073?w=400&auto=format&fit=crop&q=80',
-  ispanak:     'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400&auto=format&fit=crop&q=80',
-  sogan:       'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&auto=format&fit=crop&q=80',
-  sarimsak:    'https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=400&auto=format&fit=crop&q=80',
-  brokoli:     'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=400&auto=format&fit=crop&q=80',
-  karnabahar:  'https://images.unsplash.com/photo-1603046891726-36bfd957e0bf?w=400&auto=format&fit=crop&q=80',
-  maydanoz:    'https://images.unsplash.com/photo-1608797178974-15b35a61dd75?w=400&auto=format&fit=crop&q=80',
-  dereotu:     'https://images.unsplash.com/photo-1591927328873-2b1f88f07a20?w=400&auto=format&fit=crop&q=80',
-  fesligen:    'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&auto=format&fit=crop&q=80',
-  nane:        'https://images.unsplash.com/photo-1628556270448-4d4e4148e1b1?w=400&auto=format&fit=crop&q=80',
-  kabak:       'https://images.unsplash.com/photo-1596591868231-b1cb8b3e82e6?w=400&auto=format&fit=crop&q=80',
-  misir:       'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400&auto=format&fit=crop&q=80',
-  pirasa:      'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&auto=format&fit=crop&q=80',
-  kereviz:     'https://images.unsplash.com/photo-1566157924-0b7e2a5e31ec?w=400&auto=format&fit=crop&q=80',
-  turp:        'https://images.unsplash.com/photo-1574316071802-0d684efa7bf5?w=400&auto=format&fit=crop&q=80',
-  pancar:      'https://images.unsplash.com/photo-1593105544559-ecb03bf76f82?w=400&auto=format&fit=crop&q=80',
-  // Et & Tavuk
-  kiyma:       'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=400&auto=format&fit=crop&q=80',
-  dana:        'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=400&auto=format&fit=crop&q=80',
-  tavuk:       'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&auto=format&fit=crop&q=80',
-  pilic:       'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&auto=format&fit=crop&q=80',
-  et:          'https://images.unsplash.com/photo-1588347818036-c2e6b5f01f48?w=400&auto=format&fit=crop&q=80',
-  kuzu:        'https://images.unsplash.com/photo-1588347818036-c2e6b5f01f48?w=400&auto=format&fit=crop&q=80',
-  balik:       'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&auto=format&fit=crop&q=80',
-  somon:       'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&auto=format&fit=crop&q=80',
-  // Şarküteri
-  zeytin:      'https://images.unsplash.com/photo-1541014741259-de529411b96a?w=400&auto=format&fit=crop&q=80',
-  sucuk:       'https://images.unsplash.com/photo-1571167366136-b57cde21e87d?w=400&auto=format&fit=crop&q=80',
-  salam:       'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&auto=format&fit=crop&q=80',
-  sosis:       'https://images.unsplash.com/photo-1558030137-a56c1b002c8b?w=400&auto=format&fit=crop&q=80',
-  // Unlu Mamul
-  ekmek:       'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&auto=format&fit=crop&q=80',
-  bayat:       'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&auto=format&fit=crop&q=80',
-  pide:        'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&auto=format&fit=crop&q=80',
-  makarna:     'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=400&auto=format&fit=crop&q=80',
-  pirinc:      'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=400&auto=format&fit=crop&q=80',
-  bulgur:      'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&auto=format&fit=crop&q=80',
-  // Meyveler & Egzotikler
-  elma:        'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&auto=format&fit=crop&q=80',
-  muz:         'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400&auto=format&fit=crop&q=80',
-  portakal:    'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&auto=format&fit=crop&q=80',
-  limon:       'https://images.unsplash.com/photo-1601987077677-5346c463575b?w=400&auto=format&fit=crop&q=80',
-  uzum:        'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=400&auto=format&fit=crop&q=80',
-  cilek:       'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&auto=format&fit=crop&q=80',
-  karpuz:      'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&auto=format&fit=crop&q=80',
-  seftali:     'https://images.unsplash.com/photo-1595546070645-73e6a5db9e5a?w=400&auto=format&fit=crop&q=80',
-  armut:       'https://images.unsplash.com/photo-1561136594-7f68813d8019?w=400&auto=format&fit=crop&q=80',
-  avokado:     'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400&auto=format&fit=crop&q=80',
-  mango:       'https://images.unsplash.com/photo-1553279768-865429fa0078?w=400&auto=format&fit=crop&q=80',
-  ejder:       'https://images.unsplash.com/photo-1527325678964-54921661f888?w=400&auto=format&fit=crop&q=80',
-  pitaya:      'https://images.unsplash.com/photo-1527325678964-54921661f888?w=400&auto=format&fit=crop&q=80',
-  recel:       'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&auto=format&fit=crop&q=80',
-  marmelat:    'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&auto=format&fit=crop&q=80',
-  bal:         'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&auto=format&fit=crop&q=80',
+/**
+ * Malzeme adı veya ID'sini yerel `assets/food/ingredients` dosyalarına eşler
+ */
+const INGREDIENT_KEY_MAP: Record<string, string> = {
+  // Süt & Şarküteri
+  'suzme': 'suzme-yogurt',
+  'suzme yogurt': 'suzme-yogurt',
+  'krema': 'krema',
+  'kefir': 'kefir',
+  'ayran': 'kefir',
+  'siyah zeytin': 'siyah-zeytin',
+  'yesil zeytin': 'yesil-zeytin',
+  'zeytin': 'siyah-zeytin',
+  'sucuk': 'sucuk',
+  'salam': 'salam',
+  'sosis': 'sosis',
 
-  // Balıklar & Deniz Ürünleri
-  barbun:      'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&auto=format&fit=crop&q=80',
-  karagoz:     'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&auto=format&fit=crop&q=80',
-  istavrit:    'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=400&auto=format&fit=crop&q=80',
-  hamsi:       'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=400&auto=format&fit=crop&q=80',
-  karides:     'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=400&auto=format&fit=crop&q=80',
+  // Sebzeler & Yeşillikler
+  'sivri biber': 'sivri-biber',
+  'biber': 'sivri-biber',
+  'charliston': 'charliston',
+  'carliston': 'charliston',
+  'patlican': 'patlican',
+  'mantar': 'mantar',
+  'maydanoz': 'maydanoz',
+  'dereotu': 'dereotu',
+  'fesligen': 'fesligen',
+  'feslegen': 'fesligen',
+  'nane': 'nane',
+  'kabak': 'kabak',
+  'pirasa': 'pirasa',
+  'kereviz': 'kereviz',
+  'turp': 'turp',
+  'semizotu': 'semizotu',
+  'roka': 'roka',
+  'tere': 'tere',
+  'borulce': 'borulce',
 
-  // Yöresel Sebzeler
-  borulce:     'https://images.unsplash.com/photo-1587735243615-c03f25aaff15?w=400&auto=format&fit=crop&q=80',
-  semizotu:    'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&auto=format&fit=crop&q=80',
-  roka:        'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&auto=format&fit=crop&q=80',
-  tere:        'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&auto=format&fit=crop&q=80',
-  kuskonmaz:   'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=400&auto=format&fit=crop&q=80',
+  // Et, Tavuk & Balık
+  'kiyma': 'kiyma',
+  'dana eti': 'dana-eti',
+  'dana': 'dana-eti',
+  'kirmizi et': 'kirmizi-et',
+  'et': 'kirmizi-et',
+  'kuzu eti': 'kuzu-eti',
+  'kuzu': 'kuzu-eti',
+  'balik': 'balik',
+  'hamsi': 'hamsi',
+  'somon': 'somon',
 
-  // Kiler
-  yumurta:     'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&auto=format&fit=crop&q=80',
-  nohut:       'https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=400&auto=format&fit=crop&q=80',
-  mercimek:    'https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=400&auto=format&fit=crop&q=80',
-  fasulye:     'https://images.unsplash.com/photo-1496412705862-e0088f16f791?w=400&auto=format&fit=crop&q=80',
-  salca:       'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80',
-  zeytinyagi:  'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&auto=format&fit=crop&q=80',
+  // Unlu Mamul & Bakliyat & Kiler
+  'ekmek': 'ekmek',
+  'pide': 'pide',
+  'bulgur': 'bulgur',
+  'yufka': 'yufka',
+  'mercimek': 'mercimek',
+  'kuru fasulye': 'kuru-fasulye',
+  'fasulye': 'kuru-fasulye',
+  'salca': 'salca',
+  'tarhana': 'tarhana',
 };
 
-/** Kategori fallback görselleri */
+/** Doğrulanmış Unsplash fallback (yerel henüz indirilmeyen 20 temel ürün için) */
+const VERIFIED_UNSPLASH_FALLBACK: Record<string, string> = {
+  kasar:      'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&auto=format&fit=crop&q=80',
+  peynir:     'https://images.unsplash.com/photo-1559561853-08451507cbe7?w=400&auto=format&fit=crop&q=80',
+  yogurt:     'https://images.unsplash.com/photo-1571212515416-fef01fc43637?w=400&auto=format&fit=crop&q=80',
+  sut:        'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&auto=format&fit=crop&q=80',
+  tereyagi:   'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=400&auto=format&fit=crop&q=80',
+  domates:    'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80',
+  salatalik:  'https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?w=400&auto=format&fit=crop&q=80',
+  patates:    'https://images.unsplash.com/photo-1508313880080-c4bef0730395?w=400&auto=format&fit=crop&q=80',
+  havuc:      'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&auto=format&fit=crop&q=80',
+  ispanak:    'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400&auto=format&fit=crop&q=80',
+  sogan:      'https://images.unsplash.com/photo-1508747703725-719777637510?w=400&auto=format&fit=crop&q=80',
+  sarimsak:   'https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=400&auto=format&fit=crop&q=80',
+  brokoli:    'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=400&auto=format&fit=crop&q=80',
+  karnabahar: 'https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?w=400&auto=format&fit=crop&q=80',
+  misir:      'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400&auto=format&fit=crop&q=80',
+  pancar:     'https://images.unsplash.com/photo-1593105544559-ecb03bf76f82?w=400&auto=format&fit=crop&q=80',
+  kuskonmaz:  'https://images.unsplash.com/photo-1515471209610-dae1c92d8777?w=400&auto=format&fit=crop&q=80',
+  tavuk:      'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&auto=format&fit=crop&q=80',
+  pilic:      'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&auto=format&fit=crop&q=80',
+  makarna:    'https://images.unsplash.com/photo-1551462147-ff29053bfc14?w=400&auto=format&fit=crop&q=80',
+  pirinc:     'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&auto=format&fit=crop&q=80',
+  elma:       'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&auto=format&fit=crop&q=80',
+  muz:        'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400&auto=format&fit=crop&q=80',
+  portakal:   'https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?w=400&auto=format&fit=crop&q=80',
+  limon:      'https://images.unsplash.com/photo-1590502593747-42a996133562?w=400&auto=format&fit=crop&q=80',
+  karpuz:     'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&auto=format&fit=crop&q=80',
+  bal:        'https://images.unsplash.com/photo-1587049352851-8d4e89133924?w=400&auto=format&fit=crop&q=80',
+  un:         'https://images.unsplash.com/photo-1627485937980-221c88ac04f9?w=400&auto=format&fit=crop&q=80',
+  yumurta:    'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&auto=format&fit=crop&q=80',
+  nohut:      'https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=400&auto=format&fit=crop&q=80',
+  zeytinyagi: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&auto=format&fit=crop&q=80',
+};
+
 const CATEGORY_FALLBACK: Record<FoodCategory, string> = {
-  'Süt Ürünü':  'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=400&auto=format&fit=crop&q=80',
-  'Unlu Mamul': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&auto=format&fit=crop&q=80',
-  'Sebze':      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&auto=format&fit=crop&q=80',
-  'Şarküteri':  'https://images.unsplash.com/photo-1541014741259-de529411b96a?w=400&auto=format&fit=crop&q=80',
-  'Et & Tavuk': 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&auto=format&fit=crop&q=80',
-  'Meyve':      'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&auto=format&fit=crop&q=80',
-  'Kiler':      'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&auto=format&fit=crop&q=80',
+  'Süt Ürünü':  VERIFIED_UNSPLASH_FALLBACK.peynir,
+  'Unlu Mamul': VERIFIED_UNSPLASH_FALLBACK.un,
+  'Sebze':      VERIFIED_UNSPLASH_FALLBACK.domates,
+  'Şarküteri':  VERIFIED_UNSPLASH_FALLBACK.kasar,
+  'Et & Tavuk': VERIFIED_UNSPLASH_FALLBACK.tavuk,
+  'Meyve':      VERIFIED_UNSPLASH_FALLBACK.elma,
+  'Kiler':      VERIFIED_UNSPLASH_FALLBACK.yumurta,
 };
 
-const DEFAULT_IMAGE =
-  'https://images.unsplash.com/photo-1506368249639-73a05d6f6488?w=400&auto=format&fit=crop&q=80';
+const DEFAULT_IMAGE = VERIFIED_UNSPLASH_FALLBACK.domates;
 
 /**
- * Ürün adına göre en uygun Unsplash görselini döndürür.
- * Önce exact/partial keyword match, ardından kategori fallback, en sonda genel default.
+ * Malzeme adı veya ID'sine göre yerel ImageSourcePropType (require) döndürür.
+ * Yerel dosya bulunamazsa null döner.
  */
-export function resolveFoodImage(name: string, category?: FoodCategory): string {
-  const normalizedName = normalize(name);
+export function getLocalIngredientAsset(nameOrId: string): ImageSourcePropType | null {
+  const norm = normalizeTurkish(nameOrId).trim();
 
-  // 1. Tam eşleşme
-  if (FOOD_IMAGE_MAP[normalizedName]) {
-    return FOOD_IMAGE_MAP[normalizedName];
+  // 1. Doğrudan dosya adı / ID kontrolü (örn. "kiyma", "suzme-yogurt")
+  if (INGREDIENT_ASSETS[norm]) {
+    return INGREDIENT_ASSETS[norm];
   }
 
-  // 2. Token-based tam kelime eşleşmesi (min 3 karakter)
-  const nameTokens = normalizedName.split(/\s+/);
-  for (const token of nameTokens) {
-    if (token.length >= 3 && FOOD_IMAGE_MAP[token]) {
-      return FOOD_IMAGE_MAP[token];
+  // 2. Anahtar kelime haritası kontrolü (örn. "Süzme Yoğurt" -> "suzme-yogurt")
+  if (INGREDIENT_KEY_MAP[norm] && INGREDIENT_ASSETS[INGREDIENT_KEY_MAP[norm]]) {
+    return INGREDIENT_ASSETS[INGREDIENT_KEY_MAP[norm]];
+  }
+
+  // 3. İçerik taraması (örn. "Dana Kuşbaşı Kıyma" içinde "kiyma" geçiyor mu?)
+  for (const [key, assetKey] of Object.entries(INGREDIENT_KEY_MAP)) {
+    if (norm.includes(key) && INGREDIENT_ASSETS[assetKey]) {
+      return INGREDIENT_ASSETS[assetKey];
     }
   }
 
-  // 3. Kısmi eşleşme — sadece isim anahtar kelimeyi içeriyor mu? (tek yönlü, min 3 harf)
-  for (const [keyword, url] of Object.entries(FOOD_IMAGE_MAP)) {
-    if (keyword.length >= 3 && normalizedName.includes(keyword)) {
+  // 4. Doğrudan asset anahtarlarında token kontrolü
+  for (const assetKey of Object.keys(INGREDIENT_ASSETS)) {
+    if (norm.includes(assetKey)) {
+      return INGREDIENT_ASSETS[assetKey];
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Tarif ID'sine veya adına göre yerel tarif görseli (require) döndürür.
+ */
+export function getLocalRecipeAsset(recipeIdOrTitle: string): ImageSourcePropType | null {
+  // 1. Doğrudan recipe ID ile eşleşme (örn. "recipe-et-1")
+  if (RECIPE_ASSETS[recipeIdOrTitle]) {
+    return RECIPE_ASSETS[recipeIdOrTitle];
+  }
+
+  // 2. Başlık normalizasyonu ile eşleşme
+  const norm = normalizeTurkish(recipeIdOrTitle).trim();
+  const titleToId: Record<string, string> = {
+    'tava kavurmasi': 'recipe-et-1',
+    'kavurma': 'recipe-et-1',
+    'sarimsakli tavuk sote': 'recipe-tavuk-1',
+    'tavuk sote': 'recipe-tavuk-1',
+    'citir tavada patates': 'recipe-patates-1',
+    'citir patates': 'recipe-patates-1',
+    'patates corbasi': 'recipe-patates-2',
+    'kremamsi patates corbasi': 'recipe-patates-2',
+    'sebze sote': 'recipe-sebze-1',
+    'tavada sebze sote': 'recipe-sebze-1',
+    'zeytinyagli kuskonmaz': 'recipe-kuskonmaz-1',
+    'kuskonmaz': 'recipe-kuskonmaz-1',
+    'mantar sote': 'recipe-mantar-1',
+    'sarimsakli mantar sote': 'recipe-mantar-1',
+    'menemen': 'recipe-menemen-1',
+    'tavada hakiki menemen': 'recipe-menemen-1',
+    'cacik': 'recipe-yogurt-1',
+    'serinletici cacik': 'recipe-yogurt-1',
+    'tavada citir kasarli ekmek': 'recipe-1',
+    'kasarli ekmek': 'recipe-1',
+    'yogurtlu ekmek mantisi': 'recipe-3',
+    'ekmek mantisi': 'recipe-3',
+    'domates soslu makarna': 'recipe-makarna-1',
+    'makarna': 'recipe-makarna-1',
+    'pisi': 'recipe-un-pisi-1',
+    'anne pisisi': 'recipe-un-pisi-1',
+    'kasik dokmesi': 'recipe-un-kasik-1',
+    'peynirli kasik dokmesi': 'recipe-un-kasik-1',
+    'akitma': 'recipe-un-krep-1',
+    'krep': 'recipe-un-krep-1',
+    'un corbasi': 'recipe-un-corba-1',
+    'salcali un corbasi': 'recipe-un-corba-1',
+    'su boregi': 'recipe-yufka-borek-1',
+    'mucver': 'recipe-sebze-mucver-1',
+    'kabak mucveri': 'recipe-sebze-mucver-1',
+    'mercimek koftesi': 'recipe-bulgur-mercimek-1',
+    'tarhana corbasi': 'recipe-tarhana-1',
+    'tarhana': 'recipe-tarhana-1',
+    'gozleme': 'recipe-gozleme-1',
+    'bulgur pilavi': 'recipe-bulgur-pilav-1',
+    'yumurtali ispanak': 'recipe-ispanak-yumurta-1',
+    'patates boregi': 'recipe-patates-borek-1',
+  };
+
+  for (const [key, id] of Object.entries(titleToId)) {
+    if (norm.includes(key) && RECIPE_ASSETS[id]) {
+      return RECIPE_ASSETS[id];
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Hem React Native Image bileşeninde hem de string bekleyen yerlerde çalışan görsel resolver
+ * Geriye React Native Image'in kabul ettiği source formatını döndürür (number / require veya { uri: string })
+ */
+export function resolveFoodImageSource(
+  source?: any,
+  name?: string,
+  category?: string
+): ImageSourcePropType | { uri: string } | null {
+  // 1. Eğer source doğrudan number (require) ise doğrudan döndür
+  if (typeof source === 'number') {
+    return source;
+  }
+
+  // 2. Eğer source bir string ve local anahtarsa veya "local:" ile başlıyorsa
+  if (typeof source === 'string') {
+    if (source.startsWith('local:')) {
+      const key = source.replace('local:', '');
+      const localAsset = INGREDIENT_ASSETS[key] || RECIPE_ASSETS[key];
+      if (localAsset) return localAsset;
+    }
+
+    // Doğrudan ID eşleşmesi
+    if (RECIPE_ASSETS[source]) return RECIPE_ASSETS[source];
+    if (INGREDIENT_ASSETS[source]) return INGREDIENT_ASSETS[source];
+  }
+
+  // 3. İsimden yerel asset araması
+  if (name) {
+    const localRecipe = getLocalRecipeAsset(name);
+    if (localRecipe) return localRecipe;
+
+    const localIng = getLocalIngredientAsset(name);
+    if (localIng) return localIng;
+  }
+
+  // 4. Eğer source geçerli bir http URL'si ise
+  if (typeof source === 'string' && (source.startsWith('http://') || source.startsWith('https://'))) {
+    return { uri: source };
+  }
+
+  // 5. Fallback URL
+  const fallbackUrl = resolveFoodImage(name || '', category as FoodCategory);
+  return { uri: fallbackUrl };
+}
+
+/**
+ * Ürün adına göre string URL veya yerel referans döndürür (Geriye dönük uyumluluk için)
+ */
+export function resolveFoodImage(name: string, category?: FoodCategory): string {
+  const norm = normalizeTurkish(name).trim();
+
+  // 1. Yerel indirilmiş malzemeyse local anahtar olarak işaretle
+  for (const [key, assetKey] of Object.entries(INGREDIENT_KEY_MAP)) {
+    if (norm.includes(key)) {
+      return `local:${assetKey}`;
+    }
+  }
+
+  // 2. Doğrulanmış Unsplash fallback araması
+  for (const [key, url] of Object.entries(VERIFIED_UNSPLASH_FALLBACK)) {
+    if (norm.includes(key)) {
       return url;
     }
   }
 
-  // 3. Kategori fallback
+  // 3. Kategori Fallback
   if (category && CATEGORY_FALLBACK[category]) {
     return CATEGORY_FALLBACK[category];
   }
 
-  // 4. Genel fallback
   return DEFAULT_IMAGE;
 }

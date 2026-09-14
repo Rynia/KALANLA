@@ -1,4 +1,4 @@
-﻿// src/components/StudentVerifyModal.tsx
+// src/components/StudentVerifyModal.tsx
 // Üniversite Öğrencisi Doğrulama Modalı (.edu.tr)
 import React, { useState } from 'react';
 import {
@@ -69,10 +69,10 @@ export const StudentVerifyModal: React.FC<StudentVerifyModalProps> = ({
           </View>
 
           <Text style={styles.title}>Üniversite Öğrencisi Paketi</Text>
-          <Text style={styles.subtitle}>100% ÜCRETSİZ • SIFIR ATIK DESTEĞİ</Text>
+          <Text style={styles.subtitle}>100% ÜCRETSİZ • v1.1 GÜNCELLEMESİNDE AKTİF</Text>
 
           <Text style={styles.desc}>
-            Türkiye'deki üniversite öğrencilerine özel: Sınırsız AI Kamera taraması, sınırsız kiler takibi ve öğrenci evi pratik kurtarma reçeteleri!
+            Türkiye'deki üniversite öğrencilerine özel: Sınırsız dolap takibi ve öğrenci evi pratik kurtarma reçeteleri v1.1 güncellemesinde e-posta OTP doğrulamasıyla aktif olacaktır. E-postanızı bırakarak öncelikli listeye katılabilirsiniz!
           </Text>
 
           <View style={styles.inputContainer}>
@@ -100,13 +100,13 @@ export const StudentVerifyModal: React.FC<StudentVerifyModalProps> = ({
             ) : (
               <>
                 <ShieldCheck size={18} color="#0A0A0E" />
-                <Text style={styles.verifyBtnText}>Öğrenci Paketini Aktif Et</Text>
+                <Text style={styles.verifyBtnText}>Öncelikli Listeye Kaydol 🎓</Text>
               </>
             )}
           </TouchableOpacity>
 
           <Text style={styles.disclaimer}>
-            Doğrulama 1 yıl süreyle geçerlidir. Kişisel verileriniz hiçbir kurumla paylaşılmaz.
+            v1.1 OTP doğrulaması yayınlandığında öğrenci paketiniz 1 yıl ücretsiz olarak tanımlanacaktır.
           </Text>
         </View>
       </View>

@@ -35,19 +35,23 @@ export const LegalFooter: React.FC<LegalFooterProps> = ({ onResetData }) => {
 
       <TouchableOpacity
         style={styles.supportButton}
-        onPress={() => {
-          Alert.alert(
-            '☕ Geliştiriciye Destek Ol',
-            'KALANLA sıfır atık mutfak vizyonuyla bağımsız olarak geliştirilmektedir. Bize destek olmak ister misiniz?',
-            [
-              { text: 'Daha Sonra', style: 'cancel' },
-              { text: 'Teşekkürler ❤️', onPress: () => {} }
-            ]
-          );
+        onPress={async () => {
+          const playStoreUrl = 'market://details?id=com.rynia.kalanla';
+          const webPlayStoreUrl = 'https://play.google.com/store/apps/details?id=com.rynia.kalanla';
+          try {
+            const supported = await Linking.canOpenURL(playStoreUrl);
+            if (supported) {
+              await Linking.openURL(playStoreUrl);
+            } else {
+              await Linking.openURL(webPlayStoreUrl);
+            }
+          } catch {
+            await Linking.openURL(webPlayStoreUrl);
+          }
         }}
         activeOpacity={0.8}
       >
-        <Text style={styles.supportButtonText}>☕ Geliştiriciye Bir Kahve Ismarla</Text>
+        <Text style={styles.supportButtonText}>⭐ KALANLA'yı Değerlendir</Text>
       </TouchableOpacity>
 
       <TouchableOpacity

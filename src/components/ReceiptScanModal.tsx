@@ -1,4 +1,4 @@
-﻿// src/components/ReceiptScanModal.tsx
+// src/components/ReceiptScanModal.tsx
 // Market Fişi Okuma (Receipt OCR) ve Envantere Toplu Aktarma Modalı
 import React, { useState } from 'react';
 import {
@@ -23,6 +23,7 @@ import {
   ScannedReceiptFood,
 } from '../services/receiptScannerService';
 import { colors, spacing, radius } from '../theme/theme';
+import { FoodImage } from './FoodImage';
 
 interface ReceiptScanModalProps {
   isOpen: boolean;
@@ -218,7 +219,12 @@ export const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({
                     onPress={() => toggleItemSelect(item.id)}
                     activeOpacity={0.8}
                   >
-                    <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+                    <FoodImage
+                      source={item.imageUrl}
+                      name={item.name}
+                      category={item.category}
+                      style={styles.itemImage}
+                    />
                     <View style={styles.itemInfo}>
                       <Text style={styles.itemName}>{item.name}</Text>
                       <Text style={styles.itemMeta}>

@@ -10,7 +10,7 @@ export interface PersistedKitchenState {
   badges?: AchievementBadge[];
 }
 
-const STORAGE_KEY = '@kalanla/kitchen-state-v3';
+const STORAGE_KEY = '@kalanla/kitchen-state-v4';
 
 /**
  * Fix 8: Runtime schema validation.

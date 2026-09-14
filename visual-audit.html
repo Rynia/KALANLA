@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KALANLA // 62 Yerel Görsel Doğrulama Paneli (Local Assets v3)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #141210;
+      color: #FDFBF7;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      padding: 30px 20px;
+    }
+    header {
+      max-width: 1400px;
+      margin: 0 auto 30px;
+      border-bottom: 2px solid #2B2520;
+      padding-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #D13A22;
+    }
+    p.subtitle {
+      color: #A89F91;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .badge {
+      background: #22C55E;
+      color: #141210;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    h2 {
+      max-width: 1400px;
+      margin: 40px auto 20px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #FDFBF7;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-left: 4px solid #D13A22;
+      padding-left: 12px;
+    }
+    .grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: #1E1B18;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #2B2520;
+      transition: transform 0.15s, border-color 0.15s;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: #22C55E;
+    }
+    .img-wrap {
+      width: 100%;
+      height: 140px;
+      background: #2B2520;
+      overflow: hidden;
+      position: relative;
+    }
+    .img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .sample-pill {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(10, 10, 14, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #94A3B8;
+      font-size: 9px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .info {
+      padding: 12px;
+    }
+    .name {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #FDFBF7;
+    }
+    .id {
+      font-family: monospace;
+      font-size: 11px;
+      color: #A89F91;
+      background: #141210;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .tag-local {
+      display: inline-block;
+      margin-left: 6px;
+      background: rgba(34, 197, 94, 0.2);
+      color: #22C55E;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>KALANLA // YEREL GÖRSEL DENETİM PANOSU (v3)</h1>
+      <p class="subtitle">Kullanıcının assets/food klasörüne yerleştirdiği 39 malzeme ve 23 tarif yerel olarak doğrulanıyor.</p>
+    </div>
+    <div class="badge">AŞAMA 3: %100 YEREL ASSETLER</div>
+  </header>
+
+  <h2>1. MALZEME GÖRSELLERİ (assets/food/ingredients/) — 39 ADET</h2>
+  <div class="grid" id="ingredients-grid"></div>
+
+  <h2>2. TARİF GÖRSELLERİ (assets/food/recipes/) — 23 ADET</h2>
+  <div class="grid" id="recipes-grid"></div>
+
+  <script>
+    const INGREDIENTS = [
+      { id: 'suzme-yogurt', name: 'Süzme Yoğurt', path: 'assets/food/ingredients/suzme-yogurt.jpg' },
+      { id: 'krema', name: 'Krema', path: 'assets/food/ingredients/krema.jpg' },
+      { id: 'kefir', name: 'Kefir / Ayran', path: 'assets/food/ingredients/kefir.jpg' },
+      { id: 'sivri-biber', name: 'Yeşil Sivri Biber', path: 'assets/food/ingredients/sivri-biber.jpg' },
+      { id: 'charliston', name: 'Çarliston Biber', path: 'assets/food/ingredients/charliston.jpg' },
+      { id: 'patlican', name: 'Patlıcan', path: 'assets/food/ingredients/patlican.jpg' },
+      { id: 'mantar', name: 'Mantar', path: 'assets/food/ingredients/mantar.jpg' },
+      { id: 'maydanoz', name: 'Maydanoz', path: 'assets/food/ingredients/maydanoz.jpg' },
+      { id: 'dereotu', name: 'Dereotu', path: 'assets/food/ingredients/dereotu.jpg' },
+      { id: 'fesligen', name: 'Fesleğen', path: 'assets/food/ingredients/fesligen.jpg' },
+      { id: 'nane', name: 'Taze Nane', path: 'assets/food/ingredients/nane.jpg' },
+      { id: 'kabak', name: 'Kabak', path: 'assets/food/ingredients/kabak.jpg' },
+      { id: 'pirasa', name: 'Pırasa', path: 'assets/food/ingredients/pirasa.jpg' },
+      { id: 'kereviz', name: 'Kereviz', path: 'assets/food/ingredients/kereviz.jpg' },
+      { id: 'turp', name: 'Turp', path: 'assets/food/ingredients/turp.jpg' },
+      { id: 'semizotu', name: 'Semizotu', path: 'assets/food/ingredients/semizotu.jpg' },
+      { id: 'roka', name: 'Roka', path: 'assets/food/ingredients/roka.jpg' },
+      { id: 'tere', name: 'Tere', path: 'assets/food/ingredients/tere.jpg' },
+      { id: 'borulce', name: 'Börülce', path: 'assets/food/ingredients/borulce.jpg' },
+      { id: 'kiyma', name: 'Kıyma', path: 'assets/food/ingredients/kiyma.jpg' },
+      { id: 'dana-eti', name: 'Dana Eti', path: 'assets/food/ingredients/dana-eti.jpg' },
+      { id: 'kirmizi-et', name: 'Kırmızı Et', path: 'assets/food/ingredients/kirmizi-et.jpg' },
+      { id: 'kuzu-eti', name: 'Kuzu Eti', path: 'assets/food/ingredients/kuzu-eti.jpg' },
+      { id: 'balik', name: 'Balık', path: 'assets/food/ingredients/balik.jpg' },
+      { id: 'hamsi', name: 'Hamsi', path: 'assets/food/ingredients/hamsi.jpg' },
+      { id: 'somon', name: 'Somon', path: 'assets/food/ingredients/somon.jpg' },
+      { id: 'siyah-zeytin', name: 'Siyah Zeytin', path: 'assets/food/ingredients/siyah-zeytin.jpg' },
+      { id: 'yesil-zeytin', name: 'Yeşil Zeytin', path: 'assets/food/ingredients/yesil-zeytin.jpg' },
+      { id: 'sucuk', name: 'Sucuk', path: 'assets/food/ingredients/sucuk.jpg' },
+      { id: 'salam', name: 'Salam', path: 'assets/food/ingredients/salam.jpg' },
+      { id: 'sosis', name: 'Sosis', path: 'assets/food/ingredients/sosis.jpg' },
+      { id: 'ekmek', name: 'Ekmek', path: 'assets/food/ingredients/ekmek.jpg' },
+      { id: 'pide', name: 'Pide', path: 'assets/food/ingredients/pide.jpg' },
+      { id: 'bulgur', name: 'Bulgur', path: 'assets/food/ingredients/bulgur.jpg' },
+      { id: 'yufka', name: 'Yufka', path: 'assets/food/ingredients/yufka.jpg' },
+      { id: 'mercimek', name: 'Mercimek', path: 'assets/food/ingredients/mercimek.jpg' },
+      { id: 'kuru-fasulye', name: 'Kuru Fasulye', path: 'assets/food/ingredients/kuru-fasulye.jpg' },
+      { id: 'salca', name: 'Salça', path: 'assets/food/ingredients/salca.jpg' },
+      { id: 'tarhana', name: 'Tarhana', path: 'assets/food/ingredients/tarhana.jpg' },
+    ];
+
+    const RECIPES = [
+      { id: 'recipe-et-1', name: 'Tava Kavurması', path: 'assets/food/recipes/tava-kavurmasi.jpg' },
+      { id: 'recipe-tavuk-1', name: 'Sarımsaklı Tavuk Sote', path: 'assets/food/recipes/tavuk-sote.jpg' },
+      { id: 'recipe-patates-1', name: 'Çıtır Tavada Patates', path: 'assets/food/recipes/citir-patates.jpg' },
+      { id: 'recipe-patates-2', name: 'Kremamsı Patates Çorbası', path: 'assets/food/recipes/patates-corbasi.jpg' },
+      { id: 'recipe-sebze-1', name: 'Tavada Sebze Sote', path: 'assets/food/recipes/sebze-sote.jpg' },
+      { id: 'recipe-kuskonmaz-1', name: 'Zeytinyağlı Kuşkonmaz', path: 'assets/food/recipes/zeytinyagli-kuskonmaz.jpg' },
+      { id: 'recipe-mantar-1', name: 'Sarımsaklı Mantar Sote', path: 'assets/food/recipes/mantar-sote.jpg' },
+      { id: 'recipe-menemen-1', name: 'Tavada Hakiki Menemen', path: 'assets/food/recipes/menemen.jpg' },
+      { id: 'recipe-yogurt-1', name: 'Serinletici Cacık', path: 'assets/food/recipes/cacik.jpg' },
+      { id: 'recipe-1', name: 'Tavada Çıtır Kaşarlı Ekmek', path: 'assets/food/recipes/kasarli-ekmek.jpg' },
+      { id: 'recipe-3', name: 'Yoğurtlu Ekmek Mantısı', path: 'assets/food/recipes/ekmek-mantisi.jpg' },
+      { id: 'recipe-makarna-1', name: 'Domates Soslu Makarna', path: 'assets/food/recipes/domatesli-makarna.jpg' },
+      { id: 'recipe-un-pisi-1', name: 'Puf Kabarmış Anne Pişisi', path: 'assets/food/recipes/pisi.jpg' },
+      { id: 'recipe-un-kasik-1', name: 'Peynirli Kaşık Dökmesi', path: 'assets/food/recipes/kasik-dokmesi.jpg' },
+      { id: 'recipe-un-corba-1', name: 'Salçalı Un Çorbası', path: 'assets/food/recipes/un-corbasi.jpg' },
+      { id: 'recipe-yufka-borek-1', name: 'Tavada Peynirli Su Böreği', path: 'assets/food/recipes/su-boregi.jpg' },
+      { id: 'recipe-sebze-mucver-1', name: 'Tavada Çıtır Kabak Mücveri', path: 'assets/food/recipes/mucver.jpg' },
+      { id: 'recipe-bulgur-mercimek-1', name: 'Sıkma Mercimek Köftesi', path: 'assets/food/recipes/mercimek-koftesi.jpg' },
+      { id: 'recipe-tarhana-1', name: 'Köy Usulü Tarhana Çorbası', path: 'assets/food/recipes/tarhana-corbasi.jpg' },
+      { id: 'recipe-gozleme-1', name: 'Tavada Çıtır Gözleme', path: 'assets/food/recipes/gozleme.jpg' },
+      { id: 'recipe-bulgur-pilav-1', name: 'Salçalı Meyhane Bulgur Pilavı', path: 'assets/food/recipes/bulgur-pilavi.jpg' },
+      { id: 'recipe-ispanak-yumurta-1', name: 'Tavada Yumurtalı Ispanak', path: 'assets/food/recipes/yumurtali-ispanak.jpg' },
+      { id: 'recipe-patates-borek-1', name: 'Tavada Patates Böreği', path: 'assets/food/recipes/patates-boregi.jpg' },
+    ];
+
+    function renderGrid(containerId, items, isRecipe = false) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = items.map(item => `
+        <div class="card">
+          <div class="img-wrap">
+            <img src="${item.path}" alt="${item.name}" loading="lazy" />
+            ${isRecipe ? '<div class="sample-pill">Örnek sunum</div>' : ''}
+          </div>
+          <div class="info">
+            <div class="name">${item.name} <span class="tag-local">YEREL</span></div>
+            <div class="id">${item.id}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    renderGrid('ingredients-grid', INGREDIENTS, false);
+    renderGrid('recipes-grid', RECIPES, true);
+  </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Image } from 'react-native';
 import { colors, spacing, radius } from '../theme/theme';
 
 interface HeaderProps {
@@ -27,6 +27,11 @@ export const Header: React.FC<HeaderProps> = ({ urgentCount }) => {
     <View style={styles.container}>
       <View style={styles.leftCol}>
         <View style={styles.brandRow}>
+          <Image
+            source={require('../../assets/kalanla-logo-mark.jpg')}
+            style={styles.logoMark}
+            resizeMode="cover"
+          />
           <Text style={styles.brandTitle}>KALANLA</Text>
           <View style={styles.osBadge}>
             <Text style={styles.osBadgeText}>KITCHEN OS</Text>
@@ -73,6 +78,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  logoMark: {
+    width: 28,
+    height: 28,
+    borderRadius: 7,
   },
   brandTitle: {
     fontSize: 20,
