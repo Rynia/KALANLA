@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -26,6 +26,7 @@ import {
 import {
   loadKitchenState,
   saveKitchenState,
+  clearKitchenState,
 } from './src/storage/kitchenStorage';
 import { scoreRecipes, buildConsumptionPlan, applyConsumptionPlan } from './src/utils/recipeEngine';
 import { resolveFoodImage } from './src/utils/foodImageResolver';
@@ -47,11 +48,11 @@ import { LegalFooter } from './src/components/LegalFooter';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { AnimatedSplashScreen } from './src/components/AnimatedSplashScreen';
 import { UserSubscription } from './src/types/subscription';
-import { loadSubscription, INITIAL_SUBSCRIPTION } from './src/services/entitlements';
+import { loadSubscription, saveSubscription, clearSubscription, INITIAL_SUBSCRIPTION } from './src/services/entitlements';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('gor');
-  const [foodItems, setFoodItems] = useState<FoodItem[]>(INITIAL_FOOD_ITEMS);
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   // Dinamik tarif listesi — foodItems her değiştiğinde yeniden skorlanır
   const recipes = useMemo(
     () => scoreRecipes(foodItems, INITIAL_RECIPES),
@@ -64,9 +65,13 @@ export default function App() {
   const [rescuedCo2Kg, setRescuedCo2Kg] = useState<number>(0);
   const [rescuedMealsCount, setRescuedMealsCount] = useState<number>(0);
 
-  // Fix 2: Hydration flag — kullanıcı işlemleri yükleme tamamlanana kadar persist edilmez
-  const [isHydrated, setIsHydrated] = useState<boolean>(false);
+  // Hydration status — 'loading' | 'loaded' | 'error'
+  // error durumunda disk asla ezilmez
+  const [hydrationStatus, setHydrationStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
   const [showSplash, setShowSplash] = useState<boolean>(true);
+
+  // Synchronous lock for cooking transactions (P0 double-tap guard)
+  const cookingLock = useRef<boolean>(false);
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
@@ -89,17 +94,17 @@ export default function App() {
     [foodItems],
   );
 
-  // Fix 2: Hydration — iptal edilebilir async, race condition önlenir
+  // Hydration — iptal edilebilir async, race condition önlenir
   useEffect(() => {
     let cancelled = false;
     async function hydrate() {
-      const persisted = await loadKitchenState();
+      const result = await loadKitchenState();
       if (cancelled) return;
-      if (persisted) {
-        // Fix 1: Array.isArray ile boş liste de doğru şekilde yüklenir
+
+      if (result.status === 'loaded') {
+        const persisted = result.state;
         if (Array.isArray(persisted.foodItems)) {
-          // Fix 3: Yüklenen ürünlerin hoursLeft'i gerçek zamana göre güncellenir
-          setFoodItems(rehydrateItems(persisted.foodItems));
+          setFoodItems(persisted.foodItems);
         }
         if (typeof persisted.rescuedTotalTL === 'number') {
           setRescuedTotalTL(persisted.rescuedTotalTL);
@@ -113,21 +118,32 @@ export default function App() {
         if (Array.isArray(persisted.badges)) {
           setBadges(persisted.badges);
         }
+        setHydrationStatus('loaded');
+      } else if (result.status === 'empty') {
+        // İlk kurulum: Demo ürünlerle başlat
+        setFoodItems(INITIAL_FOOD_ITEMS);
+        setHydrationStatus('loaded');
+      } else {
+        // Okuma hatası: Asla diski demo veriyle ezme!
+        console.warn('[KALANLA] Storage read failed. Holding save engine.');
+        setHydrationStatus('error');
       }
+
       const loadedSub = await loadSubscription();
       if (!cancelled) {
         setSubscription(loadedSub);
       }
-      setIsHydrated(true);
     }
     hydrate();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Fix 7: Debounced persist — state değiştiğinde 500ms sonra tek yazma işlemi
-  // Fire-and-forget çağrıların race condition'ını önler
+  // Debounced persist — state değiştiğinde 500ms sonra tek yazma işlemi
+  // HydrationStatus 'loaded' değilse (örn. 'error' veya 'loading') asla diske yazmaz
   useEffect(() => {
-    if (!isHydrated) return; // Hydration tamamlanmadan yazmaz
+    if (hydrationStatus !== 'loaded') return;
     const timeout = setTimeout(() => {
       saveKitchenState({
         foodItems,
@@ -138,7 +154,7 @@ export default function App() {
       });
     }, 500);
     return () => clearTimeout(timeout);
-  }, [foodItems, rescuedTotalTL, rescuedCo2Kg, rescuedMealsCount, badges, isHydrated]);
+  }, [foodItems, rescuedTotalTL, rescuedCo2Kg, rescuedMealsCount, badges, hydrationStatus]);
 
   // Handle Tab Switch (if center 'ekle' is clicked, open modal directly)
   const handleTabChange = (tab: TabType) => {
@@ -212,119 +228,133 @@ export default function App() {
   };
 
   const executeCookingTransaction = (recipe: RescueRecipe) => {
-    // 1. Tüketim planı oluştur (kısmi tüketim desteği)
-    const plan = buildConsumptionPlan(recipe, foodItems);
-    const nextItems = applyConsumptionPlan(foodItems, plan);
+    // P0 Guard: Synchronous transaction lock (double-tap önleyici)
+    if (cookingLock.current) return;
+    cookingLock.current = true;
 
-    // 2. Fiş için tüketilen malzemeleri topla
-    const consumedItems: FoodItem[] = [
-      ...foodItems.filter((item) => plan.toRemove.includes(item.id)),
-      ...foodItems
-        .filter((item) => plan.toUpdate.some((u) => u.id === item.id))
-        .map((item) => {
-          const upd = plan.toUpdate.find((u) => u.id === item.id)!;
-          const consumedNum = parseFloat(item.amount) - parseFloat(upd.newAmount);
-          const unitMatch = item.amount.match(/[^\d.]+/);
-          const unit = unitMatch ? unitMatch[0].trim() : '';
-          return { ...item, amount: `${isNaN(consumedNum) ? '' : consumedNum}${unit}` };
-        }),
-    ];
+    try {
+      // 1. Tüketim planı oluştur (kısmi tüketim desteği)
+      const plan = buildConsumptionPlan(recipe, foodItems);
 
-    // 2.5 ChatGPT & Gemini Kuralı: Idempotent Transaction Kaydı
-    const transactionConsumed = [
-      ...foodItems
-        .filter((item) => plan.toRemove.includes(item.id))
-        .map((item) => ({
-          itemId: item.id,
-          itemSnapshot: { ...item }, // Orijinal ID, imageUrl ve meta verisini korur
-          wasCompletelyRemoved: true,
-          previousAmount: item.amount,
-        })),
-      ...foodItems
-        .filter((item) => plan.toUpdate.some((u) => u.id === item.id))
-        .map((item) => ({
-          itemId: item.id,
-          itemSnapshot: { ...item },
-          wasCompletelyRemoved: false,
-          previousAmount: item.amount,
-        })),
-    ];
-
-    const tx: InventoryTransaction = {
-      id: `tx-${Date.now()}`,
-      type: 'recipe-consume',
-      status: 'committed',
-      recipeId: recipe.id,
-      recipeTitle: recipe.title,
-      consumedItems: transactionConsumed,
-      savedTL: recipe.savedTL,
-      co2SavedKg: recipe.co2SavedKg,
-      createdAt: Date.now(),
-    };
-
-    setLastTransaction(tx);
-    setIsUndoVisible(true);
-
-    const nextTotal = rescuedTotalTL + recipe.savedTL;
-    const nextCo2 = Number((rescuedCo2Kg + recipe.co2SavedKg).toFixed(2));
-    const nextMeals = rescuedMealsCount + 1;
-
-    setFoodItems(nextItems);
-    setRescuedTotalTL(nextTotal);
-    setRescuedCo2Kg(nextCo2);
-    setRescuedMealsCount(nextMeals);
-
-    // 3. Termal fiş oluştur
-    const now = new Date();
-    const formattedDate = `${String(now.getDate()).padStart(2, '0')}.${String(
-      now.getMonth() + 1,
-    ).padStart(2, '0')}.${now.getFullYear()}`;
-    const formattedTime = `${String(now.getHours()).padStart(2, '0')}:${String(
-      now.getMinutes(),
-    ).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-
-    const receiptItems =
-      consumedItems.length > 0
-        ? consumedItems.map((item) => ({
-            name: item.name,
-            amount: item.amount,
-            priceTL: item.priceTL,
-          }))
-        : [
-            { name: 'Bayat Ekmek', amount: '250g', priceTL: 25 },
-            { name: 'Kaşar Peyniri', amount: '200g', priceTL: 120 },
-            { name: 'Salkım Domates', amount: '3 Adet', priceTL: 60 },
-          ];
-
-    const newReceipt: ThermalReceiptData = {
-      id: `rcp-${Date.now()}`,
-      date: formattedDate,
-      time: formattedTime,
-      txCode: `TR-IST-034 // #${Math.floor(1000 + Math.random() * 9000)}`,
-      recipeTitle: recipe.title,
-      items: receiptItems,
-      totalSavedTL: recipe.savedTL,
-      co2SavedKg: recipe.co2SavedKg,
-      durationMinutes: recipe.durationMinutes,
-      barcodeNumber: '8 690123 456789',
-    };
-
-    setActiveReceipt(newReceipt);
-
-    // 4. Başarımları güncelle
-    const nextBadges = badges.map((badge) => {
-      if (badge.id === 'badge-3') {
-        return { ...badge, unlocked: true, progress: '4/5 İLERLEME' };
+      // P0 Guard: Eğer dolaptan hiçbir ürün düşülmüyorsa (0 tüketim) asla sahte tasarruf/fiş üretme!
+      if (plan.toRemove.length === 0 && plan.toUpdate.length === 0) {
+        Alert.alert(
+          'Yetersiz Malzeme',
+          'Kilerinizde bu tarif için tüketilecek malzeme bulunamadı. Lütfen önce dolabınıza malzeme ekleyin.',
+          [{ text: 'Tamam' }]
+        );
+        return;
       }
-      return badge;
-    });
-    setBadges(nextBadges);
-    // Debounced useEffect persist eder
 
-    if (Platform.OS !== 'web') {
-      try {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } catch (e) {}
+      const nextItems = applyConsumptionPlan(foodItems, plan);
+
+      // 2. Fiş için tüketilen malzemeleri topla
+      const consumedItems: FoodItem[] = [
+        ...foodItems.filter((item) => plan.toRemove.includes(item.id)),
+        ...foodItems
+          .filter((item) => plan.toUpdate.some((u) => u.id === item.id))
+          .map((item) => {
+            const upd = plan.toUpdate.find((u) => u.id === item.id)!;
+            const consumedNum = parseFloat(item.amount) - parseFloat(upd.newAmount);
+            const unitMatch = item.amount.match(/[^\d.]+/);
+            const unit = unitMatch ? unitMatch[0].trim() : '';
+            return { ...item, amount: `${isNaN(consumedNum) ? '' : consumedNum}${unit}` };
+          }),
+      ];
+
+      // 2.5 Idempotent Transaction Snapshot Kaydı
+      const transactionConsumed = [
+        ...foodItems
+          .filter((item) => plan.toRemove.includes(item.id))
+          .map((item) => ({
+            itemId: item.id,
+            itemSnapshot: { ...item }, // Orijinal ID, imageUrl ve meta verisini korur
+            wasCompletelyRemoved: true,
+            previousAmount: item.amount,
+          })),
+        ...foodItems
+          .filter((item) => plan.toUpdate.some((u) => u.id === item.id))
+          .map((item) => ({
+            itemId: item.id,
+            itemSnapshot: { ...item },
+            wasCompletelyRemoved: false,
+            previousAmount: item.amount,
+          })),
+      ];
+
+      const tx: InventoryTransaction = {
+        id: `tx-${Date.now()}`,
+        type: 'recipe-consume',
+        status: 'committed',
+        recipeId: recipe.id,
+        recipeTitle: recipe.title,
+        consumedItems: transactionConsumed,
+        savedTL: recipe.savedTL,
+        co2SavedKg: recipe.co2SavedKg,
+        createdAt: Date.now(),
+      };
+
+      setLastTransaction(tx);
+      setIsUndoVisible(true);
+
+      const nextTotal = rescuedTotalTL + recipe.savedTL;
+      const nextCo2 = Number((rescuedCo2Kg + recipe.co2SavedKg).toFixed(2));
+      const nextMeals = rescuedMealsCount + 1;
+
+      setFoodItems(nextItems);
+      setRescuedTotalTL(nextTotal);
+      setRescuedCo2Kg(nextCo2);
+      setRescuedMealsCount(nextMeals);
+
+      // 3. Termal fiş oluştur (Yalnızca gerçekten tüketilen kalemlerle)
+      const now = new Date();
+      const formattedDate = `${String(now.getDate()).padStart(2, '0')}.${String(
+        now.getMonth() + 1,
+      ).padStart(2, '0')}.${now.getFullYear()}`;
+      const formattedTime = `${String(now.getHours()).padStart(2, '0')}:${String(
+        now.getMinutes(),
+      ).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+      const receiptItems = consumedItems.map((item) => ({
+        name: item.name,
+        amount: item.amount,
+        priceTL: item.priceTL,
+      }));
+
+      const newReceipt: ThermalReceiptData = {
+        id: `rcp-${Date.now()}`,
+        date: formattedDate,
+        time: formattedTime,
+        txCode: `TR-IST-034 // #${Math.floor(1000 + Math.random() * 9000)}`,
+        recipeTitle: recipe.title,
+        items: receiptItems,
+        totalSavedTL: recipe.savedTL,
+        co2SavedKg: recipe.co2SavedKg,
+        durationMinutes: recipe.durationMinutes,
+        barcodeNumber: '8 690123 456789',
+      };
+
+      setActiveReceipt(newReceipt);
+
+      // 4. Başarımları güncelle
+      const nextBadges = badges.map((badge) => {
+        if (badge.id === 'badge-3') {
+          return { ...badge, unlocked: true, progress: '4/5 İLERLEME' };
+        }
+        return badge;
+      });
+      setBadges(nextBadges);
+
+      if (Platform.OS !== 'web') {
+        try {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } catch (e) {}
+      }
+    } finally {
+      // Transaction kilidini 400ms sonra kaldır (animasyon ve re-render güvenliği)
+      setTimeout(() => {
+        cookingLock.current = false;
+      }, 400);
     }
   };
 
@@ -332,7 +362,7 @@ export default function App() {
   const handleUndoCook = () => {
     if (!lastTransaction || lastTransaction.status !== 'committed') return;
 
-    // Yalnızca bu transaction'ın tükettiği kalemleri geri yükle (başka tarifleri veya eklenenleri ezmez)
+    // Yalnızca bu transaction'ın tükettiği kalemleri geri yükle
     setFoodItems((prevItems) => {
       let restored = [...prevItems];
 
@@ -341,10 +371,15 @@ export default function App() {
           // Orijinal snapshottan geri koy
           restored = [ci.itemSnapshot, ...restored];
         } else {
-          // Güncellenen ürünün miktarını eski haline getir
-          restored = restored.map((item) =>
-            item.id === ci.itemId ? { ...item, amount: ci.previousAmount } : item
-          );
+          // Güncellenen ürünün miktarını eski haline getir; eğer kullanıcı ürünü silmişse snapshot ile dirilt
+          const exists = restored.some((item) => item.id === ci.itemId);
+          if (exists) {
+            restored = restored.map((item) =>
+              item.id === ci.itemId ? { ...item, amount: ci.previousAmount } : item
+            );
+          } else {
+            restored = [{ ...ci.itemSnapshot, amount: ci.previousAmount }, ...restored];
+          }
         }
       });
 
@@ -362,16 +397,37 @@ export default function App() {
     setActiveReceipt(null);
   };
 
-  // Local-First / Guest Data Reset (Apple & Store kurallarına uygun yerel sıfırlama)
-  const handleResetAllData = () => {
-    setFoodItems([]);
-    setRescuedTotalTL(0);
-    setRescuedCo2Kg(0);
-    setRescuedMealsCount(0);
-    setActiveReceipt(null);
-    setActiveDetailRecipe(null);
-    setLastTransaction(null);
-    setIsUndoVisible(false);
+  // Local-First / Guest Data Reset (Diski ve state'leri fiziksel olarak siler)
+  const handleResetAllData = async () => {
+    Alert.alert(
+      'Tüm Verileri Sıfırla',
+      'Kilerinizdeki tüm malzemeler, tasarruf geçmişiniz ve fişleriniz kalıcı olarak silinecektir. Emin misiniz?',
+      [
+        { text: 'Vazgeç', style: 'cancel' },
+        {
+          text: 'Sıfırla ve Temizle',
+          style: 'destructive',
+          onPress: async () => {
+            setFoodItems([]);
+            setRescuedTotalTL(0);
+            setRescuedCo2Kg(0);
+            setRescuedMealsCount(0);
+            setBadges(INITIAL_BADGES);
+            setSubscription(INITIAL_SUBSCRIPTION);
+            setActiveReceipt(null);
+            setActiveDetailRecipe(null);
+            setLastTransaction(null);
+            setIsUndoVisible(false);
+
+            // Kalıcı depolamayı diskten fiziksel olarak sil
+            await clearKitchenState();
+            await clearSubscription();
+
+            Alert.alert('Temizlendi', 'Kileriniz ve tüm yerel verileriniz başarıyla sıfırlandı.');
+          },
+        },
+      ]
+    );
   };
 
   // Open historical receipt preview from Earnings tab
@@ -492,6 +548,7 @@ export default function App() {
         isOpen={isReceiptModalOpen}
         onClose={() => setIsReceiptModalOpen(false)}
         onAddBatchItems={handleAddBatchItems}
+        onOpenQuickAdd={() => setIsAddModalOpen(true)}
       />
 
       {/* AI VISION CAMERA SCAN MODAL */}

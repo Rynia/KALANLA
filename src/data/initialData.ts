@@ -488,12 +488,12 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
     portion: '4 Kişilik (6 Büyük Krep)',
     requiredItemNames: [
       { name: 'Un', rescued: false, consumeAmount: '200', exactMeasure: '2 su bardağı un' },
-      { name: 'Süt', rescued: false, consumeAmount: '400', exactMeasure: '2 su bardağı ılık süt (veya su)' },
+      { name: 'Süt', rescued: false, consumeAmount: '500', exactMeasure: '2.5 su bardağı süt (veya 2 bardak süt + yarım bardak su)' },
       { name: 'Yumurta', rescued: false, consumeAmount: '2', exactMeasure: '2 adet yumurta' },
     ],
     instructions: [
       'Geniş bir kasede 2 yumurtayı 1 çay kaşığı tuz ile çırpın.',
-      '2 su bardağı süt ve 1 su bardağı su ekleyin.',
+      '2.5 su bardağı sütü (veya 2 bardak süt ve yarım bardak suyu) ekleyin.',
       '2 su bardağı unu eleyerek ekleyin ve hiç pürüz kalmayana kadar mikser veya telle çırpın (akıcı boza kıvamında olmalı).',
       'Krep tavasına bir damla sıvı yağ döküp peçeteyle yayın, tavayı orta ateşte ısıtın.',
       '1 kepçe harcı tavaya döküp tavayı eğerek hızlıca yayın. Altı hafif kızarınca spatula ile çevirip diğer yüzünü de 1 dakika pişirin.'
@@ -515,7 +515,7 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
     requiredItemNames: [
       { name: 'Un', rescued: false, consumeAmount: '50', exactMeasure: '3 tepeleme yemek kaşığı un' },
       { name: 'Salça', rescued: false, consumeAmount: '40', exactMeasure: '1 tepeleme yemek kaşığı domates salçası' },
-      { name: 'Tereyağı', rescued: false, consumeAmount: '30', exactMeasure: '1 yemek kaşığı tereyağı veya 3 kaşık sıvı yağ' },
+      { name: 'Tereyağı', rescued: false, consumeAmount: '30', exactMeasure: '1 yemek kaşığı tereyağı ve 2 yemek kaşığı sıvı yağ' },
     ],
     instructions: [
       'Tencereye 1 yemek kaşığı tereyağı ve 2 yemek kaşığı sıvı yağı alın, eritin.',
@@ -585,7 +585,7 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
     id: 'recipe-bulgur-mercimek-1',
     title: 'Geleneksel Mercimek Köftesi',
     description: 'Kırmızı mercimek ve ince bulgurla hazırlanan, bereketiyle bütün aileyi doyuran etsiz şaheser.',
-    durationMinutes: 25,
+    durationMinutes: 30,
     savedTL: 160,
     matchPercentage: 0,
     calories: 260,
@@ -595,24 +595,24 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
     portion: '5-6 Kişilik Büyük Tabak',
     requiredItemNames: [
       { name: 'Kırmızı Mercimek', rescued: false, consumeAmount: '200', exactMeasure: '1 su bardağı kırmızı mercimek' },
-      { name: 'Bulgur', rescued: false, consumeAmount: '200', exactMeasure: '1.5 su bardağı ince köftelik bulgur' },
+      { name: 'Bulgur', rescued: false, consumeAmount: '150', exactMeasure: '1 su bardağı ince köftelik bulgur' },
       { name: 'Salça', rescued: false, consumeAmount: '50', exactMeasure: '2 yemek kaşığı domates/biber salçası' },
       { name: 'Soğan', rescued: false, consumeAmount: '1', exactMeasure: '1 adet orta boy kuru soğan' },
     ],
     instructions: [
-      '1 su bardağı yıkanmış kırmızı mercimeği 3 su bardağı suda mercimekler iyice eriyip suyunu hafif çekene kadar haşlayın.',
-      'Tencerenin altını kapatın, 1.5 su bardağı ince bulguru ekleyip kaşıkla karıştırın; tencerenin kapağını kapatıp bulgurun şişmesi için 15 dakika bekletin.',
+      '1 su bardağı yıkanmış kırmızı mercimeği 3.5 su bardağı suda mercimekler iyice eriyip suyunu hafif çekene kadar haşlayın.',
+      'Tencerenin altını kapatın, 1 su bardağı ince köftelik bulguru ekleyip kaşıkla karıştırın; kapağı sıkıca kapatıp bulgurların yumuşaması için 25 dakika dinlendirin.',
       'Ayrı bir tavada yarım çay bardağı zeytinyağında 1 adet ince kıyılmış soğanı kavurun, 2 yemek kaşığı salça ekleyip 2 dakika kokusu çıkana kadar soteleyin.',
-      'Salçalı soğan karışımını mercimekli bulgurun üzerine dökün; 1 tatlı kaşığı tuz, pul biber, kimyon ve yarım limon suyu ekleyip el yakmayacak sıcaklığa gelince yoğurun.',
-      'İnce kıyılmış taze soğan ve maydanozu ekleyip hafifçe karıştırın; elinizle sıkarak şekil verip marul yaprakları üzerinde servis edin.'
+      'Salçalı soğan karışımını mercimekli bulgurun üzerine dökün; 1 tatlı kaşığı tuz, pul biber, kimyon ve yarım limon suyu ekleyip el yakmayacak sıcaklığa gelince iyice yoğurun.',
+      'İnce kıyılmış taze soğan ve maydanozu ekleyip hafifçe karıştırın; elinizle sıkarak köfte şekli verip marul yaprakları üzerinde servis edin.'
     ],
     co2SavedKg: 0.9,
     isChefPick: true,
   },
   {
     id: 'recipe-tarhana-1',
-    title: 'Şifalı Köy Usulü Tarhana Çorbası',
-    description: 'Kilerdeki kuru tarhana, tereyağı ve salçayla 10 dakikada pişen geleneksel şifa kaynağı.',
+    title: 'Köy Usulü Geleneksel Tarhana Çorbası',
+    description: 'Kilerdeki kuru tarhana, tereyağı ve salçayla 10 dakikada pişen geleneksel lezzet kaynağı.',
     durationMinutes: 10,
     savedTL: 65,
     matchPercentage: 0,
@@ -654,11 +654,12 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
       { name: 'Maydanoz', rescued: false, isPantry: true, exactMeasure: 'Yarım demet ince kıyılmış maydanoz' },
     ],
     instructions: [
-      'Yufkayı tezgaha serin, ortasına ufalanmış peynir ve maydanozu yayın.',
-      'Yufkanın dört kenarını zarf gibi içe doğru katlayarak kare şekli verin.',
-      'Geniş bir teflon tavayı az miktarda sıvı yağ veya tereyağı ile yağlayın.',
+      'Yufkayı tezgaha serin, fırça ile üzerine çok hafif sıvı yağ veya su sürün.',
+      'Ortasına ufalanmış peynir ve maydanozu yayın.',
+      'Yufkanın kenarlarını zarf gibi katlayarak kare şekli verin.',
+      'Geniş bir teflon tavayı az miktarda tereyağı ile yağlayın.',
       'Gözlemeyi tavaya alıp orta ateşte arkalı önlü nar gibi kızarana kadar (her yüzü 2.5 dakika) pişirin.',
-      'Tavadan alırken üzerine hafifçe tereyağı sürüp dilimleyerek servis yapın.'
+      'Tavadan alırken üzerine hafifçe tereyağı sürüp dilimleyerek sıcak servis yapın.'
     ],
     co2SavedKg: 0.45,
   },
@@ -685,7 +686,7 @@ export const INITIAL_RECIPES: RescueRecipe[] = [
       'Yemeklik doğranmış soğan ve biberleri ekleyip hafif sararana kadar soteleyin.',
       'Rendelenmiş domates ve 1 tatlı kaşığı salçayı ekleyip 2 dakika kavurun.',
       'Yıkanmış 2 su bardağı bulguru ekleyip 1 dakika pirinç kavurur gibi çevirin.',
-      '3.5 su bardağı sıcak su ve 1 tatlı kaşığı tuz ekleyip kapağını kapatın; kısık ateşte suyunu çekene kadar (12-14 dakika) pişirin ve 10 dakika demlendirin.'
+      '4 su bardağı sıcak su ve 1 tatlı kaşığı tuz ekleyip kapağını kapatın; kısık ateşte suyunu çekene kadar (14 dakika) pişirin ve 15 dakika kapağı açmadan demlendirin.'
     ],
     co2SavedKg: 0.6,
   },

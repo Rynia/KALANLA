@@ -29,6 +29,13 @@ function isMatch(itemName: string, requiredName: string): boolean {
   // Tam eşleşme
   if (normItem === normReq) return true;
 
+  // Taze sebze ile işlenmiş sos/salça türevlerini kesinlikle ayır (P1 Gastronomi Koruması)
+  const isItemCondiment = normItem.includes('salca') || normItem.includes('sos') || normItem.includes('puresi');
+  const isReqCondiment = normReq.includes('salca') || normReq.includes('sos') || normReq.includes('puresi');
+  if (isItemCondiment !== isReqCondiment) {
+    return false;
+  }
+
   const itemTokens = normItem.split(/\s+/);
   const reqTokens = normReq.split(/\s+/);
 
@@ -36,14 +43,16 @@ function isMatch(itemName: string, requiredName: string): boolean {
   const falsePairs: [string, string][] = [
     ['su', 'sucuk'],
     ['bal', 'balik'],
+    ['un', 'unlu'],
+    ['et', 'ot'],
   ];
 
   for (const it of itemTokens) {
     for (const rt of reqTokens) {
       if (it === rt) return true;
 
-      // 2 harf veya daha uzun kök eşleşmesi (örn. 'et' <-> 'dana et', 'patates' <-> 'patatesler')
-      if (it.length >= 2 && rt.length >= 2) {
+      // 3 harf veya daha uzun kök eşleşmesi (örn. 'patates' <-> 'patatesler')
+      if (it.length >= 3 && rt.length >= 3) {
         const isFalsePair = falsePairs.some(
           ([a, b]) => (it === a && rt === b) || (it === b && rt === a),
         );

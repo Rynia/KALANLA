@@ -1,4 +1,4 @@
-﻿// src/services/entitlements.ts
+// src/services/entitlements.ts
 // Kullanıcı yetkilendirme ve .edu.tr Öğrenci Doğrulama Servisi
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserSubscription, UserTier, TIER_LIMITS, TierEntitlements } from '../types/subscription';
@@ -36,6 +36,14 @@ export async function saveSubscription(sub: UserSubscription): Promise<void> {
     await AsyncStorage.setItem(SUB_STORAGE_KEY, JSON.stringify(sub));
   } catch (e) {
     console.warn('[KALANLA] Subscription save error:', e);
+  }
+}
+
+export async function clearSubscription(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(SUB_STORAGE_KEY);
+  } catch (e) {
+    console.warn('[KALANLA] Subscription clear error:', e);
   }
 }
 

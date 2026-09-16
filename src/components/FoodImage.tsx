@@ -1,6 +1,6 @@
 // src/components/FoodImage.tsx
 // Yerel require ve remote uri kaynaklarını otomatik ayrıştırıp render eden optimize görsel bileşeni
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, ImageStyle, StyleProp, View, Text, StyleSheet } from 'react-native';
 import { resolveFoodImageSource } from '../utils/foodImageResolver';
 
@@ -19,9 +19,10 @@ export const FoodImage: React.FC<FoodImageProps> = ({
   style,
   defaultEmoji = '🍲',
 }) => {
+  const [hasError, setHasError] = useState<boolean>(false);
   const imageSource = resolveFoodImageSource(source, name, category);
 
-  if (!imageSource) {
+  if (!imageSource || hasError) {
     return (
       <View style={[styles.placeholder, style]}>
         <Text style={styles.placeholderEmoji}>{defaultEmoji}</Text>
@@ -34,6 +35,7 @@ export const FoodImage: React.FC<FoodImageProps> = ({
       source={imageSource}
       style={style}
       resizeMode="cover"
+      onError={() => setHasError(true)}
     />
   );
 };

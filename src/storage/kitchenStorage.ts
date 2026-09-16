@@ -28,33 +28,43 @@ function isValidState(value: unknown): value is PersistedKitchenState {
   );
 }
 
-export async function loadKitchenState(): Promise<PersistedKitchenState | null> {
+export type KitchenLoadResult =
+  | { status: 'loaded'; state: PersistedKitchenState }
+  | { status: 'empty' }
+  | { status: 'error'; error: unknown };
+
+export async function loadKitchenState(): Promise<KitchenLoadResult> {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
+    if (!raw) {
+      return { status: 'empty' };
+    }
 
     let parsed: unknown;
     try {
       parsed = JSON.parse(raw);
-    } catch {
-      console.warn('[KALANLA] AsyncStorage JSON parse error — resetting');
-      return null;
+    } catch (parseErr) {
+      console.warn('[KALANLA] AsyncStorage JSON parse error:', parseErr);
+      return { status: 'error', error: parseErr };
     }
 
     if (!isValidState(parsed)) {
-      console.warn('[KALANLA] AsyncStorage schema invalid — resetting');
-      return null;
+      console.warn('[KALANLA] AsyncStorage schema invalid');
+      return { status: 'error', error: new Error('Invalid schema') };
     }
 
     // Fix 3 (hibrit): Yüklenen ürünlerin hoursLeft/riskPercentage değerlerini
     // gerçek zamanlı olarak güncelle (timestamp varsa dinamik, yoksa korunur)
     return {
-      ...parsed,
-      foodItems: rehydrateItems(parsed.foodItems),
+      status: 'loaded',
+      state: {
+        ...parsed,
+        foodItems: rehydrateItems(parsed.foodItems),
+      },
     };
   } catch (error) {
     console.warn('[KALANLA] AsyncStorage load error:', error);
-    return null;
+    return { status: 'error', error };
   }
 }
 
@@ -63,5 +73,16 @@ export async function saveKitchenState(state: PersistedKitchenState): Promise<vo
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch (error) {
     console.warn('[KALANLA] AsyncStorage save error:', error);
+  }
+}
+
+/**
+ * Kullanıcı "Tüm Verileri Sıfırla" dediğinde fiziksel diski tamamen temizler.
+ */
+export async function clearKitchenState(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    console.warn('[KALANLA] AsyncStorage clear error:', error);
   }
 }

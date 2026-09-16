@@ -1,4 +1,4 @@
-﻿// src/utils/syntheticChefEngine.ts
+// src/utils/syntheticChefEngine.ts
 // Offline-First Deterministic Generative Chef Engine for KALANLA
 import { FoodItem, RescueRecipe, FoodCategory } from '../types/models';
 
@@ -111,24 +111,67 @@ export function resolveCulinaryProfile(itemName: string, category: FoodCategory)
   }
 }
 
+// Uyumsuzluk Matrisi: Asla bir araya gelmeyecek gıda çiftleri (P1 Gastronomi Kalkanı)
+const FORBIDDEN_COMBINATIONS: [string, string][] = [
+  ['balik', 'yogurt'],
+  ['balik', 'peynir'],
+  ['balik', 'recel'],
+  ['et', 'recel'],
+  ['tavuk', 'recel'],
+  ['sarimsak', 'recel'],
+  ['sogan', 'recel'],
+  ['sarimsak', 'muz'],
+  ['sogan', 'elma'],
+];
+
+function areIncompatible(nameA: string, nameB: string): boolean {
+  const a = normalizeName(nameA);
+  const b = normalizeName(nameB);
+  return FORBIDDEN_COMBINATIONS.some(
+    ([x, y]) => (a.includes(x) && b.includes(y)) || (a.includes(y) && b.includes(x))
+  );
+}
+
+// Tek başına ana yemek olamayacak yardımcı/kiler kalemleri
+const CONDIMENT_KEYWORDS = ['salca', 'un', 'yag', 'tereyagi', 'zeytinyagi', 'sirke', 'seker', 'tuz', 'baharat', 'bulyon'];
+
+function isCondimentOnly(name: string): boolean {
+  const n = normalizeName(name);
+  return CONDIMENT_KEYWORDS.some((kw) => n.includes(kw));
+}
+
 /**
  * Hiçbir statik reçete eşleşmediğinde veya kullanıcı doğaçlama istediğinde
- * dolaptaki malzemelerden deterministik %100 UYUMLU sentetik şef menüsü üretir.
+ * dolaptaki malzemelerden deterministik gastronomik kurallarla uyumlu sentetik şef menüsü üretir.
  */
 export function synthesizeRecipeFromInventory(items: FoodItem[]): RescueRecipe | null {
   if (!items || items.length === 0) return null;
 
-  // En acil tüketilmesi gerekenleri seç
+  // En acil tüketilmesi gerekenleri sırala
   const prioritized = [...items].sort((a, b) => a.hoursLeft - b.hoursLeft);
-  const primary = prioritized[0];
-  const secondary = prioritized[1] ?? null;
-  const tertiary = prioritized[2] ?? null;
 
-  const pProfile = resolveCulinaryProfile(primary.name, primary.category);
-  const method = pProfile.idealMethods[0] || 'TAVA_SOTE';
+  // Ana malzeme olarak kiler/kondiman OLMAYAN gerçek bir ana gıda seç
+  const validPrimary = prioritized.find((item) => !isCondimentOnly(item.name)) || prioritized[0];
+  const primary = validPrimary;
+
+  // İkinci ve üçüncü malzemeleri gastronomik uyum kontrolüyle seç
+  const candidates = prioritized.filter((item) => item.id !== primary.id);
+  const secondary = candidates.find((item) => !areIncompatible(primary.name, item.name)) ?? null;
+  const tertiary = secondary
+    ? candidates.find(
+        (item) =>
+          item.id !== secondary.id &&
+          !areIncompatible(primary.name, item.name) &&
+          !areIncompatible(secondary.name, item.name) &&
+          !isCondimentOnly(item.name)
+      ) ?? null
+    : null;
 
   const usedItems = [primary, secondary, tertiary].filter(Boolean) as FoodItem[];
   const itemNames = usedItems.map((i) => i.name).join(' & ');
+
+  const pProfile = resolveCulinaryProfile(primary.name, primary.category);
+  const method = pProfile.idealMethods[0] || 'TAVA_SOTE';
 
   let title = '';
   let description = '';
@@ -145,6 +188,7 @@ export function synthesizeRecipeFromInventory(items: FoodItem[]): RescueRecipe |
         secondary
           ? `${secondary.name} ve dilediğiniz baharatları (tuz, pul biber, kekik) ilave edip 3-4 dakika daha birlikte çevirin.`
           : 'Tuz, karabiber ve sevdiğiniz baharatları ekleyip kokusu çıkana kadar 3 dakika daha soteleyin.',
+        tertiary ? `${tertiary.name} malzemesini de tavaya ekleyip harmanlayın.` : '',
         'Ocaktan almadan önce sıcak servis edin. Sıfır atık, maksimum lezzet!',
       );
       break;
@@ -169,7 +213,7 @@ export function synthesizeRecipeFromInventory(items: FoodItem[]): RescueRecipe |
       instructions.push(
         'Tavada 1 tatlı kaşığı tereyağını eritin.',
         `${primary.name} malzemesini ince dilimleyip tavada 2 dakika hafifçe kavurun.`,
-        'Ayrı bir kasede 2 yumurtayı tuz ve karabiberle çırpıp malzemelerin üzerine dökün.',
+        'Varsa 2 yumurtayı tuz ve karabiberle çırpıp (veya doğrudan harç kıvamında) malzemelerin üzerine dökün.',
         secondary
           ? `Üzerine ${secondary.name} ekleyip kapağını kapatın; kısık ateşte 3-4 dakika pişirin.`
           : 'Kısık ateşte peynir veya yumurta oturana kadar kapağı kapalı 3-4 dakika pişirin.',
@@ -213,11 +257,15 @@ export function synthesizeRecipeFromInventory(items: FoodItem[]): RescueRecipe |
       break;
   }
 
+  const cleanInstructions = instructions.filter(Boolean);
   const savedTL = usedItems.reduce((sum, it) => sum + it.priceTL, 0);
   const co2SavedKg = Number((usedItems.length * 0.45).toFixed(2));
 
+  // Deterministik ve kararlı ID: Her re-render'da rastgele id üretip kartı yok edip tekrar çizmesini önler
+  const deterministicId = `synth-${usedItems.map((i) => i.id).sort().join('-')}`;
+
   return {
-    id: `synth-${Date.now()}`,
+    id: deterministicId,
     title,
     description,
     durationMinutes,
@@ -235,6 +283,6 @@ export function synthesizeRecipeFromInventory(items: FoodItem[]): RescueRecipe |
       rescued: true,
       consumeAmount: i.amount,
     })),
-    instructions,
+    instructions: cleanInstructions,
   };
 }

@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
-import { Receipt, Camera, Image as ImageIcon, Check, X, Sparkles, Store } from 'lucide-react-native';
+import { Receipt, Camera, Image as ImageIcon, Check, X, Sparkles, Store, AlertCircle } from 'lucide-react-native';
 import { FoodItem } from '../types/models';
 import {
   prepareReceiptImage,
@@ -29,12 +29,14 @@ interface ReceiptScanModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddBatchItems: (items: Omit<FoodItem, 'id' | 'addedAt'>[]) => void;
+  onOpenQuickAdd?: () => void;
 }
 
 export const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({
   isOpen,
   onClose,
   onAddBatchItems,
+  onOpenQuickAdd,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [capturedUri, setCapturedUri] = useState<string | null>(null);
@@ -98,7 +100,8 @@ export const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({
       setMarketName(res.marketName);
       setScannedItems(res.items);
     } catch (e) {
-      Alert.alert('Hata', 'Market fişi taranırken bir sorun oluştu.');
+      Alert.alert('Hata', 'Market fişi taranırken bir sorun oluştu. Lütfen fişin net bir fotoğrafını çekin veya elle ekleyin.');
+      setCapturedUri(null);
     } finally {
       setLoading(false);
     }
@@ -191,6 +194,37 @@ export const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({
               <ActivityIndicator size="large" color="#10B981" />
               <Text style={styles.loadingTitle}>Fiş Satırları Okunuyor...</Text>
               <Text style={styles.loadingDesc}>Kısaltmalar açılıyor, gıdalar ayrıştırılıyor.</Text>
+            </View>
+          )}
+
+          {/* Fiş Taranıp 0 Gıda Bulunması Durumu (Dead-End Önleyici) */}
+          {!loading && !!capturedUri && scannedItems.length === 0 && (
+            <View style={styles.pickerBody}>
+              <View style={[styles.iconCircle, { backgroundColor: 'rgba(239, 68, 68, 0.12)' }]}>
+                <AlertCircle size={40} color="#EF4444" />
+              </View>
+              <Text style={styles.pickerTitle}>Gıda Satırı Bulunamadı</Text>
+              <Text style={styles.pickerDesc}>
+                Fiş üzerindeki yazılar okunamadı veya fişte tanınan market gıdası bulunamadı. Lütfen fişi düz bir zeminde, net ışık altında yeniden çekin.
+              </Text>
+
+              <View style={styles.buttonsContainer}>
+                <TouchableOpacity style={styles.cameraBtn} onPress={handleReset} activeOpacity={0.85}>
+                  <Text style={styles.cameraBtnText}>🔄 Tekrar Dene</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.galleryBtn}
+                  onPress={() => {
+                    handleReset();
+                    onClose();
+                    if (onOpenQuickAdd) onOpenQuickAdd();
+                  }}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.galleryBtnText}>✍️ Elle Ekle</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
 

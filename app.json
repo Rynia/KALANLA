@@ -12,6 +12,7 @@
       "infoPlist": {
         "NSCameraUsageDescription": "KALANLA, buzdolabınızdaki yiyecekleri tespit etmek ve raf ömürlerini takip edebilmek için kameranızı kullanır.",
         "NSPhotoLibraryUsageDescription": "KALANLA, galerinizdeki buzdolabı fotoğraflarını seçerek envantere aktarabilmeniz için fotoğraflarınıza erişir.",
+        "NSPhotoLibraryAddUsageDescription": "KALANLA, mutfak tasarruf ve kurtarma fişinizi galerinize kaydedebilmeniz için fotoğraf ekleme izni ister.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },

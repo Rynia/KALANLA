@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import React, { useState, useEffect, memo } from 'react';
+import { StyleSheet, Text, View, Image, AppState, AppStateStatus } from 'react-native';
 import { colors, spacing, radius } from '../theme/theme';
 
 interface HeaderProps {
@@ -7,10 +7,12 @@ interface HeaderProps {
   urgentCount: number;
 }
 
-export const Header: React.FC<HeaderProps> = ({ urgentCount }) => {
+export const Header: React.FC<HeaderProps> = memo(({ urgentCount }) => {
   const [time, setTime] = useState('');
 
   useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+
     const update = () => {
       const d = new Date();
       const h = String(d.getHours()).padStart(2, '0');
@@ -18,9 +20,35 @@ export const Header: React.FC<HeaderProps> = ({ urgentCount }) => {
       const s = String(d.getSeconds()).padStart(2, '0');
       setTime(`${h}:${m}:${s}`);
     };
-    update();
-    const interval = setInterval(update, 1000);
-    return () => clearInterval(interval);
+
+    const startTimer = () => {
+      update();
+      if (!interval) {
+        interval = setInterval(update, 1000);
+      }
+    };
+
+    const stopTimer = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+
+    startTimer();
+
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
+        startTimer();
+      } else {
+        stopTimer();
+      }
+    });
+
+    return () => {
+      stopTimer();
+      subscription.remove();
+    };
   }, []);
 
   return (
@@ -57,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({ urgentCount }) => {
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

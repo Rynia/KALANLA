@@ -9,7 +9,7 @@ import { FoodItem } from '../types/models';
  */
 export function getEffectiveHoursLeft(item: FoodItem): number {
   if (item.addedTimestamp != null && item.estimatedShelfLifeHours != null) {
-    const elapsedHours = (Date.now() - item.addedTimestamp) / 3_600_000;
+    const elapsedHours = Math.max(0, (Date.now() - item.addedTimestamp) / 3_600_000);
     return Math.max(0, item.estimatedShelfLifeHours - elapsedHours);
   }
   return Math.max(0, item.hoursLeft);

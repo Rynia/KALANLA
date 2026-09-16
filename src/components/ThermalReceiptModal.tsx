@@ -30,6 +30,7 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
   const modalReceiptRef = useRef<any>(null);
   const storyCanvasRef = useRef<any>(null);
   const [sharing, setSharing] = useState(false);
+  const [isStoryPreparing, setIsStoryPreparing] = useState(false);
 
   if (!receipt) return null;
 
@@ -38,6 +39,11 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
   const handleShare = async (isStoryMode: boolean = false) => {
     try {
       setSharing(true);
+      if (isStoryMode) {
+        setIsStoryPreparing(true);
+        // Canvas'ın mount olup layout alması için 150ms bekle
+        await new Promise((resolve) => setTimeout(resolve, 150));
+      }
       if (Platform.OS !== 'web') {
         try {
           await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -82,6 +88,7 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
       Alert.alert('Hata', 'Fiş paylaşılırken bir sorun oluştu.');
     } finally {
       setSharing(false);
+      setIsStoryPreparing(false);
     }
   };
 
@@ -232,17 +239,18 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
           </View>
         </View>
 
-        {/* 9:16 OFFSCREEN CANVAS (Captured for Instagram Story, 360x640 ratio = 9:16) */}
-        <View
-          style={styles.offscreenContainer}
-          pointerEvents="none"
-          collapsable={false}
-        >
-          <ViewShot
-            ref={storyCanvasRef}
-            options={{ format: 'png', quality: 1.0 }}
-            style={styles.storyCanvas}
+        {/* 9:16 OFFSCREEN CANVAS (Yalnızca Instagram Story paylaşımı tıklandığında mount edilir - P2 Bellek Koruyucu) */}
+        {isStoryPreparing && (
+          <View
+            style={styles.offscreenContainer}
+            pointerEvents="none"
+            collapsable={false}
           >
+            <ViewShot
+              ref={storyCanvasRef}
+              options={{ format: 'png', quality: 1.0 }}
+              style={styles.storyCanvas}
+            >
             {/* Ambient Background Gradient Glow Simulation */}
             <View style={styles.storyHeader}>
               <Text style={styles.storyStudio}>RYNIA LABS PRESENTS</Text>
@@ -302,6 +310,7 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
             </View>
           </ViewShot>
         </View>
+        )}
       </View>
     </Modal>
   );
