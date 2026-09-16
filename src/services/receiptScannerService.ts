@@ -1,4 +1,4 @@
-﻿// src/services/receiptScannerService.ts
+// src/services/receiptScannerService.ts
 // Türk Market Fişleri (BİM, A101, ŞOK, MİGROS) OCR & Gıda Normalizasyon Servisi
 import * as ImageManipulator from 'expo-image-manipulator';
 import { FoodCategory, StorageLocation } from '../types/models';
@@ -121,12 +121,16 @@ Konum: Buzdolabı, Dondurucu, Kiler.`;
         }
       }
     } catch (e) {
-      console.warn('[Receipt] Gemini OCR call failed, falling back to simulated parser:', e);
+      console.warn('[Receipt] Gemini OCR call failed:', e);
     }
   }
 
-  // Çevrimdışı / API Anahtarsız Yedek Simülasyon
-  return getSimulatedReceipt();
+  // API Anahtarı veya Backend Proxy olmadan sahte veri basılmaz (Apple 2.3.1 & Store Dürüstlük Kuralı)
+  return {
+    marketName: '',
+    totalSavedOrSpentTL: 0,
+    items: [],
+  };
 }
 
 function mapToScannedFoods(rawFoods: any[]): ScannedReceiptFood[] {

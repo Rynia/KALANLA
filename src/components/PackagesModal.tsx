@@ -1,4 +1,4 @@
-﻿// src/components/PackagesModal.tsx
+// src/components/PackagesModal.tsx
 // Paketler & Abonelik Karşılaştırma Modalı (Teenage Engineering Hardware UI)
 import React from 'react';
 import {
@@ -177,7 +177,7 @@ export const PackagesModal: React.FC<PackagesModalProps> = ({
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cardTitle}>KALANLA PRO</Text>
-                  <Text style={[styles.cardPrice, { color: '#F59E0B' }]}>49.99 ₺ / Ay veya 399 ₺ / Yıl</Text>
+                  <Text style={[styles.cardPrice, { color: '#F59E0B' }]}>🚀 v1.1 ile Lansmana Özel • Çok Yakında</Text>
                 </View>
                 {currentTier === 'PRO' && (
                   <View style={styles.activePill}>
@@ -205,12 +205,12 @@ export const PackagesModal: React.FC<PackagesModalProps> = ({
                 <TouchableOpacity
                   style={styles.proUpgradeBtn}
                   onPress={() => {
-                    Alert.alert('Yakında!', 'PRO abonelik ödeme altyapısı çok yakında App Store & Google Play lansmanı ile aktif olacak.');
+                    Alert.alert('KALANLA PRO v1.1', 'PRO abonelik ve çoklu cihaz senkronizasyonu, StoreKit ve Google Play Billing altyapısıyla v1.1 lansmanında yayınlanacaktır.');
                   }}
                   activeOpacity={0.85}
                 >
                   <Crown size={16} color="#0A0A0E" />
-                  <Text style={styles.proUpgradeBtnText}>PRO'ya Yükselt</Text>
+                  <Text style={styles.proUpgradeBtnText}>v1.1 Erken Erişim (Yakında)</Text>
                 </TouchableOpacity>
               )}
             </View>

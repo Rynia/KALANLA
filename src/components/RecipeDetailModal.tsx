@@ -39,7 +39,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
           {recipe.imageUrl && (
             <View style={styles.imageBox}>
               <FoodImage
-                source={recipe.id || recipe.imageUrl}
+                source={recipe.id.startsWith('synth-') ? recipe.imageUrl : (recipe.id || recipe.imageUrl)}
                 name={recipe.title}
                 style={styles.headerImage}
               />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -430,6 +430,11 @@ export default function App() {
     );
   };
 
+  // Memoized undo toast dismiss
+  const handleUndoDismiss = useCallback(() => {
+    setIsUndoVisible(false);
+  }, []);
+
   // Open historical receipt preview from Earnings tab
   const handleOpenReceiptFromEarnings = () => {
     const now = new Date();
@@ -439,6 +444,26 @@ export default function App() {
     const formattedTime = `${String(now.getHours()).padStart(2, '0')}:${String(
       now.getMinutes(),
     ).padStart(2, '0')}`;
+
+    if (lastTransaction && lastTransaction.status === 'committed' && lastTransaction.consumedItems.length > 0) {
+      setActiveReceipt({
+        id: `rcp-${lastTransaction.id}`,
+        date: formattedDate,
+        time: formattedTime,
+        txCode: `TR-IST-034 // #${Math.floor(1000 + Math.random() * 9000)}`,
+        recipeTitle: lastTransaction.recipeTitle,
+        items: lastTransaction.consumedItems.map((ci) => ({
+          name: ci.itemSnapshot.name,
+          amount: ci.itemSnapshot.amount,
+          priceTL: ci.itemSnapshot.priceTL,
+        })),
+        totalSavedTL: lastTransaction.savedTL,
+        co2SavedKg: lastTransaction.co2SavedKg,
+        durationMinutes: 10,
+        barcodeNumber: '8 690123 456789',
+      });
+      return;
+    }
 
     setActiveReceipt({
       id: 'rcp-historical',
@@ -592,7 +617,7 @@ export default function App() {
         isVisible={isUndoVisible}
         recipeTitle={lastTransaction?.recipeTitle || ''}
         onUndo={handleUndoCook}
-        onDismiss={() => setIsUndoVisible(false)}
+        onDismiss={handleUndoDismiss}
       />
 
       {/* CINEMATIC WARM TECH ANIMATED SPLASH SCREEN */}

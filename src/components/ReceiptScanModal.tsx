@@ -45,6 +45,19 @@ export const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({
 
   const handleLaunchCamera = async () => {
     try {
+      // Google Play Prominent Disclosure (Kamera Belirgin Açıklaması)
+      const proceed = await new Promise<boolean>((resolve) => {
+        Alert.alert(
+          'Kamera Erişimi ve Gizlilik',
+          'KALANLA, market fişinizdeki ürünleri ayrıştırıp kilerinize kaydedebilmeniz için kameranızı kullanır. Fotoğraflar yalnızca fiş okuma için anlık işlenir ve kalıcı olarak saklanmaz.',
+          [
+            { text: 'Vazgeç', style: 'cancel', onPress: () => resolve(false) },
+            { text: 'Devam Et', onPress: () => resolve(true) },
+          ]
+        );
+      });
+      if (!proceed) return;
+
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('İzin Gerekli', 'Fişi tarayabilmek için kamera izni vermelisiniz.');

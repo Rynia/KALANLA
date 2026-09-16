@@ -50,7 +50,7 @@ export async function clearSubscription(): Promise<void> {
 /**
  * Üniversite Öğrencisi Doğrulaması (.edu.tr E-Posta)
  */
-export async function verifyStudentEmail(email: string): Promise<{ success: boolean; message: string }> {
+export async function verifyStudentEmail(email: string): Promise<{ success: boolean; message: string; sub?: UserSubscription }> {
   const clean = email.trim().toLowerCase();
   
   // .edu.tr veya üniversite domain kontrolü
@@ -80,6 +80,7 @@ export async function verifyStudentEmail(email: string): Promise<{ success: bool
   return {
     success: true,
     message: 'Tebrikler! Üniversite Öğrencisi Paketiniz tanımlandı. Sınırsız AI Kamera ve dolap kapasitesi aktif!',
+    sub: updatedSub,
   };
 }
 

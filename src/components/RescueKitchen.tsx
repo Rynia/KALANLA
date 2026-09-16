@@ -63,7 +63,7 @@ export const RescueKitchen: React.FC<RescueKitchenProps> = ({
           {recipe.imageUrl && (
             <View style={styles.imageContainer}>
               <FoodImage
-                source={recipe.id || recipe.imageUrl}
+                source={recipe.id.startsWith('synth-') ? recipe.imageUrl : (recipe.id || recipe.imageUrl)}
                 name={recipe.title}
                 style={styles.recipeImage}
               />

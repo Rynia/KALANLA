@@ -31,6 +31,10 @@ export interface FoodItem {
   addedTimestamp?: number;
   /** Tahmini raf ömrü saat cinsinden — addedTimestamp ile birlikte kullanılır */
   estimatedShelfLifeHours?: number;
+  /** v1.1 için ürün ekleme kaynağı */
+  sourceType?: 'manual' | 'receipt_ocr' | 'vision_ai' | 'demo';
+  /** v1.1 için ürün barkod numarası */
+  barcode?: string;
 }
 
 export interface RequiredItem {

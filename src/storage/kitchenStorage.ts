@@ -8,6 +8,8 @@ export interface PersistedKitchenState {
   rescuedCo2Kg: number;
   rescuedMealsCount: number;
   badges?: AchievementBadge[];
+  /** v1.1 şema göçleri için versiyon takibi */
+  _schemaVersion?: number;
 }
 
 const STORAGE_KEY = '@kalanla/kitchen-state-v4';
@@ -70,7 +72,8 @@ export async function loadKitchenState(): Promise<KitchenLoadResult> {
 
 export async function saveKitchenState(state: PersistedKitchenState): Promise<void> {
   try {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const payload = { ...state, _schemaVersion: 4 };
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   } catch (error) {
     console.warn('[KALANLA] AsyncStorage save error:', error);
   }
