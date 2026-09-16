@@ -122,11 +122,11 @@ export const PackagesModal: React.FC<PackagesModalProps> = ({
                       <Text style={styles.freePillText}>100% ÜCRETSİZ</Text>
                     </View>
                   </View>
-                  <Text style={[styles.cardPrice, { color: '#60A5FA' }]}>.edu.tr ile 1 Yıl Sınırsız</Text>
+                  <Text style={[styles.cardPrice, { color: '#60A5FA' }]}>.edu.tr ile v1.1'de Aktif</Text>
                 </View>
                 {currentTier === 'STUDENT' && (
                   <View style={[styles.activePill, { backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: '#3B82F6' }]}>
-                    <Text style={[styles.activePillText, { color: '#60A5FA' }]}>AKTİF PLAN</Text>
+                    <Text style={[styles.activePillText, { color: '#60A5FA' }]}>ÖN KAYIT ALINDI</Text>
                   </View>
                 )}
               </View>
@@ -164,7 +164,7 @@ export const PackagesModal: React.FC<PackagesModalProps> = ({
                   activeOpacity={0.85}
                 >
                   <GraduationCap size={16} color="#0A0A0E" />
-                  <Text style={styles.studentVerifyBtnText}>.edu.tr ile Ücretsiz Aktif Et 🎓</Text>
+                  <Text style={styles.studentVerifyBtnText}>.edu.tr ile Ön Kayıt Ol 🎓</Text>
                 </TouchableOpacity>
               )}
             </View>

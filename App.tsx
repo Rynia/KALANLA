@@ -28,7 +28,7 @@ import {
   saveKitchenState,
   clearKitchenState,
 } from './src/storage/kitchenStorage';
-import { scoreRecipes, buildConsumptionPlan, applyConsumptionPlan } from './src/utils/recipeEngine';
+import { scoreRecipes, buildConsumptionPlan, applyConsumptionPlan, parseAmountAndUnit } from './src/utils/recipeEngine';
 import { resolveFoodImage } from './src/utils/foodImageResolver';
 import { rehydrateItems } from './src/utils/timeUtils';
 import { Header } from './src/components/Header';
@@ -72,6 +72,7 @@ export default function App() {
 
   // Synchronous lock for cooking transactions (P0 double-tap guard)
   const cookingLock = useRef<boolean>(false);
+  const isResettingRef = useRef<boolean>(false);
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
@@ -141,10 +142,11 @@ export default function App() {
   }, []);
 
   // Debounced persist — state değiştiğinde 500ms sonra tek yazma işlemi
-  // HydrationStatus 'loaded' değilse (örn. 'error' veya 'loading') asla diske yazmaz
+  // HydrationStatus 'loaded' değilse veya sıfırlama işlemi sürüyorsa asla diske yazmaz
   useEffect(() => {
-    if (hydrationStatus !== 'loaded') return;
+    if (hydrationStatus !== 'loaded' || isResettingRef.current) return;
     const timeout = setTimeout(() => {
+      if (isResettingRef.current) return;
       saveKitchenState({
         foodItems,
         rescuedTotalTL,
@@ -211,15 +213,9 @@ export default function App() {
     if (missingNonPantry.length > 0) {
       const missingNames = missingNonPantry.map((m) => m.name).join(', ');
       Alert.alert(
-        'Eksik Malzeme Var',
-        `Bu tarif için dolabınızda "${missingNames}" bulunamadı. Yine de elinizdeki mevcut malzemeler dolaptan düşülsün mü?`,
-        [
-          { text: 'Vazgeç', style: 'cancel' },
-          {
-            text: 'Devam Et',
-            onPress: () => executeCookingTransaction(recipe),
-          },
-        ]
+        'Eksik Temel Malzeme',
+        `Bu tarif için "${missingNames}" kilerinizde bulunmuyor. Gerçek tasarruf hesabı ve kurtarma fişi oluşturabilmek için lütfen önce eksik malzemeleri tamamlayın veya dolabınızdakilere uygun bir kurtarma tarifi seçin.`,
+        [{ text: 'Tamam' }]
       );
       return;
     }
@@ -248,17 +244,26 @@ export default function App() {
 
       const nextItems = applyConsumptionPlan(foodItems, plan);
 
-      // 2. Fiş için tüketilen malzemeleri topla
+      // 2. Fiş için tüketilen malzemeleri topla (birim duyarlı güvenli hesaplama)
       const consumedItems: FoodItem[] = [
         ...foodItems.filter((item) => plan.toRemove.includes(item.id)),
         ...foodItems
           .filter((item) => plan.toUpdate.some((u) => u.id === item.id))
           .map((item) => {
             const upd = plan.toUpdate.find((u) => u.id === item.id)!;
-            const consumedNum = parseFloat(item.amount) - parseFloat(upd.newAmount);
-            const unitMatch = item.amount.match(/[^\d.]+/);
-            const unit = unitMatch ? unitMatch[0].trim() : '';
-            return { ...item, amount: `${isNaN(consumedNum) ? '' : consumedNum}${unit}` };
+            const current = parseAmountAndUnit(item.amount);
+            const updated = parseAmountAndUnit(upd.newAmount);
+            let consumedVal = current.value - updated.value;
+            if (current.unit === 'kg' && updated.unit === 'g') {
+              consumedVal = current.value * 1000 - updated.value;
+            } else if (current.unit === 'l' && updated.unit === 'ml') {
+              consumedVal = current.value * 1000 - updated.value;
+            }
+            const unit = updated.unit || current.unit || '';
+            return {
+              ...item,
+              amount: `${Math.max(0, Math.round(consumedVal * 10) / 10)}${unit ? (unit === 'adet' ? ' Adet' : unit) : ''}`,
+            };
           }),
       ];
 
@@ -408,6 +413,7 @@ export default function App() {
           text: 'Sıfırla ve Temizle',
           style: 'destructive',
           onPress: async () => {
+            isResettingRef.current = true;
             setFoodItems([]);
             setRescuedTotalTL(0);
             setRescuedCo2Kg(0);
@@ -420,10 +426,18 @@ export default function App() {
             setIsUndoVisible(false);
 
             // Kalıcı depolamayı diskten fiziksel olarak sil
-            await clearKitchenState();
-            await clearSubscription();
+            const okState = await clearKitchenState();
+            const okSub = await clearSubscription();
 
-            Alert.alert('Temizlendi', 'Kileriniz ve tüm yerel verileriniz başarıyla sıfırlandı.');
+            setTimeout(() => {
+              isResettingRef.current = false;
+            }, 600);
+
+            if (okState && okSub) {
+              Alert.alert('Temizlendi', 'Kileriniz ve tüm yerel verileriniz başarıyla sıfırlandı.');
+            } else {
+              Alert.alert('Bilgi', 'Yerel durum sıfırlandı; bazı önbellek dosyaları sonraki açılışta temizlenecektir.');
+            }
           },
         },
       ]

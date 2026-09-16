@@ -156,9 +156,19 @@ export interface ConsumptionPlan {
   toUpdate: { id: string; newAmount: string }[];
 }
 
+export function parseAmountAndUnit(raw: string): { value: number; unit: string } {
+  if (!raw) return { value: 0, unit: '' };
+  const clean = raw.trim().replace(',', '.');
+  const num = parseFloat(clean);
+  const unitMatch = clean.match(/[^\d.,\s]+/);
+  const unit = unitMatch ? unitMatch[0].trim().toLowerCase() : '';
+  return { value: isNaN(num) ? 0 : num, unit };
+}
+
 /**
  * Kısmi tüketim planı.
  * Fix: isMatch'i kullanarak aynı token-based eşleşme mantığıyla çalışır.
+ * Güvenli birim dönüşümü (kg <-> g, L <-> ml) ile negatif değer veya hatalı silinme önlenir.
  */
 export function buildConsumptionPlan(
   recipe: RescueRecipe,
@@ -179,21 +189,33 @@ export function buildConsumptionPlan(
       return;
     }
 
-    const consumeNum = parseFloat(req.consumeAmount);
-    const currentNum = parseFloat(found.amount);
+    const consume = parseAmountAndUnit(req.consumeAmount);
+    const current = parseAmountAndUnit(found.amount);
 
-    if (isNaN(consumeNum) || isNaN(currentNum)) {
+    if (consume.value <= 0 || current.value <= 0) {
       toRemove.push(found.id);
       return;
     }
 
-    const remaining = currentNum - consumeNum;
+    let currentInUnit = current.value;
+    let consumeInUnit = consume.value;
+    let targetUnit = current.unit;
+
+    // Birim normalizasyonu: kg -> g
+    if (current.unit === 'kg' && (!consume.unit || consume.unit === 'g' || consume.value > 10)) {
+      currentInUnit = current.value * 1000;
+      targetUnit = 'g';
+    } else if (current.unit === 'l' && (!consume.unit || consume.unit === 'ml' || consume.value > 10)) {
+      currentInUnit = current.value * 1000;
+      targetUnit = 'ml';
+    }
+
+    const remaining = currentInUnit - consumeInUnit;
     if (remaining <= 0) {
       toRemove.push(found.id);
     } else {
-      const unitMatch = found.amount.match(/[^\d.]+/);
-      const unit = unitMatch ? unitMatch[0] : '';
-      toUpdate.push({ id: found.id, newAmount: `${Math.round(remaining * 10) / 10}${unit}` });
+      const displayUnit = targetUnit ? (targetUnit === 'adet' ? ' Adet' : targetUnit) : '';
+      toUpdate.push({ id: found.id, newAmount: `${Math.round(remaining * 10) / 10}${displayUnit}` });
     }
   });
 

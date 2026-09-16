@@ -72,10 +72,10 @@ export const StudentVerifyModal: React.FC<StudentVerifyModalProps> = ({
           </View>
 
           <Text style={styles.title}>Üniversite Öğrencisi Paketi</Text>
-          <Text style={styles.subtitle}>100% ÜCRETSİZ • ÖĞRENCİ HEDİYESİ</Text>
+          <Text style={styles.subtitle}>100% ÜCRETSİZ • v1.1 ÖN KAYIT</Text>
 
           <Text style={styles.desc}>
-            Türkiye'deki üniversite öğrencilerine özel: Sınırsız dolap takibi ve öğrenci evi pratik kurtarma reçeteleri .edu.tr e-posta adresinizle 1 yıl boyunca tamamen ücretsiz olarak tanımlanır!
+            Türkiye'deki üniversite öğrencilerine özel: Sınırsız dolap takibi ve öğrenci evi pratik kurtarma reçeteleri v1.1 güncellemesinde resmi üniversite OTP doğrulamasıyla aktif edilecektir. Üniversite e-postanızı bırakarak öncelikli listeye katılabilirsiniz!
           </Text>
 
           <View style={styles.inputContainer}>
@@ -103,13 +103,13 @@ export const StudentVerifyModal: React.FC<StudentVerifyModalProps> = ({
             ) : (
               <>
                 <ShieldCheck size={18} color="#0A0A0E" />
-                <Text style={styles.verifyBtnText}>Öğrenci Paketini Aktif Et 🎓</Text>
+                <Text style={styles.verifyBtnText}>Öncelikli Listeye Kaydol 🎓</Text>
               </>
             )}
           </TouchableOpacity>
 
           <Text style={styles.disclaimer}>
-            v1.1 güncellemesinde e-Devlet ve üniversite SMS/OTP doğrulama altyapısı eklenecektir.
+            v1.1 güncellemesinde resmi üniversite SMS/OTP doğrulama altyapısı ile 1 yıl ücretsiz tanımlanacaktır.
           </Text>
         </View>
       </View>

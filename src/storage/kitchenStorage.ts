@@ -82,10 +82,12 @@ export async function saveKitchenState(state: PersistedKitchenState): Promise<vo
 /**
  * Kullanıcı "Tüm Verileri Sıfırla" dediğinde fiziksel diski tamamen temizler.
  */
-export async function clearKitchenState(): Promise<void> {
+export async function clearKitchenState(): Promise<boolean> {
   try {
     await AsyncStorage.removeItem(STORAGE_KEY);
+    return true;
   } catch (error) {
     console.warn('[KALANLA] AsyncStorage clear error:', error);
+    return false;
   }
 }

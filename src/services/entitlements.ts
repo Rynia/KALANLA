@@ -39,16 +39,19 @@ export async function saveSubscription(sub: UserSubscription): Promise<void> {
   }
 }
 
-export async function clearSubscription(): Promise<void> {
+export async function clearSubscription(): Promise<boolean> {
   try {
     await AsyncStorage.removeItem(SUB_STORAGE_KEY);
+    return true;
   } catch (e) {
     console.warn('[KALANLA] Subscription clear error:', e);
+    return false;
   }
 }
 
 /**
- * Üniversite Öğrencisi Doğrulaması (.edu.tr E-Posta)
+ * Üniversite Öğrencisi Ön Kaydı (.edu.tr E-Posta)
+ * v1.0'da dürüst waitlist kaydı yapar, v1.1 resmi OTP güncellemesinde tam aktifleşir.
  */
 export async function verifyStudentEmail(email: string): Promise<{ success: boolean; message: string; sub?: UserSubscription }> {
   const clean = email.trim().toLowerCase();
@@ -62,15 +65,10 @@ export async function verifyStudentEmail(email: string): Promise<{ success: bool
     };
   }
 
-  // Başarılı doğrulama (1 Yıllık Öğrenci Paketi hediye edilir)
-  const oneYearLater = new Date();
-  oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
-
   const updatedSub: UserSubscription = {
-    tier: 'STUDENT',
-    studentVerified: true,
+    tier: 'FREE',
+    studentVerified: false,
     studentEmail: clean,
-    verifiedUntil: oneYearLater.toISOString(),
     monthlyVisionScansUsed: 0,
     lastScanResetDate: new Date().toISOString().slice(0, 7),
   };
@@ -79,7 +77,7 @@ export async function verifyStudentEmail(email: string): Promise<{ success: bool
 
   return {
     success: true,
-    message: 'Tebrikler! Üniversite Öğrencisi Paketiniz tanımlandı. Sınırsız AI Kamera ve dolap kapasitesi aktif!',
+    message: 'Tebrikler! Üniversite e-posta adresiniz v1.1 Öğrenci Öncelikli Listesine kaydedildi. v1.1 resmi OTP güncellemesinde 1 yıllık ücretsiz paketiniz otomatik olarak tanımlanacaktır.',
     sub: updatedSub,
   };
 }
