@@ -39,7 +39,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
           {recipe.imageUrl && (
             <View style={styles.imageBox}>
               <FoodImage
-                source={recipe.imageUrl}
+                source={recipe.id || recipe.imageUrl}
                 name={recipe.title}
                 style={styles.headerImage}
               />

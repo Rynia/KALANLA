@@ -212,11 +212,19 @@ export function getLocalRecipeAsset(recipeIdOrTitle: string): ImageSourcePropTyp
     'tarhana': 'recipe-tarhana-1',
     'gozleme': 'recipe-gozleme-1',
     'bulgur pilavi': 'recipe-bulgur-pilav-1',
+    'salcali meyhane bulgur pilavi': 'recipe-bulgur-pilav-1',
+    'domatesli salcali meyhane bulgur pilavi': 'recipe-bulgur-pilav-1',
+    'yumurtali ispanak kavurmasi': 'recipe-ispanak-yumurta-1',
+    'ispanak kavurmasi': 'recipe-ispanak-yumurta-1',
     'yumurtali ispanak': 'recipe-ispanak-yumurta-1',
+    'tavada yumurtali ispanak': 'recipe-ispanak-yumurta-1',
     'patates boregi': 'recipe-patates-borek-1',
   };
 
-  for (const [key, id] of Object.entries(titleToId)) {
+  // Uzun/daha spesifik anahtarların (örn. 'yumurtali ispanak') kısa/genel anahtarlardan (örn. 'kavurma') önce eşleşmesi için uzunluğa göre azalan sırala
+  const sortedEntries = Object.entries(titleToId).sort((a, b) => b[0].length - a[0].length);
+
+  for (const [key, id] of sortedEntries) {
     if (norm.includes(key) && RECIPE_ASSETS[id]) {
       return RECIPE_ASSETS[id];
     }

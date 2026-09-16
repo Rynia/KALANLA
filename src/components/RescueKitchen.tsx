@@ -63,7 +63,7 @@ export const RescueKitchen: React.FC<RescueKitchenProps> = ({
           {recipe.imageUrl && (
             <View style={styles.imageContainer}>
               <FoodImage
-                source={recipe.imageUrl}
+                source={recipe.id || recipe.imageUrl}
                 name={recipe.title}
                 style={styles.recipeImage}
               />
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: 'relative',
-    height: 160,
+    height: 195,
     width: '100%',
   },
   recipeImage: {
