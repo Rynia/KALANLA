@@ -183,8 +183,11 @@ export const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({
                 <Receipt size={40} color="#10B981" />
               </View>
               <Text style={styles.pickerTitle}>Market Fişini Fotoğrafla</Text>
+              <View style={styles.betaBadge}>
+                <Text style={styles.betaBadgeText}>🚀 v1.1 ML KIT (BETA)</Text>
+              </View>
               <Text style={styles.pickerDesc}>
-                Fişteki kısaltmaları (örn: KAS PEY, DOMAT) gerçek gıda isimlerine çevirir; fiyat ve miktarlarıyla tek tıkla dolabına aktarır.
+                Fişteki kısaltmaları (örn: KAS PEY, DOMAT) gıda isimlerine çevirir; fiyat ve miktarlarıyla dolabına aktarır. Cihaz içi yapay zeka v1.1 lansmanıyla tam devrede olacaktır.
               </Text>
 
               <View style={styles.buttonsContainer}>
@@ -520,5 +523,22 @@ const styles = StyleSheet.create({
     color: '#0A0A0E',
     fontWeight: '800',
     fontSize: 14,
+  },
+  betaBadge: {
+    alignSelf: 'center',
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginTop: 6,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  betaBadgeText: {
+    color: '#10B981',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

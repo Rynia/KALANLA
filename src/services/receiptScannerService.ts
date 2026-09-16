@@ -154,29 +154,3 @@ function mapToScannedFoods(rawFoods: any[]): ScannedReceiptFood[] {
   });
 }
 
-function getSimulatedReceipt(): ReceiptScanResult {
-  const simulatedItems = [
-    { name: 'Kaşar Peyniri', category: 'Süt Ürünü' as FoodCategory, amount: '400g', price: 135, days: 12, location: 'Buzdolabı' as StorageLocation },
-    { name: 'Salkım Domates', category: 'Sebze' as FoodCategory, amount: '1 kg', price: 45, days: 4, location: 'Buzdolabı' as StorageLocation },
-    { name: 'Köy Yumurtası', category: 'Kiler' as FoodCategory, amount: '15 Adet', price: 95, days: 14, location: 'Buzdolabı' as StorageLocation },
-    { name: 'Taş Fırın Ekmek', category: 'Unlu Mamul' as FoodCategory, amount: '2 Adet', price: 30, days: 2, location: 'Kiler' as StorageLocation },
-    { name: 'Tavuk Göğsü', category: 'Et & Tavuk' as FoodCategory, amount: '500g', price: 110, days: 3, location: 'Buzdolabı' as StorageLocation },
-  ];
-
-  return {
-    marketName: 'BİM // FİŞ RAPORU',
-    totalSavedOrSpentTL: 415,
-    items: simulatedItems.map((s, idx) => ({
-      id: `sim-receipt-${Date.now()}-${idx}`,
-      name: s.name,
-      category: s.category,
-      amount: s.amount,
-      location: s.location,
-      priceTL: s.price,
-      hoursLeft: s.days * 24,
-      riskPercentage: s.days <= 2 ? 90 : 40,
-      imageUrl: resolveFoodImage(s.name, s.category),
-      selected: true,
-    })),
-  };
-}

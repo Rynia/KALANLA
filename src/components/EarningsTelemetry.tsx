@@ -266,14 +266,23 @@ export const EarningsTelemetry: React.FC<EarningsTelemetryProps> = ({
       </View>
 
       {/* 6. View Last Thermal Receipt CTA */}
-      <TouchableOpacity
-        style={styles.openReceiptBtn}
-        onPress={onOpenReceipt}
-        activeOpacity={0.85}
-      >
-        <Receipt size={18} color="#141210" />
-        <Text style={styles.openReceiptText}>Son Dijital Termal Fişi Aç 📄</Text>
-      </TouchableOpacity>
+      {rescuedMealsCount > 0 ? (
+        <TouchableOpacity
+          style={styles.openReceiptBtn}
+          onPress={onOpenReceipt}
+          activeOpacity={0.85}
+        >
+          <Receipt size={18} color="#141210" />
+          <Text style={styles.openReceiptText}>Son Dijital Termal Fişi Aç 📄</Text>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.emptyReceiptCard}>
+          <Receipt size={20} color="#64748B" />
+          <Text style={styles.emptyReceiptCardText}>
+            Henüz bir kurtarma fişin yok. İlk tarifini pişirdiğinde dijital termal fişin burada oluşacak!
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -642,5 +651,23 @@ const styles = StyleSheet.create({
     color: '#141210',
     fontSize: 14,
     fontWeight: '900',
+  },
+  emptyReceiptCard: {
+    backgroundColor: '#1E1E26',
+    borderWidth: 1,
+    borderColor: '#2D2D3A',
+    borderStyle: 'dashed',
+    borderRadius: radius.md,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  emptyReceiptCardText: {
+    fontSize: 12,
+    color: '#94A3B8',
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });

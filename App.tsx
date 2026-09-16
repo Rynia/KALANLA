@@ -465,22 +465,12 @@ export default function App() {
       return;
     }
 
-    setActiveReceipt({
-      id: 'rcp-historical',
-      date: formattedDate,
-      time: formattedTime,
-      txCode: 'TR-IST-034 // #8821',
-      recipeTitle: 'TAVADA ÇITIR KAŞARLI EKMEK',
-      items: [
-        { name: 'Bayat Ekmek', amount: '250g', priceTL: 25 },
-        { name: 'Kaşar Peyniri', amount: '200g', priceTL: 120 },
-        { name: 'Salkım Domates', amount: '3 Adet', priceTL: 60 },
-      ],
-      totalSavedTL: 205,
-      co2SavedKg: 1.24,
-      durationMinutes: 9,
-      barcodeNumber: '8 690123 456789',
-    });
+    // Kullanıcı henüz bir yemek pişirmediyse sahte fiş üretilmez (Google Play Deceptive Behavior Önlemi)
+    Alert.alert(
+      'Henüz Fişiniz Yok',
+      'Kilerinizdeki malzemelerle ilk kurtarma yemeğinizi pişirdiğinizde dijital termal fişiniz burada görüntülenecektir.',
+      [{ text: 'Tamam' }]
+    );
   };
 
   return (

@@ -72,7 +72,7 @@ export const LegalFooter: React.FC<LegalFooterProps> = ({ onResetData }) => {
       </TouchableOpacity>
 
       <Text style={styles.versionText}>
-        KALANLA v2.0 • Rynia Studios • Yerel Veri Modeli
+        KALANLA v1.0 • Rynia Studios • Yerel Veri Modeli
       </Text>
 
       {/* Confirmation Modal */}

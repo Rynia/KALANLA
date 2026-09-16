@@ -29,6 +29,9 @@ export const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({
   const containerOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    let isMounted = true;
+    const timers: NodeJS.Timeout[] = [];
+
     // 1. Logo belirir (0 -> 1 sn)
     Animated.parallel([
       Animated.timing(logoOpacity, {
@@ -43,8 +46,10 @@ export const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({
         useNativeDriver: true,
       }),
     ]).start(() => {
+      if (!isMounted) return;
       // 2. 1-2 sn bekleme ve ardından yavaş parıldayarak "Ne kaldıysa, ondan başla!" yazısı
-      setTimeout(() => {
+      const t1 = setTimeout(() => {
+        if (!isMounted) return;
         Animated.parallel([
           Animated.timing(textOpacity, {
             toValue: 1,
@@ -70,8 +75,10 @@ export const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({
             }),
           ]),
         ]).start(() => {
+          if (!isMounted) return;
           // 3. Yazı 1 sn parıldayarak görünür kalır
-          setTimeout(() => {
+          const t2 = setTimeout(() => {
+            if (!isMounted) return;
             // 4. Logo ve içerik ekrana doğru pürüzsüzce (smooth) zoomlanır ve fade-out olur
             Animated.parallel([
               Animated.timing(containerScale, {
@@ -85,12 +92,21 @@ export const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({
                 useNativeDriver: true,
               }),
             ]).start(() => {
-              onAnimationFinish();
+              if (isMounted) {
+                onAnimationFinish();
+              }
             });
           }, 1100);
+          timers.push(t2);
         });
       }, 700);
+      timers.push(t1);
     });
+
+    return () => {
+      isMounted = false;
+      timers.forEach(clearTimeout);
+    };
   }, []);
 
   return (
