@@ -73,7 +73,7 @@ export default function App() {
   // Synchronous lock for cooking transactions (P0 double-tap guard)
   const cookingLock = useRef<boolean>(false);
   const isResettingRef = useRef<boolean>(false);
-  const persistTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const persistTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
