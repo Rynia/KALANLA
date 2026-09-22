@@ -1,106 +1,31 @@
-<!DOCTYPE html>
-<html lang=tr>
+<!doctype html>
+<html lang="tr">
 <head>
-    <meta charset=UTF-8>
-    <meta name=viewport content=width=device-width, initial-scale=1.0>
-    <title>Gizlilik Politikası | KALANLA - Kiler & Mutfak OS</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #1e293b;
-            background-color: #f8fafc;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 32px;
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #0f172a;
-            font-size: 28px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 12px;
-            margin-bottom: 24px;
-        }
-        h2 {
-            color: #059669;
-            font-size: 20px;
-            margin-top: 28px;
-            margin-bottom: 12px;
-        }
-        p, li {
-            font-size: 15px;
-            color: #475569;
-        }
-        ul {
-            padding-left: 20px;
-        }
-        .highlight {
-            background-color: #ecfdf5;
-            border-left: 4px solid #10b981;
-            padding: 12px 16px;
-            border-radius: 4px;
-            margin: 16px 0;
-            font-size: 14px;
-        }
-        .footer {
-            margin-top: 40px;
-            padding-top: 16px;
-            border-top: 1px solid #e2e8f0;
-            font-size: 13px;
-            color: #94a3b8;
-            text-align: center;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#141210">
+  <meta name="description" content="KALANLA, kilerindeki malzemeleri takip eden ve israfı azaltan akıllı mutfak asistanı.">
+  <title>KALANLA — Akıllı Mutfak &amp; Kiler Asistanı</title>
+  <style>
+    :root{--bg:#141210;--surface:#1c1916;--surface2:#211d19;--text:#f7f3ed;--muted:#aaa198;--line:rgba(255,255,255,.1);--green:#10b981;--greenSoft:rgba(16,185,129,.14);--terracotta:#e4774e;--gold:#e4ab57;--shadow:0 24px 70px rgba(0,0,0,.35)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--text);background:radial-gradient(circle at 80% 0%,rgba(228,119,78,.13),transparent 32rem),radial-gradient(circle at 10% 22%,rgba(16,185,129,.08),transparent 28rem),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}a{color:inherit}.wrap{width:min(1140px,calc(100% - 40px));margin:0 auto}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0}.brand{display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-weight:900;letter-spacing:.18em}.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;color:#071b12;background:var(--green);box-shadow:0 0 0 7px rgba(16,185,129,.1);font-size:20px}.nav-link{color:var(--muted);text-decoration:none;font-size:14px}.nav-link:hover{color:var(--text)}
+    .hero{min-height:690px;display:grid;grid-template-columns:1.02fr .98fr;align-items:center;gap:40px;padding:64px 0 90px}.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--green);background:var(--greenSoft);border:1px solid rgba(16,185,129,.25);border-radius:999px;padding:8px 13px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 14px var(--green)}h1{max-width:700px;margin:22px 0 20px;font-size:clamp(42px,6vw,78px);line-height:.98;letter-spacing:-.065em}h1 span{color:var(--terracotta)}.hero-copy{max-width:590px;color:var(--muted);font-size:19px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:14px 19px;border-radius:13px;text-decoration:none;font-weight:800;font-size:14px;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}.button:hover{transform:translateY(-3px)}.button-primary{color:#071b12;background:var(--green);box-shadow:0 12px 28px rgba(16,185,129,.18)}.button-secondary{color:var(--text);border:1px solid var(--line);background:rgba(255,255,255,.04)}.hero-note{margin-top:18px;color:#827970;font-size:12px}
+    .scene{position:relative;min-height:470px;perspective:1100px}.scene:before{content:"";position:absolute;inset:15% 4% 5%;border-radius:50%;background:radial-gradient(ellipse,rgba(16,185,129,.18),transparent 66%);filter:blur(18px)}.glass{position:absolute;left:12%;right:8%;top:15%;bottom:5%;border:1px solid rgba(255,255,255,.15);border-radius:34px;background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.025));transform:rotateY(-12deg) rotateX(5deg);box-shadow:var(--shadow),inset 0 1px rgba(255,255,255,.13);backdrop-filter:blur(9px)}.glass:after{content:"KALANLA / KİLER RADARI";position:absolute;top:22px;left:25px;color:rgba(255,255,255,.35);font:10px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em}.dashboard{position:absolute;left:13%;right:13%;top:28%;bottom:14%;display:flex;flex-direction:column;gap:12px;padding:24px;border-radius:22px;background:rgba(20,18,16,.82);border:1px solid rgba(255,255,255,.09);transform:translateZ(35px) rotateY(-12deg) rotateX(5deg);box-shadow:20px 25px 50px rgba(0,0,0,.3)}.dash-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font:11px ui-monospace,SFMono-Regular,Menlo,monospace}.live{color:var(--green)}.metric{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric-card{padding:14px;border-radius:15px;background:var(--surface2);border:1px solid var(--line)}.metric-card small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}.metric-card strong{display:block;margin-top:5px;font-size:24px}.metric-card strong.green{color:var(--green)}.food-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:rgba(255,255,255,.045);font-size:12px}.food-row b{margin-left:auto;color:var(--gold);font-size:11px}.float{position:absolute;display:grid;place-items:center;width:75px;height:75px;border:1px solid rgba(255,255,255,.16);border-radius:23px;background:linear-gradient(145deg,rgba(255,255,255,.15),rgba(255,255,255,.035));box-shadow:0 22px 45px rgba(0,0,0,.28);font-size:37px;animation:drift 6s ease-in-out infinite}.f1{top:7%;right:12%;animation-delay:-1s}.f2{left:3%;top:39%;animation-delay:-3s}.f3{right:0;bottom:7%;animation-delay:-4.5s}@keyframes drift{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-14px) rotate(5deg)}}
+    section{padding:90px 0}.section-head{max-width:620px;margin-bottom:30px}.kicker{color:var(--terracotta);font:11px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em;text-transform:uppercase}h2{margin:10px 0;font-size:clamp(30px,4vw,48px);line-height:1.05;letter-spacing:-.045em}.section-head p{color:var(--muted)}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.card{min-height:245px;padding:24px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025))}.icon{display:grid;place-items:center;width:44px;height:44px;margin-bottom:30px;border-radius:14px;background:var(--greenSoft);font-size:22px}.card:nth-child(2) .icon{background:rgba(228,119,78,.14)}.card:nth-child(3) .icon{background:rgba(228,171,87,.14)}.card h3{margin:0 0 10px;font-size:19px}.card p{margin:0;color:var(--muted);font-size:14px}.trust{display:grid;grid-template-columns:.8fr 1.2fr;gap:35px;align-items:center;padding:32px;border:1px solid rgba(16,185,129,.25);border-radius:26px;background:linear-gradient(120deg,rgba(16,185,129,.1),rgba(255,255,255,.035))}.trust-badge{display:flex;align-items:center;gap:14px}.trust-badge strong{display:block;font-size:18px}.trust-badge small{color:var(--muted)}.shield{display:grid;place-items:center;width:62px;height:62px;border-radius:19px;background:var(--green);color:#071b12;font-size:29px}.trust p{margin:0;color:var(--muted);font-size:14px}footer{padding:34px 0 45px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}.footer-row{display:flex;justify-content:space-between;align-items:center;gap:18px}footer a{color:var(--text);text-underline-offset:4px}
+    @media(max-width:820px){.hero{grid-template-columns:1fr;padding-top:45px}.scene{min-height:430px}.cards{grid-template-columns:1fr}.trust{grid-template-columns:1fr}}@media(max-width:520px){.wrap{width:min(100% - 28px,1140px)}nav{padding:17px 0}.nav-link{font-size:12px}h1{font-size:48px}.hero-copy{font-size:16px}.scene{min-height:350px}.glass{left:2%;right:0}.dashboard{left:4%;right:5%;padding:15px}.float{width:58px;height:58px;font-size:28px;border-radius:17px}.f1{right:2%}.f2{left:-3%}.footer-row{flex-direction:column;align-items:flex-start}section{padding:65px 0}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+  </style>
 </head>
 <body>
-    <div class=container>
-        <h1>KALANLA Gizlilik Politikası</h1>
-        <p><strong>Son Güncelleme:</strong> 22 Eylül 2026</p>
-        <p><strong>Geliştirici:</strong> Rynia Studios (İletişim: ryniastudios@gmail.com)</p>
-
-        <div class="highlight">
-            <strong>Özet:</strong> KALANLA, kullanıcı gizliliğine ve veri güvenliğine en üst düzeyde önem verir. Uygulamamız "Local-First" (Önce Yerel Cihaz) mimarisiyle tasarlanmıştır. Kiler envanteriniz, harcama kayıtlarınız ve alışveriş verileriniz yalnızca sizin cihazınızda saklanır ve harici sunuculara aktarılmaz.
-        </div>
-
-        <h2>1. Toplanan Bilgiler ve Kullanım Amaçları</h2>
-        <p>KALANLA v1.0 uygulamasını kullandığınızda aşağıdaki veriler işlenir:</p>
-        <ul>
-            <li><strong>Kiler ve Envanter Bilgileri:</strong> Eklediğiniz malzemeler, miktarlar ve son kullanma tarihleri. Bu veriler yalnızca cihazınızın yerel depolama alanında (AsyncStorage) saklanır.</li>
-            <li><strong>Kamera İzni:</strong> Market fişlerini veya malzemelerinizi fotoğraflayıp envantere aktarabilmeniz için kamera izni istenir. Fotoğraflar hiçbir uzak sunucuya yüklenmez veya saklanmaz.</li>
-            <li><strong>Üniversite Öğrencisi Ön Kaydı:</strong> İsteğe bağlı olarak girilen .edu.tr e-posta adresi, yalnızca v1.1 lansmanı için cihazınızda yerel bir ön kayıt işareti olarak tutulur; harici hiçbir sunucuya iletilmez.</li>
-            <li><strong>Finansal Bilgiler ve Satın Alma:</strong> KALANLA v1.0 tamamen ücretsiz bir kiler yönetim asistanıdır. Kredi kartı, banka veya ödeme verisi toplanmamakta ve işlenmemektedir.</li>
-        </ul>
-
-        <h2>2. İzinler</h2>
-        <ul>
-            <li><strong>CAMERA (Kamera İzni):</strong> Sadece kullanıcı isteğe bağlı olarak fiş veya malzeme fotoğraflama özelliğini kullandığında kullanılır.</li>
-            <li><strong>INTERNET:</strong> Tarif ve gıda görsellerinin yüklenmesi ve yasal bağlantıların açılması için kullanılır.</li>
-        </ul>
-
-        <h2>3. Verilerin Paylaşılması ve Üçüncü Taraflar</h2>
-        <p>Rynia Studios olarak kişisel verilerinizi hiçbir üçüncü şahsa, reklam verenlere veya veri komisyoncularına satmayız, kiralamayız ve aktarmayız. Uygulama içerisinde kullanıcıyı takip eden üçüncü taraf reklam veya analitik izleyicileri yer almaz.</p>
-
-        <h2>4. Verilerin Güvenliği ve Silinmesi</h2>
-        <p>Tüm verileriniz cihazınızda saklandığından, uygulamayı sildiğinizde veya uygulama içi Ayarlar sekmesinden Verileri Sıfırla seçeneğini kullandığınızda tüm kiler ve kullanım verileriniz kalıcı olarak imha edilir.</p>
-
-        <h2>5. Çocukların Gizliliği</h2>
-        <p>KALANLA genel kitleye hitap eden bir mutfak ve bütçe yönetim aracıdır. 13 yaşın altındaki çocuklardan bilerek herhangi bir kişisel veri toplamamaktadır.</p>
-
-        <h2>6. İletişim</h2>
-        <p>Gizlilik politikamız veya veri güvenliğiyle ilgili sorularınız için bizimle doğrudan iletişime geçebilirsiniz:</p>
-        <p><strong>E-posta:</strong> ryniastudios@gmail.com<br>
-        <strong>Geliştirici:</strong> Rynia Studios</p>
-
-        <div class=footer>
-            &copy; 2026 Rynia Studios. Tüm hakları saklıdır. KALANLA - Kiler & Mutfak OS
-        </div>
-    </div>
+  <header class="wrap"><nav aria-label="Ana navigasyon"><a class="brand" href="#top" aria-label="KALANLA ana sayfa"><span class="mark">⌁</span><span>KALANLA</span></a><a class="nav-link" href="privacy-policy.html">Gizlilik Politikası ↗</a></nav></header>
+  <main id="top">
+    <section class="wrap hero">
+      <div><div class="eyebrow"><i></i> v1.0 • Local-first</div><h1>Mutfağında ne kaldıysa, <span>ondan başla.</span></h1><p class="hero-copy">KALANLA; kilerindeki malzemeleri takip eden, yaklaşan son kullanma tarihlerini görünür kılan ve evdeki malzemelerle sıfır atık tarifler sunan akıllı mutfak asistanı.</p><div class="actions"><a class="button button-primary" href="https://play.google.com/store/apps/details?id=com.rynia.kalanla" target="_blank" rel="noopener">Google Play'den İndir <span>↗</span></a><a class="button button-secondary" href="#features">Nasıl çalışır? ↓</a></div><p class="hero-note">Kiler verilerin v1.0’da cihazında kalır. Gereksiz hesap, reklam ve takip yok.</p></div>
+      <div class="scene" aria-label="KALANLA kiler radarı ön izlemesi"><div class="glass"></div><div class="dashboard"><div class="dash-top"><span>01 // DOLAP RADARI</span><span class="live">● CANLI</span></div><div class="metric"><div class="metric-card"><small>Dolap değeri</small><strong>₺640</strong></div><div class="metric-card"><small>Kurtarılan</small><strong class="green">₺280</strong></div></div><div class="food-row"><span>🍅</span><span>Salkım domates</span><b>36 saat</b></div><div class="food-row"><span>🥬</span><span>Ispanak</span><b>2 gün</b></div><div class="food-row"><span>🍞</span><span>Ekşi mayalı ekmek</span><b>5 gün</b></div></div><div class="float f1">🍅</div><div class="float f2">🥬</div><div class="float f3">🫙</div></div>
+    </section>
+    <section class="wrap" id="features"><div class="section-head"><div class="kicker">Kiler OS / 03 çekirdek özellik</div><h2>İsrafı azaltan küçük kararlar.</h2><p>Mutfağını karmaşık tablolarla değil, günlük alışkanlıklarına uyum sağlayan sade bir radar ile yönet.</p></div><div class="cards"><article class="card"><div class="icon">⌁</div><h3>Dolap Radarı</h3><p>Malzemelerini, miktarlarını ve yaklaşan riskleri tek bakışta gör. Önce neyi tüketmen gerektiğini bil.</p></article><article class="card"><div class="icon">✦</div><h3>Sıfır Atık Şef Reçeteleri</h3><p>Evdeki malzemelerine göre kurtarma tariflerini keşfet; gerçekten tükettiğin malzemelerle tasarrufunu takip et.</p></article><article class="card"><div class="icon">▤</div><h3>Termal Tasarruf Fişi</h3><p>Her kurtarma hamlesinden sonra oluşan dijital fişle sofranda ve bütçende kalan değeri gör.</p></article></div></section>
+    <section class="wrap"><div class="trust"><div class="trust-badge"><div class="shield">✓</div><div><strong>%100 Local-First</strong><small>Verin cihazında, kontrol sende.</small></div></div><p>KALANLA v1.0’da kiler, tasarruf ve kullanım verileri cihazının yerel depolamasında tutulur. Verilerini istediğin zaman uygulama içinden sıfırlayabilirsin.</p></div></section>
+  </main>
+  <footer><div class="wrap footer-row"><div><strong>Rynia Studios</strong> · KALANLA Kitchen OS<br><span>Ne kaldıysa, ondan başla.</span></div><a href="privacy-policy.html">Gizlilik Politikası (Privacy Policy) ↗</a></div></footer>
 </body>
 </html>
