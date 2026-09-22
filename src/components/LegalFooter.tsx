@@ -65,7 +65,7 @@ export const LegalFooter: React.FC<LegalFooterProps> = ({ onResetData }) => {
 
       <TouchableOpacity
         style={styles.privacyButton}
-        onPress={() => Linking.openURL('https://ryniastudios.netlify.app/privacy.html')}
+        onPress={() => Linking.openURL('https://rynia.github.io/KALANLA/')}
         activeOpacity={0.7}
       >
         <Text style={styles.privacyButtonText}>Gizlilik Politikası (Privacy Policy) ↗</Text>
