@@ -68,106 +68,12 @@ export async function compressAndBase64(imageUri: string): Promise<string> {
  * Deterministik olarak boş dizi [] döner.
  */
 export async function detectFoodItemsFromImage(
-  base64Data: string,
-  apiKey?: string
+  _base64Data: string,
+  _apiKey?: string
 ): Promise<DetectedFoodItem[]> {
-  if (!apiKey || apiKey.trim().length < 5) {
-    // API anahtarı girilmediğinde deterministik boş durum (Apple 2.3 uyumlu, sahte veri yok)
-    return [];
-  }
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 saniye katı timeout (Apple 4.2 kuralı)
-
-  try {
-    // 1. OPENAI GPT-4o-mini Engine (Production Provider)
-    if (ACTIVE_VISION_PROVIDER === 'openai') {
-      const response = await fetch(OPENAI_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        signal: controller.signal,
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            {
-              role: 'user',
-              content: [
-                { type: 'text', text: 'Bu buzdolabındaki/mutfaktaki malzemeleri JSON olarak çıkar.' },
-                {
-                  type: 'image_url',
-                  image_url: {
-                    url: `data:image/jpeg;base64,${base64Data}`,
-                  },
-                },
-              ],
-            },
-          ],
-          response_format: { type: 'json_object' },
-          max_tokens: 800,
-        }),
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        const content = data.choices?.[0]?.message?.content ?? '{}';
-        const parsed = JSON.parse(content);
-        if (Array.isArray(parsed.items) && parsed.items.length > 0) {
-          return mapToDetectedFoodItems(parsed.items);
-        }
-      }
-      return [];
-    }
-
-    // 2. GEMINI ENGINE FALLBACK (Eğer Gemini seçildiyse)
-    const geminiUrl = `${GEMINI_ENDPOINT}?key=${apiKey}`;
-    const response = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: controller.signal,
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: SYSTEM_PROMPT },
-              {
-                inline_data: {
-                  mime_type: 'image/jpeg',
-                  data: base64Data,
-                },
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2,
-        },
-      }),
-    });
-
-    clearTimeout(timeoutId);
-
-    if (response.ok) {
-      const data = await response.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
-      const cleanJson = text.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(cleanJson);
-
-      if (Array.isArray(parsed.items) && parsed.items.length > 0) {
-        return mapToDetectedFoodItems(parsed.items);
-      }
-    }
-  } catch (e: any) {
-    clearTimeout(timeoutId);
-    console.warn('[Vision] Vision API isteği başarısız oldu veya zaman aşımına uğradı:', e?.message || e);
-  }
-
-  // Apple Guideline 2.3: Sahte veri yok, temiz boş durum
+  // v1.0 Google Play & Data Safety Uyum Kalkanı:
+  // v1.0'da tüm kiler yerel cihazda çalışır, hiçbir görsel dış sunucuya aktarılmaz.
+  // Gerçek AI Vision analiz motoru v1.1 ile güvenli backend proxy üzerinden sunulacaktır.
   return [];
 }
 

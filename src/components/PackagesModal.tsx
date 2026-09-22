@@ -96,7 +96,7 @@ export const PackagesModal: React.FC<PackagesModalProps> = ({
                 </View>
                 <View style={styles.featureRow}>
                   <Check size={14} color="#10B981" />
-                  <Text style={styles.featureText}>Ayda 5 AI Kamera Taraması</Text>
+                  <Text style={styles.featureText}>Hızlı Ekle ile Sınırsız Malzeme Girişi</Text>
                 </View>
                 <View style={styles.featureRow}>
                   <Check size={14} color="#10B981" />

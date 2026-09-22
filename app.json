@@ -28,7 +28,15 @@
     },
     "plugins": [
       "expo-asset",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "KALANLA, market fişinizi veya buzdolabı fotoğrafınızı seçebilmeniz için galerinize erişir.",
+          "cameraPermission": "KALANLA, fiş ve buzdolabı taraması için kameranızı kullanır."
+        }
+      ],
+      "expo-image-manipulator"
     ],
     "extra": {
       "eas": {

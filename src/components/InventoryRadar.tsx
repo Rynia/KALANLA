@@ -102,7 +102,7 @@ export const InventoryRadar: React.FC<InventoryRadarProps> = ({
       <View style={styles.radarCard}>
         <View style={styles.radarCol}>
           <Text style={styles.radarLabel}>DOLAP DEĞERİ</Text>
-          <Text style={styles.radarValue}>₺{totalPantryValue}</Text>
+          <Text style={styles.radarValue} numberOfLines={1} adjustsFontSizeToFit>₺{totalPantryValue}</Text>
           <Text style={styles.radarSub}>{items.length} Kalem Gıda</Text>
         </View>
 
@@ -110,7 +110,7 @@ export const InventoryRadar: React.FC<InventoryRadarProps> = ({
 
         <View style={styles.radarCol}>
           <Text style={[styles.radarLabel, { color: '#EF4444' }]}>48S RİSKTE</Text>
-          <Text style={[styles.radarValue, { color: '#EF4444' }]}>₺{riskValue48h}</Text>
+          <Text style={[styles.radarValue, { color: '#EF4444' }]} numberOfLines={1} adjustsFontSizeToFit>₺{riskValue48h}</Text>
           <Text style={[styles.radarSub, { color: '#EF4444' }]}>
             {urgentItems.length} Ürün Acil
           </Text>
@@ -120,7 +120,7 @@ export const InventoryRadar: React.FC<InventoryRadarProps> = ({
 
         <View style={styles.radarCol}>
           <Text style={[styles.radarLabel, { color: '#10B981' }]}>KURTARILAN</Text>
-          <Text style={[styles.radarValue, { color: '#10B981' }]}>₺{rescuedTotalTL}</Text>
+          <Text style={[styles.radarValue, { color: '#10B981' }]} numberOfLines={1} adjustsFontSizeToFit>₺{rescuedTotalTL}</Text>
           <Text style={[styles.radarSub, { color: '#10B981' }]}>Cepte Kaldı</Text>
         </View>
       </View>

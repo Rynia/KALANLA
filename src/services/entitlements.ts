@@ -56,12 +56,13 @@ export async function clearSubscription(): Promise<boolean> {
 export async function verifyStudentEmail(email: string): Promise<{ success: boolean; message: string; sub?: UserSubscription }> {
   const clean = email.trim().toLowerCase();
   
-  // .edu.tr veya üniversite domain kontrolü
-  const isEdu = clean.endsWith('.edu.tr') || clean.includes('.edu.');
+  // Geçerli e-posta formatı ve .edu.tr / .edu uzantı kontrolü
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(edu\.tr|edu)$/i;
+  const isEdu = emailRegex.test(clean);
   if (!isEdu) {
     return {
       success: false,
-      message: 'Lütfen geçerli bir üniversite e-posta adresi girin (örn: ogrenci@itu.edu.tr).',
+      message: 'Lütfen geçerli bir üniversite e-posta adresi girin (örn: isim@universite.edu.tr).',
     };
   }
 

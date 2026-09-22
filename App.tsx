@@ -73,6 +73,7 @@ export default function App() {
   // Synchronous lock for cooking transactions (P0 double-tap guard)
   const cookingLock = useRef<boolean>(false);
   const isResettingRef = useRef<boolean>(false);
+  const persistTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
@@ -145,7 +146,12 @@ export default function App() {
   // HydrationStatus 'loaded' değilse veya sıfırlama işlemi sürüyorsa asla diske yazmaz
   useEffect(() => {
     if (hydrationStatus !== 'loaded' || isResettingRef.current) return;
-    const timeout = setTimeout(() => {
+
+    if (persistTimerRef.current) {
+      clearTimeout(persistTimerRef.current);
+    }
+
+    persistTimerRef.current = setTimeout(() => {
       if (isResettingRef.current) return;
       saveKitchenState({
         foodItems,
@@ -155,7 +161,12 @@ export default function App() {
         badges,
       });
     }, 500);
-    return () => clearTimeout(timeout);
+
+    return () => {
+      if (persistTimerRef.current) {
+        clearTimeout(persistTimerRef.current);
+      }
+    };
   }, [foodItems, rescuedTotalTL, rescuedCo2Kg, rescuedMealsCount, badges, hydrationStatus]);
 
   // Handle Tab Switch (if center 'ekle' is clicked, open modal directly)
@@ -414,6 +425,9 @@ export default function App() {
           style: 'destructive',
           onPress: async () => {
             isResettingRef.current = true;
+            if (persistTimerRef.current) {
+              clearTimeout(persistTimerRef.current);
+            }
             setFoodItems([]);
             setRescuedTotalTL(0);
             setRescuedCo2Kg(0);

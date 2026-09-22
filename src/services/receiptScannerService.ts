@@ -46,86 +46,12 @@ export async function prepareReceiptImage(uri: string): Promise<string> {
  * Fiş fotoğrafını Gemini veya yerel Türk market parserı ile analiz eder.
  */
 export async function parseMarketReceipt(
-  base64Image: string,
-  apiKey?: string
+  _base64Image: string,
+  _apiKey?: string
 ): Promise<ReceiptScanResult> {
-  if (apiKey && apiKey.trim().length > 10) {
-    try {
-      const prompt = `Sen Türk perakende market fişleri (BİM, A101, ŞOK, Migros, CarrefourSA vb.) üzerinde uzmanlaşmış bir OCR ve gıda ayrıştırma motorusun.
-Bu fiş fotoğrafındaki gıda maddelerini tespit et.
-
-GÖREVLER:
-1. Market adını tespit et (BİM, A101, ŞOK, MİGROS veya DİĞER).
-2. GIDA DIŞI TÜM SATIRLARI ELE: 'POSET', 'DETERJAN', 'SABUN', 'KDV', 'TOPLAM', 'NAKIT', 'KREDI KARTI', 'BILGI FISIDIR' vb.
-3. Market kısaltmalarını gerçek Türkçe gıda adlarına dönüştür:
-   - 'KAS PEY' -> 'Kaşar Peyniri'
-   - 'SALKIM DOM' -> 'Salkım Domates'
-   - 'TAV GOG' -> 'Tavuk Göğsü'
-   - 'UHT SUT 1L' -> 'Süt'
-   - 'YUM M 15LI' -> 'Yumurta'
-4. Miktar, fiyat ve buzdolabı saklama ömrünü tahmin et.
-
-YALNIZCA SAF JSON ŞEMASIYLA YANIT VER:
-{
-  "marketName": "BİM",
-  "totalTL": 285.50,
-  "foods": [
-    {
-      "name": "Kaşar Peyniri",
-      "category": "Süt Ürünü",
-      "amount": "400g",
-      "priceTL": 130,
-      "shelfLifeDays": 15,
-      "location": "Buzdolabı"
-    }
-  ]
-}
-Kategoriler: Süt Ürünü, Sebze, Meyve, Et & Tavuk, Şarküteri, Unlu Mamul, Kiler.
-Konum: Buzdolabı, Dondurucu, Kiler.`;
-
-      const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: prompt },
-                {
-                  inline_data: {
-                    mime_type: 'image/jpeg',
-                    data: base64Image,
-                  },
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.1,
-          },
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
-        const cleanJson = text.replace(/```json|```/g, '').trim();
-        const parsed = JSON.parse(cleanJson);
-
-        if (Array.isArray(parsed.foods) && parsed.foods.length > 0) {
-          return {
-            marketName: parsed.marketName || 'Market Fişi',
-            totalSavedOrSpentTL: parsed.totalTL || 0,
-            items: mapToScannedFoods(parsed.foods),
-          };
-        }
-      }
-    } catch (e) {
-      console.warn('[Receipt] Gemini OCR call failed:', e);
-    }
-  }
-
-  // API Anahtarı veya Backend Proxy olmadan sahte veri basılmaz (Apple 2.3.1 & Store Dürüstlük Kuralı)
+  // v1.0 Google Play & Data Safety Uyum Kalkanı:
+  // Fiş görseli hiçbir dış sunucuya gönderilmez.
+  // v1.1 ile güvenli backend proxy ve on-device ML Kit OCR üzerinden aktifleşecektir.
   return {
     marketName: '',
     totalSavedOrSpentTL: 0,

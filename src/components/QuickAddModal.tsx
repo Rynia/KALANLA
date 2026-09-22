@@ -192,6 +192,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               placeholder="Malzeme ara (Örn: Kaşar, Domates, Kıyma)..."
               placeholderTextColor="#64748B"
               value={search}
+              maxLength={40}
               onChangeText={(text) => {
                 setSearch(text);
                 setName(text);
@@ -297,7 +298,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
                   <Text style={styles.stepperVal}>₺{priceTL}</Text>
                   <TouchableOpacity
                     style={styles.stepperBtn}
-                    onPress={() => setPriceTL(priceTL + 10)}
+                    onPress={() => setPriceTL((prev) => Math.min(9999, prev + 10))}
                   >
                     <Plus size={14} color="#F8FAFC" />
                   </TouchableOpacity>

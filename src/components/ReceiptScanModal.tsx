@@ -176,33 +176,34 @@ export const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          {/* Fiş Çekilmediyse Seçim Ekranı */}
-          {!capturedUri && (
-            <View style={styles.pickerBody}>
-              <View style={styles.iconCircle}>
-                <Receipt size={40} color="#10B981" />
-              </View>
-              <Text style={styles.pickerTitle}>Market Fişini Fotoğrafla</Text>
-              <View style={styles.betaBadge}>
-                <Text style={styles.betaBadgeText}>🚀 v1.1 ML KIT (BETA)</Text>
-              </View>
-              <Text style={styles.pickerDesc}>
-                Fişteki kısaltmaları (örn: KAS PEY, DOMAT) gıda isimlerine çevirir; fiyat ve miktarlarıyla dolabına aktarır. Cihaz içi yapay zeka v1.1 lansmanıyla tam devrede olacaktır.
-              </Text>
-
-              <View style={styles.buttonsContainer}>
-                <TouchableOpacity style={styles.cameraBtn} onPress={handleLaunchCamera} activeOpacity={0.85}>
-                  <Camera size={18} color="#0A0A0E" />
-                  <Text style={styles.cameraBtnText}>Fişi Çek</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.galleryBtn} onPress={handleLaunchGallery} activeOpacity={0.85}>
-                  <ImageIcon size={18} color="#F8FAFC" />
-                  <Text style={styles.galleryBtnText}>Galeriden Seç</Text>
-                </TouchableOpacity>
-              </View>
+          {/* v1.0 Lansman Ön-Bilgilendirme ve Dürüst Beta Vitrini */}
+          <View style={styles.pickerBody}>
+            <View style={styles.iconCircle}>
+              <Receipt size={40} color="#10B981" />
             </View>
-          )}
+
+            <View style={styles.betaBadge}>
+              <Text style={styles.betaBadgeText}>🚀 v1.1 GÜNCELLEMESİNDE GELİYOR</Text>
+            </View>
+
+            <Text style={styles.pickerTitle}>Market Fişi OCR Tarayıcı</Text>
+            <Text style={styles.pickerDesc}>
+              BİM, A101, ŞOK, Migros fişlerinizi tek karede okutup kısaltmaları gıdaya dönüştüren yapay zeka ve OCR motorumuz v1.1 ile aktif olacaktır. Şu an kilerinizi Hızlı Ekle ile saniyeler içinde doldurabilirsiniz.
+            </Text>
+
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity
+                style={styles.cameraBtn}
+                onPress={() => {
+                  onClose();
+                  if (onOpenQuickAdd) onOpenQuickAdd();
+                }}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.cameraBtnText}>✍️ Malzemeleri Hızlı Ekle</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
           {/* Analiz Ediliyor Ekranı */}
           {loading && (
