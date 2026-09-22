@@ -78,7 +78,7 @@ export async function verifyStudentEmail(email: string): Promise<{ success: bool
 
   return {
     success: true,
-    message: 'Tebrikler! Üniversite e-posta adresiniz v1.1 Öğrenci Öncelikli Listesine kaydedildi. v1.1 resmi OTP güncellemesinde 1 yıllık ücretsiz paketiniz otomatik olarak tanımlanacaktır.',
+    message: 'Üniversite e-posta adresiniz bu cihazda yerel olarak kaydedildi. v1.1 öğrenci programı resmi güncellemesiyle aktifleştiğinde öncelikli erişim için kullanılacaktır.',
     sub: updatedSub,
   };
 }

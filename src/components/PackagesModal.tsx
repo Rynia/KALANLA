@@ -64,11 +64,9 @@ export const PackagesModal: React.FC<PackagesModalProps> = ({
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
             {/* Mevcut Durum Barı */}
             <View style={styles.statusBox}>
-              <Text style={styles.statusBoxLabel}>AYLIK AI DOLAP & FİŞ TARAMA HAKKI</Text>
+              <Text style={styles.statusBoxLabel}>KİLER & ENVANTER ERİŞİMİ</Text>
               <Text style={styles.statusBoxVal}>
-                {currentTier === 'FREE'
-                  ? `${remainingScans} / 5 Hak Kaldı`
-                  : 'Sınırsız (Limitsiz AI)'}
+                Sınırsız Hızlı Malzeme Ekleme (Aktif)
               </Text>
             </View>
 
