@@ -405,9 +405,9 @@
         <div class="receipt reveal">
           <div class="rhead">TERMİNAL #04 · RYNIA KITCHEN OS<br>TR-IST-034 // #8821</div>
           <div class="rtitle">Mayasız Anne Usulü Çabuk Pişi</div>
-          <div class="rline"><span>01. Un (2.5 su bardağı) ✓</span><span>₺8.75</span></div>
-          <div class="rline"><span>02. Yoğurt (1 çay bardağı) ✓</span><span>₺6.50</span></div>
-          <div class="rline"><span>03. Yumurta (1 adet) ✓</span><span>₺8.30</span></div>
+          <div class="rline"><span>01. Un (1 kg Paket) ✓</span><span>₺32.50</span></div>
+          <div class="rline"><span>02. Süzme Yoğurt (500g) ✓</span><span>₺37.50</span></div>
+          <div class="rline"><span>03. Köy Yumurtası (3 Adet) ✓</span><span>₺25.00</span></div>
           <div class="rtotal"><span>TOPLAM TASARRUF</span><span>₺95.00</span></div>
           <div class="rfoot">🌯 ~0.6 Tavuk Dürüm Değerinde</div>
           <div class="rquote">"Ne kaldıysa, ondan başla."</div>
@@ -605,24 +605,24 @@
 
   /* ================= INTERACTIVE DEMO ================= */
   var ING = {
-    tomato: { emoji:'🍅', name:'Domates', cost:8 },
-    bread:  { emoji:'🥖', name:'Bayat Ekmek', cost:6 },
-    yogurt: { emoji:'🥛', name:'Yoğurt', cost:16 },
-    cheese: { emoji:'🧀', name:'Kaşar', cost:38 },
-    egg:    { emoji:'🥚', name:'Yumurta', cost:9 }
+    tomato: { emoji:'🍅', name:'Domates (500g)', cost:35 },
+    bread:  { emoji:'🥖', name:'Bayat Ekmek (2 Adet)', cost:25 },
+    yogurt: { emoji:'🥛', name:'Süzme Yoğurt (500g)', cost:55 },
+    cheese: { emoji:'🧀', name:'Kaşar Peyniri (300g)', cost:110 },
+    egg:    { emoji:'🥚', name:'Köy Yumurtası (4 Adet)', cost:40 }
   };
-  var DURUM_PRICE = 325;
+  var DURUM_PRICE = 160; // 2026 KALANLA Benchmark: 1 Tavuk Dürüm ~160 TL
   var RECIPES = {
-    'bread,cheese': { title:'Kaşarlı Tost Dilimleri', time:8,  tasarruf:260 },
-    'bread,egg':    { title:'Fırında Ekmekli Yumurta Kapama', time:12, tasarruf:195 },
-    'bread,tomato': { title:'Ekmek Üstü Domates Bruschetta', time:9,  tasarruf:150 },
-    'bread,yogurt': { title:'Yoğurt Soslu Bayat Ekmek Mantısı', time:15, tasarruf:325 },
-    'cheese,egg':   { title:'Kaşarlı Sahanda Yumurta', time:8,  tasarruf:275 },
-    'cheese,tomato':{ title:'Domates Kaşarlı Kaşık Salatası', time:6,  tasarruf:230 },
-    'cheese,yogurt':{ title:'Yoğurtlu Kaşar Mezesi', time:5,  tasarruf:245 },
-    'egg,tomato':   { title:'Klasik Domatesli Menemen', time:12, tasarruf:160 },
-    'egg,yogurt':   { title:'Yoğurtlu Çırpma Omlet', time:10, tasarruf:180 },
-    'tomato,yogurt':{ title:'Yoğurt Soslu Domates Mezesi', time:6,  tasarruf:140 }
+    'bread,cheese': { title:'Kaşarlı Tost Dilimleri', time:8 },
+    'bread,egg':    { title:'Fırında Ekmekli Yumurta Kapama', time:12 },
+    'bread,tomato': { title:'Ekmek Üstü Domates Bruschetta', time:9 },
+    'bread,yogurt': { title:'Yoğurt Soslu Bayat Ekmek Mantısı', time:15 },
+    'cheese,egg':   { title:'Kaşarlı Sahanda Yumurta', time:8 },
+    'cheese,tomato':{ title:'Domates Kaşarlı Kaşık Salatası', time:6 },
+    'cheese,yogurt':{ title:'Yoğurtlu Kaşar Mezesi', time:5 },
+    'egg,tomato':   { title:'Klasik Domatesli Menemen', time:12 },
+    'egg,yogurt':   { title:'Yoğurtlu Çırpma Omlet', time:10 },
+    'tomato,yogurt':{ title:'Yoğurt Soslu Domates Mezesi', time:6 }
   };
 
   var grid = document.getElementById('ingGrid');
@@ -661,16 +661,20 @@
       return;
     }
     var base = [selected[0], selected[1]].slice().sort().join(',');
-    var recipe = RECIPES[base] || RECIPES['bread,yogurt'];
+    var recipe = RECIPES[base] || { title:'Sıfır Atık Karışık Mutfak Tavası', time:10 };
     var bonusId = selected.length === 3 ? selected[2] : null;
     var title = recipe.title;
     var time = recipe.time;
-    var tasarruf = recipe.tasarruf;
     if(bonusId){
-      title += ' + ' + ING[bonusId].name;
+      var bonusName = ING[bonusId].name.split(' (')[0];
+      title += ' + ' + bonusName;
       time += 3;
-      tasarruf += ING[bonusId].cost * 4;
     }
+    
+    // Toplam tasarruf seçilen malzemelerin birebir toplamıdır
+    var tasarruf = selected.reduce(function(acc, id){
+      return acc + ING[id].cost;
+    }, 0);
     var drum = (tasarruf / DURUM_PRICE).toFixed(1);
 
     var box = document.createElement('div');
@@ -679,7 +683,7 @@
       '<div class="rhead">SENTETİK ŞEF · KALANLA DEMO<br>SIMÜLASYON // ' + time + ' DK</div>' +
       '<div class="rtitle" id="demoTitle"></div>' +
       '<div id="demoLines"></div>' +
-      '<div class="rtotal"><span>TOPLAM TASARRUF</span><span>₺' + tasarruf.toFixed(0) + '</span></div>' +
+      '<div class="rtotal"><span>TOPLAM TASARRUF</span><span>₺' + tasarruf.toFixed(2) + '</span></div>' +
       '<div class="rfoot">🌯 ~' + drum + ' Tavuk Dürüm Değerinde</div>';
     wrap.innerHTML = '';
     wrap.appendChild(box);
