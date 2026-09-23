@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>KALANLA — Akıllı Mutfak &amp; Kiler Asistanı | Rynia Studios</title>
 <meta name="description" content="KALANLA, dolabındaki malzemeleri takip eden, son kullanma tarihlerini hatırlatan ve sıfır atık yemek tarifleri üreten akıllı mutfak asistanıdır. %100 yerel veri modeli.">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta property="og:title" content="KALANLA — Ne kaldıysa, ondan başla.">
 <meta property="og:description" content="Dolabını söyle, lezzete dönüştür. Sıfır atık akıllı mutfak asistanı.">
 <meta property="og:type" content="website">
@@ -405,11 +408,11 @@
         <div class="receipt reveal">
           <div class="rhead">TERMİNAL #04 · RYNIA KITCHEN OS<br>TR-IST-034 // #8821</div>
           <div class="rtitle">Mayasız Anne Usulü Çabuk Pişi</div>
-          <div class="rline"><span>01. Un (1 kg Paket) ✓</span><span>₺32.50</span></div>
-          <div class="rline"><span>02. Süzme Yoğurt (500g) ✓</span><span>₺37.50</span></div>
-          <div class="rline"><span>03. Köy Yumurtası (3 Adet) ✓</span><span>₺25.00</span></div>
-          <div class="rtotal"><span>TOPLAM TASARRUF</span><span>₺95.00</span></div>
-          <div class="rfoot">🌯 ~0.6 Tavuk Dürüm Değerinde</div>
+          <div class="rline"><span>01. Buğday Unu (1 kg Paket) ✓</span><span>₺38.00</span></div>
+          <div class="rline"><span>02. Doğal Yoğurt (1 kg Kova) ✓</span><span>₺75.00</span></div>
+          <div class="rline"><span>03. Köy Yumurtası (10'lu Kutu) ✓</span><span>₺65.00</span></div>
+          <div class="rtotal"><span>TOPLAM TASARRUF</span><span>₺178.00</span></div>
+          <div class="rfoot">🌯 ~0.7 Tavuk Dürüm Değerinde</div>
           <div class="rquote">"Ne kaldıysa, ondan başla."</div>
         </div>
       </div>
@@ -605,13 +608,13 @@
 
   /* ================= INTERACTIVE DEMO ================= */
   var ING = {
-    tomato: { emoji:'🍅', name:'Domates (500g)', cost:35 },
-    bread:  { emoji:'🥖', name:'Bayat Ekmek (2 Adet)', cost:25 },
-    yogurt: { emoji:'🥛', name:'Süzme Yoğurt (500g)', cost:55 },
-    cheese: { emoji:'🧀', name:'Kaşar Peyniri (300g)', cost:110 },
-    egg:    { emoji:'🥚', name:'Köy Yumurtası (4 Adet)', cost:40 }
+    tomato: { emoji:'🍅', name:'Salkım Domates (1 kg)', cost:55 },
+    bread:  { emoji:'🥖', name:'Bayat Ekmek (2 Adet)', cost:35 },
+    yogurt: { emoji:'🥛', name:'Doğal Yoğurt (1 kg Kova)', cost:75 },
+    cheese: { emoji:'🧀', name:'Taze Kaşar (400g Blok)', cost:220 },
+    egg:    { emoji:'🥚', name:'Köy Yumurtası (10\'lu Kutu)', cost:65 }
   };
-  var DURUM_PRICE = 160; // 2026 KALANLA Benchmark: 1 Tavuk Dürüm ~160 TL
+  var DURUM_PRICE = 260; // 2026 Türkiye Ortalama Tavuk Dürüm Benchmark: ₺260
   var RECIPES = {
     'bread,cheese': { title:'Kaşarlı Tost Dilimleri', time:8 },
     'bread,egg':    { title:'Fırında Ekmekli Yumurta Kapama', time:12 },
