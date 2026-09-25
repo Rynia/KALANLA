@@ -1,4 +1,4 @@
-# 🥦 KALANLA — Kiler & Mutfak OS
+# 🥦 KALANLA — Smart Kitchen OS
 ### *Local-First Zero-Waste Smart Kitchen Assistant & Telemetry Engine*
 
 <p align="center">
@@ -10,114 +10,121 @@
   <a href="https://play.google.com/apps/testing/com.rynia.kalanla"><img src="https://img.shields.io/badge/Google_Play-Closed_Beta-34D399?style=for-the-badge&logo=googleplay&logoColor=white" alt="Google Play Closed Beta" /></a>
   <img src="https://img.shields.io/badge/App_Store-Coming_Soon-0284C7?style=for-the-badge&logo=apple&logoColor=white" alt="App Store Coming Soon" />
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/React_Native-Expo_57-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="Expo" />
+  <img src="https://img.shields.io/badge/React_Native-Expo_SDK_52-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="Expo" />
   <img src="https://img.shields.io/badge/Architecture-Local--First-F59E0B?style=for-the-badge" alt="Local First" />
+  <img src="https://img.shields.io/badge/Privacy-Zero_Tracking-8B5CF6?style=for-the-badge" alt="Zero Tracking" />
 </p>
 
 ---
 
-## 🏛️ Vizyon ve Felsefe
-**KALANLA**, mutfaktaki gıda israfını sıfırlamak ve ev ekonomisini korumak için tasarlanmış bağımsız bir **Mutfak İşletim Sistemidir (Kitchen OS)**.
+## 🏛️ Vision & Philosophy
 
-Mevcut yemek tarifleri uygulamalarının aksine, kullanıcıya *"markete gidip şunları satın al"* demez. Tam tersine: **"Dolabında ne kaldıysa, ondan başla"** felsefesiyle çalışır.
+**KALANLA** is an autonomous, privacy-centric **Kitchen Operating System (Kitchen OS)** engineered to eliminate household food waste and protect domestic budgets.
 
-> *"Kimse 'güzel bir uygulama' için var olmaz. İnsanlar dolapta unuttuğu yiyeceklerin bozulmasını önlediğinde ve ay sonunda cebinde kalan gerçek parayı gördüğünde bir ürün vazgeçilmez olur."*
+Unlike conventional recipe apps that push users to grocery stores with *"go buy these ingredients"*, KALANLA operates in reverse: **"Start with whatever is left in your pantry."**
 
----
-
-## ✨ Temel Özellikler
-
-### ⏱️ 1. 48 Saatlik Risk Radarı (Shelf-Life Telemetry)
-* Dolaptaki gıdaların son kullanma ve bozulma risklerini saatlik hassasiyetle hesaplar.
-* **Acil Tüketim Rozetleri:** *"Son 18 Saat"*, *"Bugün Tüket"* alarmlarıyla çürüme eşiğindeki gıdaları en tepeye çeker.
-
-### 🍳 2. Deterministik Sıfır-Atık Şef Motoru
-* Dolaptaki malzemeleri eşleştiren yerel reçete motoru.
-* İnternet bağlantısı gerektirmez; Türk mutfağının denenmiş kurtarma reçeteleriyle (fırında kaşarlı ekmek, yayla çorbası, sebzeli omlet vb.) saniyeler içinde tarif üretir.
-
-### 🧾 3. 9:16 Termal Tasarruf Fişi (Financial Telemetry)
-* Kurtarılan her gıda ile cebinizde kalan reel Türk Lirası miktarını ve karbon tasarrufunu hesaplar.
-* Nostaljik termal kasa fişi formatında 9:16 oranında çıktı verir; tek dokunuşla Instagram Story veya WhatsApp'ta paylaşılabilir.
-
-### ↩️ 4. Güvenli Geri Al Kalkanı (Undo Safety)
-* Yanlışlıkla bir malzemeyi "Pişirdim" veya "Sildim" dediğinizde 5 saniyelik geri sayımlı haptik kalkan devreye girer. Yanlışlıkla veri kaybını sıfıra indirir.
-
-### 🔒 5. %100 Local-First Gizlilik & Hesap Zorunluluğu Yok
-* **Üyelik Yok:** E-posta, şifre veya sosyal medya girişi gerektirmez.
-* **Sıfır Dış Veri Aktarımı:** Tüm envanter ve tercihler kullanıcının kendi cihazında (`AsyncStorage`) şifreli ve yerel tutulur.
+> *"Nobody downloads an app just for a pretty interface. An app becomes indispensable when it quietly saves food from rotting in the back of the fridge, leaving measurable cash in your pocket at the end of every month."*
 
 ---
 
-## 🛠️ Teknoloji Yığını (Tech Stack)
+## ✨ Key Features
 
-| Katman | Teknoloji | Açıklama |
+### ⏱️ 1. 48-Hour Risk Radar (Shelf-Life Telemetry)
+* Accurately calculates food expiration and spoilage windows down to the hour.
+* **Urgent Consumption Badges:** Instant alerts such as *"Expires in 18h"*, *"Consume Today"* float deteriorating perishables to the top before they spoil.
+
+### 🍳 2. Deterministic Zero-Waste Chef Engine
+* Client-side deterministic recipe matching algorithm.
+* **100% Offline-capable:** Generates proven rescue recipes (artisan crouton toasts, creamy leftover soups, skillet scrambles, broth bases) without relying on external API latency or internet connection.
+
+### 🧾 3. 9:16 Thermal Savings Receipt (Financial Telemetry)
+* Computes real-world financial currency savings and ecological carbon footprint reduction for every saved pantry item.
+* Exports a nostalgic, retro thermal cashier receipt in native 9:16 story format for 1-tap sharing to Instagram Stories or messaging apps.
+
+### ↩️ 4. Haptic Safety & Undo Guard
+* Mistakenly marked an item as "Cooked" or "Discarded"? An automatic 5-second countdown with native haptic feedback shields you against accidental data loss.
+
+### 🔒 5. 100% Local-First & Zero Tracking Architecture
+* **No Account Required:** No emails, passwords, phone numbers, or social logins.
+* **Zero Cloud Telemetry:** All pantry data, logs, and user preferences are encrypted and stored exclusively on-device (`AsyncStorage`). Your grocery habits belong to you.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Description |
 |:---|:---|:---|
-| **Framework** | [React Native](https://reactnative.dev/) + [Expo](https://expo.dev/) (SDK ~57) | Çift platform (iOS & Android) yerel performans |
-| **Dil** | [TypeScript](https://www.typescriptlang.org/) (Strict Mode) | Tip güvenliği ve sıfır derleme hatası (`tsc --noEmit`) |
-| **Depolama** | `@react-native-async-storage/async-storage` | Cihaz içi yerel kalıcılık (Local-First) |
-| **İkonografi** | `lucide-react-native` | Hafif ve vektörel titanyum arayüz ikonları |
-| **Haptics** | `expo-haptics` | Buton basışlarında gerçekçi dokunsal geri bildirim |
-| **Ekran Çıktısı** | `react-native-view-shot` + `expo-sharing` | 9:16 termal fiş oluşturucu ve paylaşım motoru |
-| **Dağıtım** | EAS Build (Expo Application Services) | Android App Bundle (.aab) & iOS IPA otomasyonu |
+| **Framework** | [React Native](https://reactnative.dev/) + [Expo](https://expo.dev/) (SDK 52) | Cross-platform (iOS & Android) native runtime |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) (Strict Mode) | Strong type safety with zero compile warnings (`tsc --noEmit`) |
+| **Persistence** | `@react-native-async-storage/async-storage` | Fully on-device client hydration (Local-First) |
+| **Icons** | `lucide-react-native` | Crisp, lightweight titanium vector icons |
+| **Haptics** | `expo-haptics` | Precise tactile micro-interactions |
+| **Canvas & Sharing** | `react-native-view-shot` + `expo-sharing` | High-fidelity 9:16 thermal receipt rasterizer and system share sheet |
+| **DevOps & Pipeline**| EAS Build (Expo Application Services) | Automated Android App Bundle (.aab) & iOS IPA pipelines |
 
 ---
 
-## 📂 Proje Dizin Yapısı
+## 📂 Project Architecture
 
 ```bash
 kiler-kitchen-os/
-├── assets/                  # 1024x1024 Safe-Zone uyumlu simgeler & görseller
+├── assets/                  # App icons, splash screens, and safe-zone adaptive assets
 ├── src/
-│   ├── components/          # Modüler UI bileşenleri (Radar, Reçete, Termal Fiş)
-│   ├── constants/           # Sistem sabitleri ve kopya metinleri
-│   ├── data/                # Türk mutfağı gıda ontolojisi & akıllı varsayılanlar
-│   ├── services/            # Yetki (entitlements) ve yerel motor servisleri
-│   ├── storage/             # AsyncStorage veri doğrulama ve hydration katmanı
-│   ├── theme/               # Titanyum Koyu (#0A0A0E) renk ve boşluk paleti
-│   ├── types/               # TypeScript tip tanımları (models, subscription)
-│   └── utils/               # Reçete motoru, zaman matematiği ve görsel çözümleyici
-├── app.json                 # Apple Privacy Manifest & Android izin beyanları
-├── eas.json                 # Production build profilleri
-└── App.tsx                  # Ana durum yöneticisi ve sekme orkestrasyonu
+│   ├── components/          # Modular UI widgets (Radar, Chef, Thermal Receipt, Modals)
+│   ├── constants/           # Typography, color constants, copy definitions
+│   ├── data/                # Food ontology, shelf-life rules, and fallback seeds
+│   ├── services/            # Entitlements, store status, and telemetry engines
+│   ├── storage/             # AsyncStorage schema validation, backup, and hydration
+│   ├── theme/               # Dark Titanium palette (#0A0A0E) and responsive spacing
+│   ├── types/               # TypeScript interfaces (PantryItem, Recipe, Subscription)
+│   └── utils/               # Deterministic recipe matcher, time math, date formatters
+├── app.json                 # Apple Privacy Manifest & Android permission configs
+├── eas.json                 # Production build profiles for Google Play & TestFlight
+└── App.tsx                  # Root state manager, navigation bar, and tab orchestration
 ```
 
 ---
 
-## 🚀 Yerel Geliştirme (Local Setup)
+## 🚀 Local Development Setup
 
-Projeyi yerel makinenizde çalıştırmak için:
+To run KALANLA locally on your machine:
 
 ```bash
-# 1. Repoyu klonlayın
+# 1. Clone the repository
 git clone https://github.com/Rynia/KALANLA.git
 cd KALANLA
 
-# 2. Bağımlılıkları yükleyin
+# 2. Install dependencies
 npm install
 
-# 3. TypeScript tip kontrolü yapın
+# 3. Verify TypeScript compilation
 npx tsc --noEmit
 
-# 4. Geliştirici sunucusunu başlatın
+# 4. Start Expo local development server
 npx expo start
 ```
 
----
-
-## 🗺️ Sürüm Yol Haritası (Roadmap)
-
-* [x] **v1.0.0 (Alpha / Closed Beta):** Saf Local-First çekirdek, 48 saatlik risk radarı, kurtarma reçeteleri, termal fiş simülatörü.
-* [ ] **v1.1.0:** 🧾💀 *İsraf Otopsisi* (Waste Autopsy Report), 🎴 *Dolap Falı* (Fridge Fortune), Cihaz içi ML Kit yerel fiş okuma.
-* [ ] **v1.2.0:** 🥘🔥 *Kazan Başı Canlılık* (Eşzamanlı pişirenler sayacı & tencere tıkırtısı reaksiyonları).
-* [ ] **v1.3.0:** Ortak Aile Dolabı (Çoklu cihaz yerel senkronizasyonu).
+Press `a` for Android Emulator or scan the QR code with **Expo Go** / development build on your physical device.
 
 ---
 
-## 📄 Gizlilik Politikası & Lisans
+## 🗺️ Product Roadmap
 
-* **Gizlilik Politikası:** [https://rynia.github.io/KALANLA/privacy.html](https://rynia.github.io/KALANLA/privacy.html)
-* **Geliştirici:** [Rynia Studios](https://ryniastudios.netlify.app) (ryniastudios@gmail.com)
+* [x] **v1.0.0 (Alpha / Closed Beta):** Pure Local-First core, 48h shelf-life risk radar, zero-waste recipe engine, retro thermal receipt generator.
+* [ ] **v1.1.0:** 🧾💀 *Waste Autopsy Report*, 🎴 *Fridge Fortune*, On-device ML Kit receipt OCR parsing.
+* [ ] **v1.2.0:** 🥘🔥 *Community Pot Pulse* (Anonymous concurrent cooker counters & audio bubbling reactions).
+* [ ] **v1.3.0:** Family Pantry Sync (Multi-device local Wi-Fi / P2P sync).
+
+---
+
+## 📄 Privacy Policy & Compliance
+
+* **Privacy Policy:** [https://rynia.github.io/KALANLA/privacy.html](https://rynia.github.io/KALANLA/privacy.html)
+* **Website:** [https://rynia.github.io/KALANLA/](https://rynia.github.io/KALANLA/)
+* **Developer & Studio:** [Rynia Studios](https://ryniastudios.netlify.app) (ryniastudios@gmail.com)
+
+---
 
 <p align="center">
-  <b>Rynia Studios</b> © 2026 • <i>"Ne kaldıysa, ondan başla."</i>
+  <b>Rynia Studios</b> © 2026 • <i>"Start with what's left."</i>
 </p>
