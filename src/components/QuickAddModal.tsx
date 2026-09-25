@@ -154,7 +154,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
           <View style={styles.headerRow}>
             <View style={{ flex: 1 }}>
               <Text style={styles.headerTitle}>Dolaba Malzeme Ekle</Text>
-              <Text style={styles.headerSub}>Türk mutfağından hızlı ara veya kamerayla tara</Text>
+              <Text style={styles.headerSub}>Türk mutfağından akıllı arama ile anında ekle</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               {onOpenReceiptScan && (

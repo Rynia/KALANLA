@@ -120,11 +120,11 @@ export const PackagesModal: React.FC<PackagesModalProps> = ({
                       <Text style={styles.freePillText}>100% ÜCRETSİZ</Text>
                     </View>
                   </View>
-                  <Text style={[styles.cardPrice, { color: '#60A5FA' }]}>.edu.tr ile v1.1'de Aktif</Text>
+                  <Text style={[styles.cardPrice, { color: '#60A5FA' }]}>.edu.tr ile 100% Ücretsiz</Text>
                 </View>
                 {currentTier === 'STUDENT' && (
                   <View style={[styles.activePill, { backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: '#3B82F6' }]}>
-                    <Text style={[styles.activePillText, { color: '#60A5FA' }]}>ÖN KAYIT ALINDI</Text>
+                    <Text style={[styles.activePillText, { color: '#60A5FA' }]}>ÖĞRENCİ AKTİF</Text>
                   </View>
                 )}
               </View>
@@ -133,13 +133,13 @@ export const PackagesModal: React.FC<PackagesModalProps> = ({
                 <View style={styles.featureRow}>
                   <Check size={14} color="#60A5FA" />
                   <Text style={[styles.featureText, { color: '#F8FAFC', fontWeight: '700' }]}>
-                    SINIRSIZ AI Dolap & Fiş Taraması
+                    SINIRSIZ Kiler & Dolap Kapasitesi
                   </Text>
                 </View>
                 <View style={styles.featureRow}>
                   <Check size={14} color="#60A5FA" />
                   <Text style={[styles.featureText, { color: '#F8FAFC', fontWeight: '700' }]}>
-                    SINIRSIZ Kiler & Dolap Kapasitesi
+                    Akıllı Gramaj & Raf Ömrü Tahminleri
                   </Text>
                 </View>
                 <View style={styles.featureRow}>
@@ -162,7 +162,7 @@ export const PackagesModal: React.FC<PackagesModalProps> = ({
                   activeOpacity={0.85}
                 >
                   <GraduationCap size={16} color="#0A0A0E" />
-                  <Text style={styles.studentVerifyBtnText}>.edu.tr ile Ön Kayıt Ol 🎓</Text>
+                  <Text style={styles.studentVerifyBtnText}>.edu.tr ile Öğrenciyi Doğrula 🎓</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -175,7 +175,7 @@ export const PackagesModal: React.FC<PackagesModalProps> = ({
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cardTitle}>KALANLA PRO</Text>
-                  <Text style={[styles.cardPrice, { color: '#F59E0B' }]}>🚀 v1.1 ile Lansmana Özel • Çok Yakında</Text>
+                  <Text style={[styles.cardPrice, { color: '#F59E0B' }]}>Gelecek Özellikler Yol Haritası</Text>
                 </View>
                 {currentTier === 'PRO' && (
                   <View style={styles.activePill}>
@@ -187,30 +187,22 @@ export const PackagesModal: React.FC<PackagesModalProps> = ({
               <View style={styles.featureList}>
                 <View style={styles.featureRow}>
                   <Check size={14} color="#F59E0B" />
-                  <Text style={styles.featureText}>Sınırsız AI Kamera & BİM/A101 Fiş OCR</Text>
-                </View>
-                <View style={styles.featureRow}>
-                  <Check size={14} color="#F59E0B" />
                   <Text style={styles.featureText}>Ortak Aile Dolabı (Çoklu Cihaz Senkronu)</Text>
                 </View>
                 <View style={styles.featureRow}>
                   <Check size={14} color="#F59E0B" />
                   <Text style={styles.featureText}>Gelişmiş Karbon & Aylık Finansal Telemetri</Text>
                 </View>
+                <View style={styles.featureRow}>
+                  <Check size={14} color="#F59E0B" />
+                  <Text style={styles.featureText}>Kişiselleştirilmiş Akıllı Kurtarma Reçeteleri</Text>
+                </View>
               </View>
 
-              {currentTier !== 'PRO' && (
-                <TouchableOpacity
-                  style={styles.proUpgradeBtn}
-                  onPress={() => {
-                    Alert.alert('KALANLA PRO v1.1', 'PRO abonelik ve çoklu cihaz senkronizasyonu, StoreKit ve Google Play Billing altyapısıyla v1.1 lansmanında yayınlanacaktır.');
-                  }}
-                  activeOpacity={0.85}
-                >
-                  <Crown size={16} color="#0A0A0E" />
-                  <Text style={styles.proUpgradeBtnText}>v1.1 Erken Erişim (Yakında)</Text>
-                </TouchableOpacity>
-              )}
+              <View style={[styles.proUpgradeBtn, { backgroundColor: 'rgba(245, 158, 11, 0.12)', borderWidth: 1, borderColor: 'rgba(245, 158, 11, 0.3)' }]}>
+                <Crown size={15} color="#F59E0B" />
+                <Text style={[styles.proUpgradeBtnText, { color: '#F59E0B' }]}>v1.0'da Tüm Temel Özellikler Açık</Text>
+              </View>
             </View>
           </ScrollView>
         </View>

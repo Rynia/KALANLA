@@ -582,8 +582,6 @@ export default function App() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddItem={handleAddItem}
-        onOpenVisionScan={() => setIsVisionModalOpen(true)}
-        onOpenReceiptScan={() => setIsReceiptModalOpen(true)}
       />
 
       {/* MARKET RECEIPT OCR SCAN MODAL */}

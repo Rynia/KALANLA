@@ -10,6 +10,8 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { GraduationCap, CheckCircle, X, ShieldCheck } from 'lucide-react-native';
 import { verifyStudentEmail } from '../services/entitlements';
@@ -62,56 +64,61 @@ export const StudentVerifyModal: React.FC<StudentVerifyModalProps> = ({
   return (
     <Modal visible={isOpen} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.card}>
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-            <X size={18} color="#94A3B8" />
-          </TouchableOpacity>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ width: '100%', alignItems: 'center' }}
+        >
+          <View style={styles.card}>
+            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+              <X size={18} color="#94A3B8" />
+            </TouchableOpacity>
 
-          <View style={styles.iconBox}>
-            <GraduationCap size={44} color="#60A5FA" />
+            <View style={styles.iconBox}>
+              <GraduationCap size={44} color="#60A5FA" />
+            </View>
+
+            <Text style={styles.title}>Üniversite Öğrencisi Paketi</Text>
+            <Text style={styles.subtitle}>100% ÜCRETSİZ • ÖĞRENCİ MODU</Text>
+
+            <Text style={styles.desc}>
+              Türkiye'deki üniversite öğrencilerine özel: Sınırsız kiler kapasitesi ve öğrenci evine özel pratik kurtarma menüleri. Üniversite e-postanızı girerek öğrenci ayrıcalıklarını anında aktifleştirebilirsiniz!
+            </Text>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Üniversite E-Posta Adresiniz (.edu.tr)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="ornek@itu.edu.tr veya boun.edu.tr"
+                placeholderTextColor="#64748B"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={styles.verifyBtn}
+              onPress={handleVerify}
+              disabled={loading}
+              activeOpacity={0.85}
+            >
+              {loading ? (
+                <ActivityIndicator color="#0A0A0E" />
+              ) : (
+                <>
+                  <ShieldCheck size={18} color="#0A0A0E" />
+                  <Text style={styles.verifyBtnText}>Öğrenci Modunu Aktif Et 🎓</Text>
+                </>
+              )}
+            </TouchableOpacity>
+
+            <Text style={styles.disclaimer}>
+              Türkiye'deki tüm .edu.tr uzantılı üniversite e-posta adresleri desteklenir.
+            </Text>
           </View>
-
-          <Text style={styles.title}>Üniversite Öğrencisi Paketi</Text>
-          <Text style={styles.subtitle}>100% ÜCRETSİZ • v1.1 ÖN KAYIT</Text>
-
-          <Text style={styles.desc}>
-            Türkiye'deki üniversite öğrencilerine özel: Sınırsız dolap takibi ve öğrenci evi pratik kurtarma reçeteleri v1.1 güncellemesinde resmi üniversite OTP doğrulamasıyla aktif edilecektir. Üniversite e-postanızı bırakarak öncelikli listeye katılabilirsiniz!
-          </Text>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Üniversite E-Posta Adresiniz (.edu.tr)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="ornek@itu.edu.tr veya boun.edu.tr"
-              placeholderTextColor="#64748B"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-
-          <TouchableOpacity
-            style={styles.verifyBtn}
-            onPress={handleVerify}
-            disabled={loading}
-            activeOpacity={0.85}
-          >
-            {loading ? (
-              <ActivityIndicator color="#0A0A0E" />
-            ) : (
-              <>
-                <ShieldCheck size={18} color="#0A0A0E" />
-                <Text style={styles.verifyBtnText}>Öncelikli Listeye Kaydol 🎓</Text>
-              </>
-            )}
-          </TouchableOpacity>
-
-          <Text style={styles.disclaimer}>
-            v1.1 güncellemesinde resmi üniversite SMS/OTP doğrulama altyapısı ile 1 yıl ücretsiz tanımlanacaktır.
-          </Text>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );
