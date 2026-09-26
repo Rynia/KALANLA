@@ -108,19 +108,44 @@ Press `a` for Android Emulator or scan the QR code with **Expo Go** / developmen
 
 ---
 
+---
+
+## ⚡ Open-Source Architecture & Infrastructure
+
+KALANLA is built upon and battle-tests Rynia's open-source infrastructure libraries:
+
+* **[local-first-kernel](https://github.com/Rynia/local-first-kernel)**: Powers KALANLA's zero-cloud persistence, append-only pantry event log, haptic undo/redo guards, and offline state machine.
+* **[receipt-renderer](https://github.com/Rynia/receipt-renderer)**: Renders KALANLA's iconic 9:16 thermal savings receipts and visual barcode telemetry.
+* **[expo-release-guard](https://github.com/Rynia/expo-release-guard)**: Pre-flight release validation CLI that audits Apple Privacy Manifests, permissions, and production EAS builds before store submission.
+
+---
+
+## 🌐 The Rynia Software Ecosystem
+
+Part of the deterministic, local-first engineering suite crafted by [@Rynia](https://github.com/Rynia):
+
+| Package / Project | Role | Status |
+| :--- | :--- | :--- |
+| [**local-first-kernel**](https://github.com/Rynia/local-first-kernel) | Append-only reactive event micro-kernel & offline sync | `v1.0.0` |
+| [**expo-release-guard**](https://github.com/Rynia/expo-release-guard) | Pre-flight zero-rejection store compliance & privacy manifest CLI | `v1.0.0` |
+| [**receipt-renderer**](https://github.com/Rynia/receipt-renderer) | Zero-dependency 9:16 thermal receipt AST & dual SVG/ASCII renderer | `v1.0.0` |
+| [**KALANLA**](https://github.com/Rynia/KALANLA) | Smart kitchen pantry OS powered by this ecosystem | `Live Beta (Google Play)` |
+
+---
+
 ## 🗺️ Product Roadmap
 
-* [x] **v1.0.0 (Alpha / Closed Beta):** Pure Local-First core, 48h shelf-life risk radar, zero-waste recipe engine, retro thermal receipt generator.
+* [x] **v1.0.0 (Closed Beta on Google Play):** Pure Local-First core, 48h shelf-life risk radar, zero-waste recipe engine, retro thermal receipt generator.
 * [ ] **v1.1.0:** 🧾💀 *Waste Autopsy Report*, 🎴 *Fridge Fortune*, On-device ML Kit receipt OCR parsing.
 * [ ] **v1.2.0:** 🥘🔥 *Community Pot Pulse* (Anonymous concurrent cooker counters & audio bubbling reactions).
-* [ ] **v1.3.0:** Family Pantry Sync (Multi-device local Wi-Fi / P2P sync).
+* [ ] **v1.3.0:** Family Pantry Sync (Multi-device local Wi-Fi / P2P sync via `local-first-kernel`).
 
 ---
 
 ## 📄 Privacy Policy & Compliance
 
-* **Privacy Policy:** [https://rynia.github.io/KALANLA/privacy.html](https://rynia.github.io/KALANLA/privacy.html)
-* **Website:** [https://rynia.github.io/KALANLA/](https://rynia.github.io/KALANLA/)
+* **Google Play Privacy Policy:** [https://rynia.github.io/KALANLA/privacy.html](https://rynia.github.io/KALANLA/privacy.html)
+* **Web Showcase:** [https://rynia.github.io/KALANLA/](https://rynia.github.io/KALANLA/)
 * **Developer & Studio:** [Rynia Studios](https://ryniastudios.netlify.app) (ryniastudios@gmail.com)
 
 ---
